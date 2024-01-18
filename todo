@@ -1,0 +1,10 @@
+1/15
+- implement session management [DONE]
+
+1/16
+- send session id in response in login handler [DONE]
+- create ListFurniture and GetFurnitures endpoints
+  - create integration tests for them
+  - crate integration test for ListFurniture with DB operation
+
+
