@@ -27,6 +27,7 @@ const (
 	Baroque   string = "Baroque"
 	Federal   string = "Federal"
 	Rococo    string = "Rococo"
+	Sheraton  string = "Sheraton"
 )
 
 const (
@@ -47,7 +48,6 @@ const (
 	appropriate form details about the furniture
 */
 type FurnitureListing struct {
-	Id          string
 	Title       string  `json:"title"`
 	Description string  `json:"desc"`
 	Cost        float64 `json:"cost"`
@@ -55,7 +55,7 @@ type FurnitureListing struct {
 	// Bed, Table, Desk, Chair, Chest, Nightstand, Cabinet
 	Type string `json:"type"`
 
-	// Victorian, English, Baroque, Federal, Rococo, Unknown
+	// Victorian, English, Baroque, Federal, Rococo, Sheraton, Unknown
 	Style string `json:"style"`
 
 	// Mint, Excellent, Good, Worn, Restored, Original Finish
