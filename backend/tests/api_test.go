@@ -440,7 +440,7 @@ func TestHandleGetFurniture(t *testing.T) {
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // invalid valid
-			name:               "Test 5",
+			name:               "Test 2",
 			method:             "GET",
 			expectedMessage:    "Furniture listing with provided listingID not found",
 			payload:            "65aeadc6f96ba92452b8e52",
