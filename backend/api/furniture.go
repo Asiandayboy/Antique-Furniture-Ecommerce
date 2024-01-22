@@ -46,6 +46,14 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// client must be authenticated to create a furniture listing
+	sessionManager := GetSessionManager()
+	_, loggedIn := sessionManager.IsLoggedIn(r)
+	if !loggedIn {
+		http.Error(w, "You must be logged in to create a furniture listing", http.StatusUnauthorized)
+		return
+	}
+
 	// decode request body into struct
 	var newListing types.FurnitureListing
 	err := util.ReadJSONReq[types.FurnitureListing](r, &newListing)
