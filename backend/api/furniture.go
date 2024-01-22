@@ -4,19 +4,11 @@ import (
 	"backend/db"
 	"backend/types"
 	"backend/util"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
-type listFormError struct {
-	message string
-}
-
-func (l listFormError) Error() string {
-	return l.message
-}
-
+// this has to be the ugliest thiing ever
 func ValidateListFormFields(listing types.FurnitureListing) (bool, string) {
 	if listing.Title == "" {
 		return false, "Title not provided"
@@ -40,10 +32,12 @@ func ValidateListFormFields(listing types.FurnitureListing) (bool, string) {
 
 /*
 This endpoint processes a new furniture listing request
+
+Successful requests return 200 status code and the new listingID
 */
 func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "Request must be a POST request", http.StatusBadRequest)
+		http.Error(w, "Request must be a POST request", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -51,7 +45,7 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	var newListing types.FurnitureListing
 	err := util.ReadJSONReq[types.FurnitureListing](r, &newListing)
 	if err != nil {
-		http.Error(w, "Failed to decode into JSON", http.StatusInternalServerError)
+		http.Error(w, "Failed to decode JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -62,20 +56,19 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// apply a unique ID to the listing
-	listingId, err := uuid.NewRandom()
+	// save new listing in database
+	result, err := db.InsertIntoListingsCollection(newListing)
 	if err != nil {
-		http.Error(w, "Failed to apply ID to new listing", http.StatusInternalServerError)
+		http.Error(w, "Failed to insert listing into database", http.StatusConflict)
 		return
 	}
-	newListing.Id = listingId.String()
 
-	// save new listing in database
-	result, _ := db.InsertIntoListingsCollection(newListing)
+	// insertedID is of type primitive.ObjectID, which is type [12]byte
+	insertedId := result.InsertedID.(primitive.ObjectID)
 
-	// return success code, "success" msg
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(insertedId.Hex()))
 
-	http.Error(w, "something", http.StatusInternalServerError)
 }
 
 /*
