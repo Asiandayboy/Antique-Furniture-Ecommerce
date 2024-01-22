@@ -4,8 +4,9 @@ import (
 	"backend/db"
 	"backend/types"
 	"backend/util"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // this has to be the ugliest thiing ever
@@ -75,6 +76,37 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 This endpoint handler gets all the listed furnitures and returns
 it back to client in response
 */
-func HandleGetFurnitures(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleGetFurnitures(w http.ResponseWriter, r *http.Request) {
+
+}
+
+/*
+This endpoint handler returns the furniture listing given the listingID
+is provided in the request URL
+
+200 - furniture listing found
+500 - furniture listing not found in DB
+*/
+func (s *Server) HandleGetFurniture(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Request must be a GET request", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// get id from url query params
+	id := r.URL.Query().Get("listingid")
+
+	_, err := db.FindByIDInListingsCollection(id)
+	if err != nil {
+		http.Error(
+			w,
+			"Furniture listing with provided listingID not found",
+			http.StatusBadRequest,
+		)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
 
 }
