@@ -134,10 +134,14 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// save appropriate session data to session store
 	sessionManager := GetSessionManager()
-	session, err := sessionManager.GetSession(userResult.SessionId)
-	if err != nil {
-		http.Error(w, "Failed to create session", http.StatusInternalServerError)
-		return
+	session, exists := sessionManager.GetSession(userResult.SessionId)
+	if !exists {
+		// create new session
+		session, err = sessionManager.CreateSession()
+		if err != nil {
+			http.Error(w, "Failed to create session", http.StatusInternalServerError)
+			return
+		}
 	}
 	session.Store["username"] = userResult.Username
 
@@ -151,4 +155,8 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &cookie)
 
 	w.Write([]byte("success"))
+}
+
+func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
+
 }
