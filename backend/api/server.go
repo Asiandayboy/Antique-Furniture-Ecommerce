@@ -28,7 +28,8 @@ func (s *Server) Start() {
 	mux.HandleFunc("/signup", s.HandleSignup)
 	mux.HandleFunc("/checkout", HandleCheckout)
 	mux.HandleFunc("/list_furniture", s.HandleListFurniture)
-	mux.HandleFunc("/get_furnitures", HandleGetFurnitures)
+	mux.HandleFunc("/get_furnitures", s.HandleGetFurnitures)
+	mux.HandleFunc("/get_furniture", s.HandleGetFurniture)
 
 	// initialize SessionManager
 	GetSessionManager()
