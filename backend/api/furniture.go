@@ -4,8 +4,12 @@ import (
 	"backend/db"
 	"backend/types"
 	"backend/util"
+	"context"
+	"encoding/json"
+	"log"
 	"net/http"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -73,14 +77,6 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-This endpoint handler gets all the listed furnitures and returns
-it back to client in response
-*/
-func (s *Server) HandleGetFurnitures(w http.ResponseWriter, r *http.Request) {
-
-}
-
-/*
 This endpoint handler returns the furniture listing given the listingID
 is provided in the request URL
 
@@ -108,5 +104,55 @@ func (s *Server) HandleGetFurniture(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("success"))
+
+}
+
+/*
+This endpoint handler gets all the listed furnitures and returns
+it back to client in response
+
+- Note: Wouldn't it be bad to return EVERY single document in the listings
+collection at the same time for each request?
+
+For now, this endpoint returns every single document in the listings collection
+at the same time for each request
+*/
+func (s *Server) HandleGetFurnitures(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Request must be a GET request", http.StatusMethodNotAllowed)
+		return
+	}
+
+	collection := db.GetCollection("listings")
+	cursor, err := collection.Find(context.Background(), bson.D{})
+	if err != nil {
+		http.Error(w, "Error getting listings", http.StatusInternalServerError)
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var listings []types.FurnitureListing
+	for cursor.Next(context.Background()) {
+		var listing types.FurnitureListing
+		if err := cursor.Decode(&listing); err != nil {
+			log.Printf("Error decoding document: %v", err)
+			continue
+		}
+		listings = append(listings, listing)
+	}
+
+	if err := cursor.Err(); err != nil {
+		http.Error(w, "Error iterating over furniture listings", http.StatusInternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(listings)
+	if err != nil {
+		http.Error(w, "Error encoding response data into JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 
 }
