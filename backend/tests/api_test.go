@@ -7,6 +7,7 @@ import (
 	"backend/util"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -400,6 +401,74 @@ func TestValidateListFormFields(t *testing.T) {
 
 func TestHandleGetFurnitures(t *testing.T) {
 
+}
+
+func TestHandleGetFurniture(t *testing.T) {
+	tests := []struct {
+		name               string
+		method             string
+		payload            string
+		expectedStatusCode int
+		expectedMessage    string
+	}{
+		{ // invalid ID
+			name:               "Test 1",
+			method:             "GET",
+			payload:            "",
+			expectedMessage:    "Furniture listing with provided listingID not found",
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{ // valid
+			name:               "Test 2",
+			method:             "GET",
+			expectedMessage:    "success",
+			payload:            "65aeadc6f9a6ba92452b8e52",
+			expectedStatusCode: http.StatusOK,
+		},
+		{ // invalid method
+			name:               "Test 3",
+			method:             "POST",
+			expectedMessage:    "Request must be a GET request",
+			payload:            "234324324234324",
+			expectedStatusCode: http.StatusMethodNotAllowed,
+		},
+		{ // invalid method
+			name:               "Test 4",
+			method:             "DELETE",
+			expectedMessage:    "Request must be a GET request",
+			payload:            "6783",
+			expectedStatusCode: http.StatusMethodNotAllowed,
+		},
+		{ // invalid valid
+			name:               "Test 2",
+			method:             "GET",
+			expectedMessage:    "Furniture listing with provided listingID not found",
+			payload:            "65aeadc6f96ba92452b8e52",
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	db.Init()
+	defer db.Close()
+	server := api.NewServer(":3000")
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var target string = fmt.Sprintf("/get_furniture?listingid=%s", tc.payload)
+			r := httptest.NewRequest(tc.method, target, nil)
+			w := httptest.NewRecorder()
+
+			server.HandleGetFurniture(w, r)
+
+			if strings.TrimSpace(w.Body.String()) != tc.expectedMessage {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMessage, w.Body.String())
+			}
+
+			if w.Code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+			}
+
+		})
+	}
 }
 
 func TestHandleCheckout(t *testing.T) {
