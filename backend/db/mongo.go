@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -93,4 +94,26 @@ func FindByUsernameInCollection(username string) *mongo.SingleResult {
 func InsertIntoListingsCollection(furnitureListInfo types.FurnitureListing) (*mongo.InsertOneResult, error) {
 	collection := GetCollection("listings")
 	return collection.InsertOne(context.Background(), furnitureListInfo)
+}
+
+/*
+This function takes the hex string ID and converts it into an ObjectID so that
+it can be used to query the mongoDB to search for the associated listing
+*/
+func FindByIDInListingsCollection(listingId string) (*mongo.SingleResult, error) {
+	collection := GetCollection("listings")
+	objID, err := primitive.ObjectIDFromHex(listingId)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{
+		"_id": objID,
+	}
+	result := collection.FindOne(context.Background(), filter)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	return result, nil
 }
