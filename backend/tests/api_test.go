@@ -7,11 +7,13 @@ import (
 	"backend/util"
 	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func trimSpaceAndNewline(s string) string {
@@ -22,7 +24,6 @@ func TestHandleSignup(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	go server.Start()
 
 	tests := []struct {
 		name               string
@@ -103,7 +104,6 @@ func TestHandleLogin(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	go server.Start()
 
 	tests := []struct {
 		name               string
@@ -180,7 +180,6 @@ func TestHandleLoginCookie(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	go server.Start()
 
 	payload := `{"username": "testuser1", "password": "testpassword1"}`
 	req, err := http.NewRequest("POST", "/login", bytes.NewBufferString(payload))
@@ -204,13 +203,13 @@ Integration test for HandleListFurniture handler to see if
     representing a JSON object bc of JSON.stringify(obj)
 
 2. New furniture listings are saved in the DB
-  - check this by string comparing the expected body and the mongo document
-    and ensuring they're the same
+  - check this by grabbbing the listingID from the response
+    and use that to find it in the DB
 
 *From the frontend (React TS), the body is sent as one long string
 representing a JSON object
 */
-func TestHandleListFurnitureJSON(t *testing.T) {
+func TestHandleListFurniture(t *testing.T) {
 
 	// prepare images to simulate http request from client
 	imgData1, err := util.EncodeImageToBase64("../tests/test_images/tiger_maple1.jpg")
@@ -227,70 +226,125 @@ func TestHandleListFurnitureJSON(t *testing.T) {
 	furnitureListing1 := types.FurnitureListing{
 		Title:       "English Tiger maple queen bed",
 		Description: "My favorite bed",
-		Type:        "Bed",
+		Type:        types.Bed,
 		Cost:        7500,
-		Style:       "English",
+		Style:       types.English,
 		Condition:   "Great",
-		Material:    "Tiger Maple",
+		Material:    types.TigerMaple,
 		Images:      []string{imgData1, imgData2},
+	}
+
+	furnitureListing2 := types.FurnitureListing{
+		Title:       "Cherry Farm Table Sheraton Style",
+		Description: "Selling my lovely Cherry Farm Table",
+		Type:        types.Table,
+		Cost:        2700,
+		Style:       types.Sheraton,
+		Condition:   "Great",
+		Material:    types.Cherry,
 	}
 
 	// simulating JSON.stringify(obj) in TS
 	payload1, err := json.Marshal(furnitureListing1)
 	if err != nil {
-		t.Fatal("Failed to encode payload into JSON")
+		t.Fatal("Failed to encode payload1 into JSON")
 	}
-	payload1String := string(payload1)
+
+	payload2, err := json.Marshal(furnitureListing2)
+	if err != nil {
+		t.Fatal("Failed to encode payload2 into JSON")
+	}
 
 	// create test cases
 	tests := []struct {
 		name               string
 		payload            string
 		expectedStatusCode int
-		expectedBody       string
+		expectedMessage    string
+		expectedError      error
 	}{
-		{ // test to check if server is receiving the json payload correctly
+		{ // valid
 			name:               "Test 1",
-			payload:            payload1String,
+			payload:            string(payload1),
 			expectedStatusCode: http.StatusOK,
-			expectedBody:       payload1String,
+		},
+		{ // missing image
+			name:               "Test 2",
+			payload:            string(payload2),
+			expectedStatusCode: http.StatusBadRequest,
+			expectedMessage:    "Images not provided",
+		},
+		{ // invalid payload format type
+			name:               "Test 3",
+			payload:            "34",
+			expectedStatusCode: http.StatusBadRequest,
+			expectedError:      primitive.ErrInvalidHex,
+		},
+		{ // invalid json formatting
+			name:               "Test 4",
+			payload:            `{"Title":"Oak Nightstand with refinish}`,
+			expectedStatusCode: http.StatusBadRequest,
+			expectedError:      primitive.ErrInvalidHex,
+		},
+		{ // missing condition
+			name:               "Test 5",
+			payload:            `{"Title":"Oak Nightstand with refinish"}`,
+			expectedStatusCode: http.StatusBadRequest,
+			expectedMessage:    "Condition not provided",
 		},
 	}
 
+	db.Init()
+	defer db.Close()
+	server := api.NewServer(":3000")
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			server := api.NewServer(":3000")
-			go server.Start()
 
-			req, err := http.NewRequest("POST", "/list_furniture", bytes.NewBufferString(payload1String))
-			if err != nil {
-				t.Fatal(err)
-			}
-
+			req := httptest.NewRequest("POST", "/list_furniture", strings.NewReader(tc.payload))
 			recorder := httptest.NewRecorder()
+
+			/*
+				need to call the http handler after the first error condition bc
+				the json decoding of the request body in the handler eats up the
+				request body, which would result in an empty body being read if we
+				call the http handler before the first check
+			*/
 			server.HandleListFurniture(recorder, req)
 
-			body, err := io.ReadAll(req.Body)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// validate JSON body is received
-			if string(body) != tc.expectedBody {
-				t.Fatalf("Expected: %s, got: %s", tc.expectedBody, string(body))
-			}
-
 			// validate that body was inserted into MongoDB correctly
-
-			if status := recorder.Code; status != tc.expectedStatusCode {
-				t.Fatalf("Expected status code: %d, got: %v\n", status, tc.expectedStatusCode)
+			res := strings.TrimSpace(recorder.Body.String())
+			if res == "" {
+				t.Fatal("Response did not return an ID")
 			}
+
+			if tc.expectedMessage != "" {
+				if res != tc.expectedMessage {
+					t.Fatalf("Expected: '%s', got: '%s'\n", tc.expectedMessage, res)
+				}
+			} else {
+				_, err := db.FindByIDInListingsCollection(res)
+				if err != nil {
+					if err == mongo.ErrNoDocuments {
+						t.Fatalf("Expected document with ID: %s, got no document\n", res)
+					} else if err == primitive.ErrInvalidHex {
+						if err != tc.expectedError {
+							t.Fatalf("listingID string is an invalid hex string: %s\n", res)
+						}
+					}
+				}
+			}
+
+			status := recorder.Code
+			if status != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %v\n", tc.expectedStatusCode, status)
+			}
+
 		})
 	}
 }
 
 /*
-Unit test to test ValidateListFormFields
+Unit test for ValidateListFormFields
 */
 func TestValidateListFormFields(t *testing.T) {
 	tests := []struct {
