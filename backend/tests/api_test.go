@@ -113,7 +113,7 @@ func TestHandleLogin(t *testing.T) {
 		expectedResMsg     string
 		expectedStatusCode int
 	}{
-		{ // test valid login
+		{ // test valid login (TestHandleSignup should be ran first to test this first case)
 			name:               "Test 1",
 			method:             "POST",
 			payload:            `{"username": "testuser1", "password": "testpassword1"}`,
@@ -256,9 +256,17 @@ func TestHandleListFurniture(t *testing.T) {
 		t.Fatal("Failed to encode payload2 into JSON")
 	}
 
+	// creating fake loggedIn clients
+	session := api.GetSessionManager()
+	session1, err := session.CreateSession()
+	if err != nil {
+		t.Fatalf("Err creating fake session: %s", err.Error())
+	}
+
 	// create test cases
 	tests := []struct {
 		name               string
+		authentication     string
 		payload            string
 		expectedStatusCode int
 		expectedMessage    string
@@ -267,31 +275,43 @@ func TestHandleListFurniture(t *testing.T) {
 		{ // valid
 			name:               "Test 1",
 			payload:            string(payload1),
+			authentication:     session1.SessionId.String(),
 			expectedStatusCode: http.StatusOK,
 		},
 		{ // missing image
 			name:               "Test 2",
 			payload:            string(payload2),
+			authentication:     session1.SessionId.String(),
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Images not provided",
 		},
 		{ // invalid payload format type
 			name:               "Test 3",
 			payload:            "34",
+			authentication:     session1.SessionId.String(),
 			expectedStatusCode: http.StatusBadRequest,
 			expectedError:      primitive.ErrInvalidHex,
 		},
 		{ // invalid json formatting
 			name:               "Test 4",
+			authentication:     session1.SessionId.String(),
 			payload:            `{"Title":"Oak Nightstand with refinish}`,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedError:      primitive.ErrInvalidHex,
 		},
 		{ // missing condition
 			name:               "Test 5",
+			authentication:     session1.SessionId.String(),
 			payload:            `{"Title":"Oak Nightstand with refinish"}`,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Condition not provided",
+		},
+		{ // not authenticated
+			name:               "Test 6",
+			payload:            string(payload1),
+			authentication:     "foo",
+			expectedStatusCode: http.StatusUnauthorized,
+			expectedMessage:    "You must be logged in to create a furniture listing",
 		},
 	}
 
@@ -302,6 +322,10 @@ func TestHandleListFurniture(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			req := httptest.NewRequest("POST", "/list_furniture", strings.NewReader(tc.payload))
+			req.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.authentication,
+			})
 			recorder := httptest.NewRecorder()
 
 			/*
@@ -315,7 +339,7 @@ func TestHandleListFurniture(t *testing.T) {
 			// validate that body was inserted into MongoDB correctly
 			res := strings.TrimSpace(recorder.Body.String())
 			if res == "" {
-				t.Fatal("Response did not return an ID")
+				t.Fatal("Response did not return an anything")
 			}
 
 			if tc.expectedMessage != "" {
