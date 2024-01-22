@@ -1,8 +1,10 @@
 package api
 
 import (
-	"github.com/google/uuid"
+	"net/http"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 type SessionStore map[string]any
@@ -13,6 +15,7 @@ type Session struct {
 }
 
 type SessionManager struct {
+	// a map of all currently running sessions
 	Sessions map[string]*Session
 }
 
@@ -37,9 +40,9 @@ func GetSessionManager() *SessionManager {
 }
 
 /*
-Creates a new session and adds it to the map of stored Sessions.
-This method will return an error if an error occurs when generating
-a new sessionId
+Creates a new session with a UUID and adds it to the map of currently running sessions.
+
+This method will return an error if an error occurs when generating a new sessionId
 */
 func (s *SessionManager) CreateSession() (*Session, error) {
 
@@ -62,15 +65,41 @@ func (s *SessionManager) CreateSession() (*Session, error) {
 }
 
 /*
-Creates a session if the session with the sessionId cannot be found, else
-returns the existing session.
+Retrieves the session associated with the provided sessionID.
 
-Returns an error if an error occured when creating a new session
+If a session can be found with the provided sessionID, the session and true will be
+returned. If not, nil and false will be returned
 */
-func (s *SessionManager) GetSession(sessionId string) (*Session, error) {
+func (s *SessionManager) GetSession(sessionId string) (*Session, bool) {
 	if session, sessionExists := s.Sessions[sessionId]; !sessionExists {
-		return s.CreateSession()
+		return nil, false
 	} else {
-		return session, nil
+		return session, true
 	}
+}
+
+/*
+Deletes the session associated with the provided sessionID from the
+map of currently running sessions
+*/
+func (s *SessionManager) DeleteSession(sessionID string) {
+	delete(s.Sessions, sessionID)
+}
+
+/*
+Checks if the client is logged in.
+
+Reads sessionID from request cookie and returns the session and true if a session can be
+retrieved with the provided ID. If a session can't be found, then it will return nil and false.
+*/
+func (s *SessionManager) IsLoggedIn(r *http.Request) (*Session, bool) {
+	cookie, err := r.Cookie(SESSIONID_COOKIE_NAME)
+	if err != nil {
+		return nil, false
+	}
+
+	sessionID := cookie.Value
+	SessionManager := GetSessionManager()
+
+	return SessionManager.GetSession(sessionID)
 }
