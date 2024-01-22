@@ -400,7 +400,48 @@ func TestValidateListFormFields(t *testing.T) {
 }
 
 func TestHandleGetFurnitures(t *testing.T) {
+	tests := []struct {
+		name               string
+		method             string
+		expectedStatusCode int
+		expectedMessage    string
+	}{
+		{ // valid
+			name:               "Test 1",
+			method:             "GET",
+			expectedStatusCode: http.StatusOK,
+		},
+		{ // valid
+			name:               "Test 2",
+			method:             "POST",
+			expectedStatusCode: http.StatusMethodNotAllowed,
+			expectedMessage:    "Request must be a GET request",
+		},
+	}
 
+	db.Init()
+	defer db.Close()
+	server := api.NewServer(":3000")
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, "/get_furnitures", nil)
+			w := httptest.NewRecorder()
+
+			server.HandleGetFurnitures(w, r)
+
+			statusCode := w.Code
+			if statusCode != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, statusCode)
+			}
+
+			if tc.expectedMessage != "" {
+				message := strings.TrimSpace(w.Body.String())
+				if message != tc.expectedMessage {
+					t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMessage, message)
+				}
+			}
+		})
+	}
 }
 
 func TestHandleGetFurniture(t *testing.T) {
