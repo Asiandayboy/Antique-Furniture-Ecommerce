@@ -6,6 +6,7 @@ import (
 	"backend/types"
 	"backend/util"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -152,10 +154,7 @@ func TestHandleLogin(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req, err := http.NewRequest(tc.method, "/login", bytes.NewBufferString(tc.payload))
-			if err != nil {
-				t.Fatal(err)
-			}
+			req := httptest.NewRequest(tc.method, "/login", bytes.NewBufferString(tc.payload))
 
 			recorder := httptest.NewRecorder()
 			server.HandleLogin(recorder, req)
@@ -172,21 +171,18 @@ func TestHandleLogin(t *testing.T) {
 
 /*
 This test is to see if the server is setting the cookie
-for the session in the response header
+for the session in the response header when logging in
 
 This test should be run after TestHandleSignup is called, to ensure
 the tested user is added first
 */
-func TestHandleLoginCookie(t *testing.T) {
+func TestLoginCookie(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
 
 	payload := `{"username": "testuser1", "password": "testpassword1"}`
-	req, err := http.NewRequest("POST", "/login", bytes.NewBufferString(payload))
-	if err != nil {
-		t.Fatal(err)
-	}
+	req := httptest.NewRequest("POST", "/login", bytes.NewBufferString(payload))
 
 	recorder := httptest.NewRecorder()
 	server.HandleLogin(recorder, req)
@@ -209,6 +205,13 @@ Integration test for HandleListFurniture handler to see if
 
 *From the frontend (React TS), the body is sent as one long string
 representing a JSON object
+
+This test uses the sessionID to find the client's document in the "users" collection.
+Then it uses the userID from the document to associate the furniture listing with the
+client.
+
+Sample sessionID (which belongs to a test acc in the DB) to be used when testing:
+sessionID -> "testtest-test-test-test-testtesttest"
 */
 func TestHandleListFurniture(t *testing.T) {
 
@@ -256,60 +259,72 @@ func TestHandleListFurniture(t *testing.T) {
 		t.Fatal("Failed to encode payload2 into JSON")
 	}
 
-	// creating fake loggedIn clients
-	session := api.GetSessionManager()
-	session1, err := session.CreateSession()
+	// creating a fake loggedIn client using the test account
+	const TEST_SESS_ID string = "testtest-test-test-test-testtesttest"
+	sessionManager := api.GetSessionManager()
+	session, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: TEST_SESS_ID,
+	})
+
 	if err != nil {
-		t.Fatalf("Err creating fake session: %s", err.Error())
+		t.Fatalf("Err creating simulated session: %s\n", err.Error())
 	}
+
+	// userID from the test account
+	TEST_OBJID, err := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// when logging in, the userid gets saved into the session store
+	session.Store["userid"] = TEST_OBJID
 
 	// create test cases
 	tests := []struct {
 		name               string
-		authentication     string
+		sessionID          string
 		payload            string
 		expectedStatusCode int
 		expectedMessage    string
-		expectedError      error
 	}{
 		{ // valid
 			name:               "Test 1",
 			payload:            string(payload1),
-			authentication:     session1.SessionId.String(),
+			sessionID:          session.SessionId,
 			expectedStatusCode: http.StatusOK,
 		},
 		{ // missing image
 			name:               "Test 2",
 			payload:            string(payload2),
-			authentication:     session1.SessionId.String(),
+			sessionID:          session.SessionId,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Images not provided",
 		},
 		{ // invalid payload format type
 			name:               "Test 3",
 			payload:            "34",
-			authentication:     session1.SessionId.String(),
+			sessionID:          session.SessionId,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedError:      primitive.ErrInvalidHex,
+			expectedMessage:    "Failed to decode JSON",
 		},
 		{ // invalid json formatting
 			name:               "Test 4",
-			authentication:     session1.SessionId.String(),
+			sessionID:          session.SessionId,
 			payload:            `{"Title":"Oak Nightstand with refinish}`,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedError:      primitive.ErrInvalidHex,
+			expectedMessage:    "Failed to decode JSON",
 		},
 		{ // missing condition
 			name:               "Test 5",
-			authentication:     session1.SessionId.String(),
+			sessionID:          session.SessionId,
 			payload:            `{"Title":"Oak Nightstand with refinish"}`,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Condition not provided",
 		},
-		{ // not authenticated
+		{ // not logged in
 			name:               "Test 6",
 			payload:            string(payload1),
-			authentication:     "foo",
+			sessionID:          "foo",
 			expectedStatusCode: http.StatusUnauthorized,
 			expectedMessage:    "You must be logged in to create a furniture listing",
 		},
@@ -324,7 +339,7 @@ func TestHandleListFurniture(t *testing.T) {
 			req := httptest.NewRequest("POST", "/list_furniture", strings.NewReader(tc.payload))
 			req.AddCookie(&http.Cookie{
 				Name:  api.SESSIONID_COOKIE_NAME,
-				Value: tc.authentication,
+				Value: tc.sessionID,
 			})
 			recorder := httptest.NewRecorder()
 
@@ -336,32 +351,59 @@ func TestHandleListFurniture(t *testing.T) {
 			*/
 			server.HandleListFurniture(recorder, req)
 
+			status := recorder.Code
+			if status != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %v\n", tc.expectedStatusCode, status)
+			}
+
 			// validate that body was inserted into MongoDB correctly
 			res := strings.TrimSpace(recorder.Body.String())
 			if res == "" {
 				t.Fatal("Response did not return an anything")
 			}
 
-			if tc.expectedMessage != "" {
-				if res != tc.expectedMessage {
-					t.Fatalf("Expected: '%s', got: '%s'\n", tc.expectedMessage, res)
-				}
-			} else {
-				_, err := db.FindByIDInListingsCollection(res)
-				if err != nil {
-					if err == mongo.ErrNoDocuments {
-						t.Fatalf("Expected document with ID: %s, got no document\n", res)
-					} else if err == primitive.ErrInvalidHex {
-						if err != tc.expectedError {
-							t.Fatalf("listingID string is an invalid hex string: %s\n", res)
-						}
-					}
-				}
+			// find the document in the listings collection with the listingID and userID
+			listingResDB, err := db.FindByIDInListingsCollection(res)
+
+			// compare expected message
+			if tc.expectedMessage != "" && res != tc.expectedMessage {
+				t.Fatalf("Expected: '%s', got: '%s'\n", tc.expectedMessage, res)
+			}
+			// stop testcase when an error is reached
+			if err != nil {
+				return
 			}
 
-			status := recorder.Code
-			if status != tc.expectedStatusCode {
-				t.Fatalf("Expected status code: %d, got: %v\n", tc.expectedStatusCode, status)
+			/*
+				THE CODE BELOW..
+				only applies to testcases that are simulating valid requests, like Test 1,
+				bc the other test cases, which tests for errors, will return above
+			*/
+
+			var actualListing types.FurnitureListing
+			decodeErr := listingResDB.Decode(&actualListing)
+			if decodeErr != nil {
+				t.Fatalf("Failed to decode resultDB into struct: %v\n", decodeErr)
+			}
+
+			/*
+				use the userID and the listingID returned from the response recorder
+				to validate that the listing was added to the DB
+			*/
+
+			var objectID primitive.ObjectID = session.Store["userid"].(primitive.ObjectID)
+			listingObjectID, err := primitive.ObjectIDFromHex(res)
+			if err != nil {
+				t.Fatal("Hex string is not a valid objectID")
+			}
+
+			listingsColletion := db.GetCollection("listings")
+			result := listingsColletion.FindOne(context.Background(), bson.M{
+				"userid": objectID,
+				"_id":    listingObjectID,
+			})
+			if result.Err() == mongo.ErrNoDocuments {
+				t.Fatalf("Expected document with userID: %s, and listingID: %s; got nothing\n", objectID.Hex(), listingObjectID.Hex())
 			}
 
 		})

@@ -38,7 +38,11 @@ func ValidateListFormFields(listing types.FurnitureListing) (bool, string) {
 /*
 This endpoint processes a new furniture listing request
 
-Successful requests return 200 status code and the new listingID
+If an error occurs during the processing, an error message string
+will be returned in the response.
+
+If no errors occur, the ID hex string of the ObjectID of the new
+furniture listing document will be returned in the response.
 */
 func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -58,7 +62,7 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	var newListing types.FurnitureListing
 	err := util.ReadJSONReq[types.FurnitureListing](r, &newListing)
 	if err != nil {
-		http.Error(w, "Failed to decode JSON: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
 		return
 	}
 
@@ -69,8 +73,25 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get session to get userID from session store
+	sessionID, err := sessionManager.GetSessionID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	session, exists := sessionManager.GetSession(sessionID)
+	if !exists {
+		http.Error(w, "Session not found. Log in.", http.StatusUnauthorized)
+		return
+	}
+
+	// add userID to newListing
+	newListing.UserID = session.Store["userid"].(primitive.ObjectID)
+
 	// save new listing in database
-	result, err := db.InsertIntoListingsCollection(newListing)
+	listingsCollection := db.GetCollection("listings")
+	result, err := listingsCollection.InsertOne(context.Background(), newListing)
 	if err != nil {
 		http.Error(w, "Failed to insert listing into database", http.StatusConflict)
 		return
@@ -78,7 +99,6 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 
 	// insertedID is of type primitive.ObjectID, which is type [12]byte
 	insertedId := result.InsertedID.(primitive.ObjectID)
-
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(insertedId.Hex()))
 
