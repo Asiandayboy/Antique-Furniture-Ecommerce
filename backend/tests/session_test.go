@@ -15,14 +15,17 @@ func TestGetSession(t *testing.T) {
 	*/
 	sessionManager := api.GetSessionManager()
 
-	expectedSession, err := sessionManager.CreateSession()
+	expectedSession, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "",
+	})
+
 	if err != nil {
 		t.Fatal("Failed to create new session:", err)
 	}
 
-	actualSession, exists := sessionManager.GetSession(expectedSession.SessionId.String())
+	actualSession, exists := sessionManager.GetSession(expectedSession.SessionId)
 	if !exists {
-		t.Fatal("Session does not exist")
+		t.Fatal("Session does not exist:", expectedSession.SessionId)
 	}
 
 	// compare memory address of the session
@@ -33,7 +36,12 @@ func TestGetSession(t *testing.T) {
 
 func TestIsLoggedIn(t *testing.T) {
 	sessionManager := api.GetSessionManager()
-	session, err := sessionManager.CreateSession() // simulating a loggedIn user
+
+	// simulating a loggedIn user
+	session, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "",
+	})
+
 	if err != nil {
 		t.Fatal("Fail to generate new sessionID when testing")
 	}
@@ -50,7 +58,7 @@ func TestIsLoggedIn(t *testing.T) {
 		},
 		{
 			name:           "Test 2",
-			payload:        session.SessionId.String(),
+			payload:        session.SessionId,
 			expectedReturn: true,
 		},
 	}
