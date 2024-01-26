@@ -74,28 +74,6 @@ func InsertIntoUsersCollection(signupInfo types.User) (*mongo.InsertOneResult, e
 	return collection.InsertOne(context.Background(), signupInfo)
 }
 
-func FindInUsersCollection(loginInfo types.User) *mongo.SingleResult {
-	collection := GetCollection("users")
-	filter := bson.M{
-		"username": loginInfo.Username,
-		"password": loginInfo.Password,
-	}
-	return collection.FindOne(context.Background(), filter)
-}
-
-func FindByUsernameInCollection(username string) *mongo.SingleResult {
-	collection := GetCollection("users")
-	filter := bson.M{
-		"username": username,
-	}
-	return collection.FindOne(context.Background(), filter)
-}
-
-func InsertIntoListingsCollection(furnitureListInfo types.FurnitureListing) (*mongo.InsertOneResult, error) {
-	collection := GetCollection("listings")
-	return collection.InsertOne(context.Background(), furnitureListInfo)
-}
-
 /*
 This function takes the hex string ID and converts it into an ObjectID so that
 it can be used to query the mongoDB to search for the associated listing
