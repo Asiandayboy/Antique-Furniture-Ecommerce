@@ -5,10 +5,12 @@ import (
 	"backend/db"
 	"backend/types"
 	"backend/util"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
-	// "go.mongodb.org/mongo-driver/mongo"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Server struct {
@@ -26,7 +28,7 @@ func (s *Server) Start() {
 	mux.HandleFunc("/", s.HandleRoot)
 	mux.HandleFunc("/login", s.HandleLogin)
 	mux.HandleFunc("/signup", s.HandleSignup)
-	mux.HandleFunc("/checkout", HandleCheckout)
+	mux.HandleFunc("/checkout", s.HandleCheckout)
 	mux.HandleFunc("/list_furniture", s.HandleListFurniture)
 	mux.HandleFunc("/get_furnitures", s.HandleGetFurnitures)
 	mux.HandleFunc("/get_furniture", s.HandleGetFurniture)
@@ -75,12 +77,12 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 
 	// create new session before saving info to database
 	sessionManager := GetSessionManager()
-	session, err := sessionManager.CreateSession()
+	session, err := sessionManager.CreateSession(SessionTemplate{SessionID: ""})
 	if err != nil {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
 		return
 	}
-	signupInfo.SessionId = session.SessionId.String()
+	signupInfo.SessionId = session.SessionId
 
 	// hash password
 	hashedPassword, err := util.HashPassword(signupInfo.Password)
@@ -119,8 +121,17 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// find document by username, since each username is constrained to be unique
 	var userResult types.User
-	err = db.FindByUsernameInCollection(loginInfo.Username).Decode(&userResult)
-	if err != nil {
+	usersCollection := db.GetCollection("users")
+	res := usersCollection.FindOne(context.Background(), bson.M{
+		"username": loginInfo.Username,
+	})
+
+	if res.Err() != nil {
+		http.Error(w, "Invalid login", http.StatusUnauthorized)
+		return
+	}
+
+	if err = res.Decode(&userResult); err != nil {
 		http.Error(w, "Invalid login", http.StatusUnauthorized)
 		return
 	}
@@ -137,18 +148,19 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	session, exists := sessionManager.GetSession(userResult.SessionId)
 	if !exists {
 		// create new session
-		session, err = sessionManager.CreateSession()
+		session, err = sessionManager.CreateSession(SessionTemplate{SessionID: ""})
 		if err != nil {
 			http.Error(w, "Failed to create session", http.StatusInternalServerError)
 			return
 		}
 	}
 	session.Store["username"] = userResult.Username
+	session.Store["userid"] = userResult.UserId
 
 	// send back response with cookie
 	cookie := http.Cookie{
 		Name:  SESSIONID_COOKIE_NAME,
-		Value: session.SessionId.String(),
+		Value: session.SessionId,
 		Path:  "/",
 	}
 
@@ -157,6 +169,9 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
+/*
+Delete session, effectively logging the user out
+*/
 func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 }
