@@ -1,5 +1,7 @@
 package types
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 const Unknown string = "Unknown"
 
 const (
@@ -44,8 +46,8 @@ const (
 )
 
 /*
-	This type represents a furniture listing with all
-	appropriate form details about the furniture
+This type represents a furniture listing with all
+appropriate form details about the furniture
 */
 type FurnitureListing struct {
 	Title       string  `json:"title"`
@@ -66,4 +68,7 @@ type FurnitureListing struct {
 
 	// images are stored as based64 encoded strings
 	Images []string `json:"images"`
+
+	// UserID of the client who created the listing; the owner of the post
+	UserID primitive.ObjectID `bson:"userid"`
 }
