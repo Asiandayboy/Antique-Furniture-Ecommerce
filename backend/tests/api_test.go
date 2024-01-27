@@ -74,10 +74,7 @@ func TestHandleSignup(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req, err := http.NewRequest(tc.method, "/signup", bytes.NewBufferString(tc.payload))
-			if err != nil {
-				t.Fatal(err)
-			}
+			req := httptest.NewRequest(tc.method, "/signup", bytes.NewBufferString(tc.payload))
 
 			// response recorder response the response
 			recorder := httptest.NewRecorder()
@@ -167,6 +164,89 @@ func TestHandleLogin(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHandleLogout(t *testing.T) {
+	sessionManager := api.GetSessionManager()
+
+	// creating fake loggedIn client #1
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "test1",
+	})
+	if err != nil {
+		t.Fatal("Failed to create fake session1")
+		return
+	}
+
+	// creating fake loggedIn client #2
+	session2, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "test2",
+	})
+	if err != nil {
+		t.Fatal("Failed to create fake sesion2")
+	}
+
+	tests := []struct {
+		name        string
+		sessionID   string
+		method      string
+		expectedMsg string
+	}{
+		{
+			name:        "Test 1",
+			sessionID:   session1.SessionId,
+			method:      "POST",
+			expectedMsg: "success",
+		},
+		{
+			name:        "Test 2",
+			sessionID:   session2.SessionId,
+			method:      "GET",
+			expectedMsg: "Request must be a POST request",
+		},
+		{
+			name:        "Test 3",
+			sessionID:   session2.SessionId,
+			method:      "POST",
+			expectedMsg: "success",
+		},
+		{
+			name:        "Test 4",
+			sessionID:   "bruh",
+			method:      "POST",
+			expectedMsg: "Session does not exist",
+		},
+	}
+
+	server := api.NewServer(":3000")
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, "/logout", nil)
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionID,
+			})
+			w := httptest.NewRecorder()
+
+			server.HandleLogout(w, r)
+
+			msg := strings.TrimSpace(w.Body.String())
+			if msg != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, msg)
+			}
+
+			if tc.method != "POST" {
+				return
+			}
+
+			_, sessionExists := sessionManager.GetSession(tc.sessionID)
+			if sessionExists {
+				t.Fatal("Session is not supposed to exist")
+			}
+		})
+
+	}
+
 }
 
 /*

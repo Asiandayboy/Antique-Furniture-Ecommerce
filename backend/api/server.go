@@ -23,11 +23,15 @@ func NewServer(port string) *Server {
 	}
 }
 
+/*
+Starts the server to begin listening for requests
+*/
 func (s *Server) Start() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.HandleRoot)
 	mux.HandleFunc("/login", s.HandleLogin)
 	mux.HandleFunc("/signup", s.HandleSignup)
+	mux.HandleFunc("/logout", s.HandleLogout)
 	mux.HandleFunc("/checkout", s.HandleCheckout)
 	mux.HandleFunc("/list_furniture", s.HandleListFurniture)
 	mux.HandleFunc("/get_furnitures", s.HandleGetFurnitures)
@@ -169,9 +173,28 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-/*
-Delete session, effectively logging the user out
-*/
 func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Request must be a POST request", http.StatusMethodNotAllowed)
+		return
+	}
 
+	// delete session
+	sessionManager := GetSessionManager()
+	sessionID, err := sessionManager.GetSessionID(r)
+	if err == http.ErrNoCookie {
+		http.Error(w, "SessionID cookie not found", http.StatusBadRequest)
+		return
+	}
+
+	_, sessioExists := sessionManager.GetSession(sessionID)
+	if !sessioExists {
+		http.Error(w, "Session does not exist", http.StatusUnauthorized)
+		return
+	}
+
+	sessionManager.DeleteSession(sessionID)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
 }
