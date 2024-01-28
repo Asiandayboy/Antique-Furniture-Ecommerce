@@ -118,6 +118,7 @@ func (s *Server) HandleGetFurniture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get id from url query params
+	// listingid param might not be set; check for that 1/26
 	id := r.URL.Query().Get("listingid")
 
 	_, err := db.FindByIDInListingsCollection(id)

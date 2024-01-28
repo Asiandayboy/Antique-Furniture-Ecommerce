@@ -23,9 +23,9 @@ func TestGetSession(t *testing.T) {
 		t.Fatal("Failed to create new session:", err)
 	}
 
-	actualSession, exists := sessionManager.GetSession(expectedSession.SessionId)
+	actualSession, exists := sessionManager.GetSession(expectedSession.SessionID)
 	if !exists {
-		t.Fatal("Session does not exist:", expectedSession.SessionId)
+		t.Fatal("Session does not exist:", expectedSession.SessionID)
 	}
 
 	// compare memory address of the session
@@ -58,7 +58,7 @@ func TestIsLoggedIn(t *testing.T) {
 		},
 		{
 			name:           "Test 2",
-			payload:        session.SessionId,
+			payload:        session.SessionID,
 			expectedReturn: true,
 		},
 	}

@@ -12,7 +12,7 @@ type SessionStore map[string]any
 const ErrSessionAlreadyExists string = "Session already exists"
 
 type Session struct {
-	SessionId string
+	SessionID string
 	Store     SessionStore
 }
 
@@ -78,7 +78,7 @@ func (s *SessionManager) CreateSession(template SessionTemplate) (*Session, erro
 
 		// create new session
 		session = &Session{
-			SessionId: uuidID.String(),
+			SessionID: uuidID.String(),
 			Store:     make(map[string]any),
 		}
 		id = uuidID.String()
@@ -90,7 +90,7 @@ func (s *SessionManager) CreateSession(template SessionTemplate) (*Session, erro
 		}
 
 		session = &Session{
-			SessionId: template.SessionID,
+			SessionID: template.SessionID,
 			Store:     make(map[string]any),
 		}
 		id = template.SessionID
@@ -147,6 +147,5 @@ func (s *SessionManager) IsLoggedIn(r *http.Request) (*Session, bool) {
 		return nil, false
 	}
 
-	SessionManager := GetSessionManager()
-	return SessionManager.GetSession(sessionID)
+	return s.GetSession(sessionID)
 }

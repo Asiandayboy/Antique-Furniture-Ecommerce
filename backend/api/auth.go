@@ -10,6 +10,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const (
+	ErrUnauthorized  = "Session not found; you must be logged in"
+	ErrInvalidLogin  = "Invalid login"
+	ErrUsernameTaken = "Username is taken"
+	ErrEmailTaken    = "Email is taken"
+	ErrSignupSave    = "Failed to save user account"
+)
+
 func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Request must be a POST request", http.StatusBadRequest)
@@ -26,13 +34,13 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 
 	usernameUnique := db.CheckFieldUniqueness("username", signupInfo.Username)
 	if !usernameUnique { // username not unique
-		http.Error(w, "Username is taken", http.StatusConflict)
+		http.Error(w, ErrUsernameTaken, http.StatusConflict)
 		return
 	}
 
 	emailUnique := db.CheckFieldUniqueness("email", signupInfo.Email)
 	if !emailUnique { // email not unique
-		http.Error(w, "Email is taken", http.StatusConflict)
+		http.Error(w, ErrEmailTaken, http.StatusConflict)
 		return
 	}
 
@@ -43,7 +51,7 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
 		return
 	}
-	signupInfo.SessionId = session.SessionId
+	signupInfo.SessionID = session.SessionID
 
 	// hash password
 	hashedPassword, err := util.HashPassword(signupInfo.Password)
@@ -56,7 +64,7 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	// insert signupInfo into DB
 	_, err = db.InsertIntoUsersCollection(signupInfo)
 	if err != nil {
-		http.Error(w, "Failed to save user account", http.StatusInternalServerError)
+		http.Error(w, ErrSignupSave, http.StatusInternalServerError)
 		return
 	}
 
@@ -88,25 +96,25 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if res.Err() != nil {
-		http.Error(w, "Invalid login", http.StatusUnauthorized)
+		http.Error(w, ErrInvalidLogin, http.StatusUnauthorized)
 		return
 	}
 
 	if err = res.Decode(&userResult); err != nil {
-		http.Error(w, "Invalid login", http.StatusUnauthorized)
+		http.Error(w, ErrInvalidLogin, http.StatusUnauthorized)
 		return
 	}
 
 	// compare passwords
 	err = util.CheckPassword(loginInfo.Password, userResult.Password)
 	if err != nil {
-		http.Error(w, "Invalid login", http.StatusUnauthorized)
+		http.Error(w, ErrInvalidLogin, http.StatusUnauthorized)
 		return
 	}
 
 	// save appropriate session data to session store
 	sessionManager := GetSessionManager()
-	session, exists := sessionManager.GetSession(userResult.SessionId)
+	session, exists := sessionManager.GetSession(userResult.SessionID)
 	if !exists {
 		// create new session
 		session, err = sessionManager.CreateSession(SessionTemplate{SessionID: ""})
@@ -116,12 +124,12 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	session.Store["username"] = userResult.Username
-	session.Store["userid"] = userResult.UserId
+	session.Store["userid"] = userResult.UserID
 
 	// send back response with cookie
 	cookie := http.Cookie{
 		Name:  SESSIONID_COOKIE_NAME,
-		Value: session.SessionId,
+		Value: session.SessionID,
 		Path:  "/",
 	}
 
@@ -154,4 +162,33 @@ func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("success"))
+}
+
+type CtxSessionKey string
+
+// Key name for attaching session value to request context
+const SessionKey CtxSessionKey = "session"
+
+/*
+This middleware checks if the client is authenticated by retrieving
+their sessionID cookie and validating that their session exists.
+
+If it does exist, the <next> handler will be called with the session
+attached to the request context, with the key name of <SessionKey>.
+Otherwise, a 401 status code will be returned
+*/
+func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sessionManager := GetSessionManager()
+
+		session, isLoggedIn := sessionManager.IsLoggedIn(r)
+		if !isLoggedIn {
+			http.Error(w, ErrUnauthorized, http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), SessionKey, session)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
 }
