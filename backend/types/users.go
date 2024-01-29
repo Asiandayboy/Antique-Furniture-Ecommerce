@@ -22,8 +22,9 @@ type Address struct {
 	AddressID primitive.ObjectID `bson:"_id"`
 	UserID    primitive.ObjectID `bson:"userid"`
 	State     string             `bson:"state" json:"state"`
+	City      string             `bson:"city" json:"city"`
 	Street    string             `bson:"street" json:"street"`
-	ZipCode   string             `bson:"zipcode" json:"zipcode"`
+	ZipCode   string             `bson:"zipCode" json:"zipCode"`
 	Default   bool               `bson:"default" json:"default"`
 }
 
