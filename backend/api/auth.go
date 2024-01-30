@@ -11,19 +11,17 @@ import (
 )
 
 const (
-	ErrUnauthorized  = "Session not found; you must be logged in"
+	// Authentication failed; session not found
+	ErrUnauthorized = "Session not found; you must be logged in"
+	// Invalid login credentials
 	ErrInvalidLogin  = "Invalid login"
 	ErrUsernameTaken = "Username is taken"
 	ErrEmailTaken    = "Email is taken"
-	ErrSignupSave    = "Failed to save user account"
+	// New account failed to save into DB
+	ErrSignupSave = "Failed to save user account"
 )
 
 func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Request must be a POST request", http.StatusBadRequest)
-		return
-	}
-
 	// read json
 	var signupInfo types.User
 	err := util.ReadJSONReq[types.User](r, &signupInfo)
@@ -75,11 +73,6 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Request must be a POST request", http.StatusBadRequest)
-		return
-	}
-
 	// read json
 	var loginInfo types.User
 	err := util.ReadJSONReq[types.User](r, &loginInfo)
@@ -139,26 +132,11 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Request must be a POST request", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// delete session
+	session := r.Context().Value(SessionKey).(*Session)
+
 	sessionManager := GetSessionManager()
-	sessionID, err := sessionManager.GetSessionID(r)
-	if err == http.ErrNoCookie {
-		http.Error(w, "SessionID cookie not found", http.StatusBadRequest)
-		return
-	}
-
-	_, sessioExists := sessionManager.GetSession(sessionID)
-	if !sessioExists {
-		http.Error(w, "Session does not exist", http.StatusUnauthorized)
-		return
-	}
-
-	sessionManager.DeleteSession(sessionID)
+	sessionManager.DeleteSession(session.SessionID)
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("success"))
@@ -166,7 +144,7 @@ func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 type CtxSessionKey string
 
-// Key name for attaching session value to request context
+// Key name for attached session value to request context AuthMiddleware
 const SessionKey CtxSessionKey = "session"
 
 /*

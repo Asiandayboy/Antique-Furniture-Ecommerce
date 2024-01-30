@@ -27,6 +27,7 @@ func TestHandleSignup(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
+	server.Post("/signup", server.HandleSignup)
 
 	tests := []struct {
 		name               string
@@ -35,19 +36,19 @@ func TestHandleSignup(t *testing.T) {
 		expectedResMsg     string
 		expectedStatusCode int
 	}{
-		{ // test valid signup; if this test fails, it's bc the payload is already in the db; just delete it and test again
-			name:               "Test 1",
-			method:             "POST",
-			payload:            `{"username": "testuser1", "password": "testpassword1", "email": "test@gmail.com"}`,
-			expectedResMsg:     "success",
-			expectedStatusCode: http.StatusOK,
-		},
+		// { // test valid signup; if this test fails, it's bc the payload is already in the db; just delete it and test again
+		// 	name:               "Test 1",
+		// 	method:             "POST",
+		// 	payload:            `{"username": "testuser1", "password": "testpassword1", "email": "test@gmail.com"}`,
+		// 	expectedResMsg:     "success",
+		// 	expectedStatusCode: http.StatusOK,
+		// },
 		{ // test invalid method
 			name:               "Test 2",
 			method:             "GET",
 			payload:            `{"username": "testuser1", "password": "testpassword1", "email": "test@gmail.com"}`,
 			expectedResMsg:     "Request must be a POST request",
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // testing invalid json decode
 			name:               "Test 3",
@@ -74,18 +75,18 @@ func TestHandleSignup(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(tc.method, "/signup", bytes.NewBufferString(tc.payload))
+			r := httptest.NewRequest(tc.method, "/signup", bytes.NewBufferString(tc.payload))
 
 			// response recorder response the response
-			recorder := httptest.NewRecorder()
+			w := httptest.NewRecorder()
 
 			// hit endpoint
-			server.HandleSignup(recorder, req)
+			server.Mux.ServeHTTP(w, r)
 
-			if status := recorder.Code; status != tc.expectedStatusCode {
+			if status := w.Code; status != tc.expectedStatusCode {
 				t.Errorf("Expected code: %v, got: %v", tc.expectedStatusCode, status)
 			}
-			if res := recorder.Body; trimSpaceAndNewline(res.String()) != tc.expectedResMsg {
+			if res := w.Body; trimSpaceAndNewline(res.String()) != tc.expectedResMsg {
 				t.Errorf("Expected ResMsg: %v, got: %v", tc.expectedResMsg, res.String())
 			}
 
@@ -104,6 +105,7 @@ func TestHandleLogin(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
+	server.Post("/login", server.HandleLogin)
 
 	tests := []struct {
 		name               string
@@ -124,7 +126,7 @@ func TestHandleLogin(t *testing.T) {
 			method:             "GET",
 			payload:            `{"username": "bob", "password": "bob"}`,
 			expectedResMsg:     "Request must be a POST request",
-			expectedStatusCode: http.StatusBadRequest,
+			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // test invalid login/invalid username
 			name:               "Test 3",
@@ -151,15 +153,15 @@ func TestHandleLogin(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(tc.method, "/login", bytes.NewBufferString(tc.payload))
+			r := httptest.NewRequest(tc.method, "/login", bytes.NewBufferString(tc.payload))
 
-			recorder := httptest.NewRecorder()
-			server.HandleLogin(recorder, req)
+			w := httptest.NewRecorder()
+			server.Mux.ServeHTTP(w, r)
 
-			if status := recorder.Code; status != tc.expectedStatusCode {
+			if status := w.Code; status != tc.expectedStatusCode {
 				t.Errorf("Expected code: %v, got: %v", tc.expectedStatusCode, status)
 			}
-			if res := recorder.Body; trimSpaceAndNewline(res.String()) != tc.expectedResMsg {
+			if res := w.Body; trimSpaceAndNewline(res.String()) != tc.expectedResMsg {
 				t.Errorf("Expected ResMsg: %v, got: %v", tc.expectedResMsg, res.String())
 			}
 		})
@@ -192,33 +194,34 @@ func TestHandleLogout(t *testing.T) {
 		method      string
 		expectedMsg string
 	}{
-		{
+		{ // valid
 			name:        "Test 1",
-			sessionID:   session1.SessionId,
+			sessionID:   session1.SessionID,
 			method:      "POST",
 			expectedMsg: "success",
 		},
-		{
+		{ // invalid method
 			name:        "Test 2",
-			sessionID:   session2.SessionId,
+			sessionID:   session2.SessionID,
 			method:      "GET",
-			expectedMsg: "Request must be a POST request",
+			expectedMsg: api.ErrPostMethod,
 		},
-		{
+		{ // valid
 			name:        "Test 3",
-			sessionID:   session2.SessionId,
+			sessionID:   session2.SessionID,
 			method:      "POST",
 			expectedMsg: "success",
 		},
-		{
+		{ // not logged in anymore
 			name:        "Test 4",
 			sessionID:   "bruh",
 			method:      "POST",
-			expectedMsg: "Session does not exist",
+			expectedMsg: api.ErrUnauthorized,
 		},
 	}
 
 	server := api.NewServer(":3000")
+	server.Post("/logout", server.HandleLogout, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest(tc.method, "/logout", nil)
@@ -228,7 +231,7 @@ func TestHandleLogout(t *testing.T) {
 			})
 			w := httptest.NewRecorder()
 
-			server.HandleLogout(w, r)
+			server.Mux.ServeHTTP(w, r)
 
 			msg := strings.TrimSpace(w.Body.String())
 			if msg != tc.expectedMsg {
@@ -260,14 +263,15 @@ func TestLoginCookie(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
+	server.Post("/login", server.HandleLogin)
 
 	payload := `{"username": "testuser1", "password": "testpassword1"}`
-	req := httptest.NewRequest("POST", "/login", bytes.NewBufferString(payload))
+	r := httptest.NewRequest("POST", "/login", bytes.NewBufferString(payload))
 
-	recorder := httptest.NewRecorder()
-	server.HandleLogin(recorder, req)
+	w := httptest.NewRecorder()
+	server.Mux.ServeHTTP(w, r)
 
-	cookie := recorder.Header().Get("Set-Cookie")
+	cookie := w.Header().Get("Set-Cookie")
 	if !strings.Contains(cookie, "afpsid=") {
 		t.Fatalf("Cookie has not been set\n")
 	}
@@ -362,6 +366,7 @@ func TestHandleListFurniture(t *testing.T) {
 	// create test cases
 	tests := []struct {
 		name               string
+		method             string
 		sessionID          string
 		payload            string
 		expectedStatusCode int
@@ -369,59 +374,74 @@ func TestHandleListFurniture(t *testing.T) {
 	}{
 		{ // valid
 			name:               "Test 1",
+			method:             "POST",
 			payload:            string(payload1),
-			sessionID:          session.SessionId,
+			sessionID:          session.SessionID,
 			expectedStatusCode: http.StatusOK,
 		},
 		{ // missing image
 			name:               "Test 2",
+			method:             "POST",
 			payload:            string(payload2),
-			sessionID:          session.SessionId,
+			sessionID:          session.SessionID,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Images not provided",
 		},
 		{ // invalid payload format type
 			name:               "Test 3",
+			method:             "POST",
 			payload:            "34",
-			sessionID:          session.SessionId,
+			sessionID:          session.SessionID,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Failed to decode JSON",
 		},
 		{ // invalid json formatting
 			name:               "Test 4",
-			sessionID:          session.SessionId,
+			method:             "POST",
+			sessionID:          session.SessionID,
 			payload:            `{"Title":"Oak Nightstand with refinish}`,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Failed to decode JSON",
 		},
 		{ // missing condition
 			name:               "Test 5",
-			sessionID:          session.SessionId,
+			method:             "POST",
+			sessionID:          session.SessionID,
 			payload:            `{"Title":"Oak Nightstand with refinish"}`,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Condition not provided",
 		},
 		{ // not logged in
 			name:               "Test 6",
+			method:             "POST",
 			payload:            string(payload1),
 			sessionID:          "foo",
 			expectedStatusCode: http.StatusUnauthorized,
-			expectedMessage:    "You must be logged in to create a furniture listing",
+			expectedMessage:    api.ErrUnauthorized,
+		},
+		{ // invalid method
+			name:               "Test 7",
+			method:             "PUT",
+			payload:            string(payload1),
+			sessionID:          "foo",
+			expectedStatusCode: http.StatusMethodNotAllowed,
+			expectedMessage:    api.ErrPostMethod,
 		},
 	}
 
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
+	server.Post("/list_furniture", server.HandleListFurniture, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 
-			req := httptest.NewRequest("POST", "/list_furniture", strings.NewReader(tc.payload))
-			req.AddCookie(&http.Cookie{
+			r := httptest.NewRequest(tc.method, "/list_furniture", strings.NewReader(tc.payload))
+			r.AddCookie(&http.Cookie{
 				Name:  api.SESSIONID_COOKIE_NAME,
 				Value: tc.sessionID,
 			})
-			recorder := httptest.NewRecorder()
+			w := httptest.NewRecorder()
 
 			/*
 				need to call the http handler after the first error condition bc
@@ -429,15 +449,15 @@ func TestHandleListFurniture(t *testing.T) {
 				request body, which would result in an empty body being read if we
 				call the http handler before the first check
 			*/
-			server.HandleListFurniture(recorder, req)
+			server.Mux.ServeHTTP(w, r)
 
-			status := recorder.Code
+			status := w.Code
 			if status != tc.expectedStatusCode {
 				t.Fatalf("Expected status code: %d, got: %v\n", tc.expectedStatusCode, status)
 			}
 
 			// validate that body was inserted into MongoDB correctly
-			res := strings.TrimSpace(recorder.Body.String())
+			res := strings.TrimSpace(w.Body.String())
 			if res == "" {
 				t.Fatal("Response did not return an anything")
 			}
@@ -568,12 +588,13 @@ func TestHandleGetFurnitures(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
+	server.Get("/get_furnitures", server.HandleGetFurnitures)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest(tc.method, "/get_furnitures", nil)
 			w := httptest.NewRecorder()
 
-			server.HandleGetFurnitures(w, r)
+			server.Mux.ServeHTTP(w, r)
 
 			statusCode := w.Code
 			if statusCode != tc.expectedStatusCode {
@@ -609,7 +630,7 @@ func TestHandleGetFurniture(t *testing.T) {
 			name:               "Test 2",
 			method:             "GET",
 			expectedMessage:    "success",
-			payload:            "65aeadc6f9a6ba92452b8e52",
+			payload:            "65b433dd8d3c8f926b88cd7a",
 			expectedStatusCode: http.StatusOK,
 		},
 		{ // invalid method
@@ -626,7 +647,7 @@ func TestHandleGetFurniture(t *testing.T) {
 			payload:            "6783",
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
-		{ // invalid valid
+		{ // invalid listingID
 			name:               "Test 5",
 			method:             "GET",
 			expectedMessage:    "Furniture listing with provided listingID not found",
@@ -638,13 +659,14 @@ func TestHandleGetFurniture(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
+	server.Get("/get_furniture", server.HandleGetFurniture)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			var target string = fmt.Sprintf("/get_furniture?listingid=%s", tc.payload)
 			r := httptest.NewRequest(tc.method, target, nil)
 			w := httptest.NewRecorder()
 
-			server.HandleGetFurniture(w, r)
+			server.Mux.ServeHTTP(w, r)
 
 			if strings.TrimSpace(w.Body.String()) != tc.expectedMessage {
 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMessage, w.Body.String())
@@ -658,6 +680,193 @@ func TestHandleGetFurniture(t *testing.T) {
 	}
 }
 
-func TestHandleCheckout(t *testing.T) {
+// 1/28 [WIP]
+// func TestHandleAccountGet(t *testing.T) {
+// 	// creating fake logged in clients
+// 	sessionManager := api.GetSessionManager()
+// 	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+// 		SessionID: "",
+// 	})
+// 	if err != nil {
+// 		t.Fatal("Failed to generate session1")
+// 	}
+// 	session1.Store["userid"] = "testuser1"
 
+// 	session2, err := sessionManager.CreateSession(api.SessionTemplate{
+// 		SessionID: "",
+// 	})
+// 	if err != nil {
+// 		t.Fatal("Failed to generate session1")
+// 	}
+// 	session2.Store["userid"] = "testuser2"
+
+// 	tests := []struct {
+// 		name        string
+// 		method      string
+// 		sessionid   string
+// 		expectedMsg string
+// 	}{
+// 		{ // valid, authorized
+// 			name:        "Test 1",
+// 			method:      "GET",
+// 			sessionid:   session1.SessionID,
+// 			expectedMsg: "success",
+// 		},
+// 		{ // valid, authorized
+// 			name:        "Test 2",
+// 			method:      "GET",
+// 			sessionid:   session2.SessionID,
+// 			expectedMsg: "success",
+// 		},
+// 		{ // unauthorized
+// 			name:        "Test 3",
+// 			method:      "GET",
+// 			sessionid:   "foo",
+// 			expectedMsg: api.ErrUnauthorized,
+// 		},
+// 	}
+
+// 	server := api.NewServer(":3000")
+// 	server.Use("/account", server.HandleAccount, api.AuthMiddleware)
+
+// 	for _, tc := range tests {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			r := httptest.NewRequest(tc.method, "/account", nil)
+// 			r.AddCookie(&http.Cookie{
+// 				Name:  api.SESSIONID_COOKIE_NAME,
+// 				Value: tc.sessionid,
+// 			})
+// 			w := httptest.NewRecorder()
+
+// 			server.Mux.ServeHTTP(w, r)
+
+// 			res := strings.TrimSpace(w.Body.String())
+
+// 			if res != tc.expectedMsg {
+// 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+// 			}
+// 		})
+// 	}
+// }
+
+/*
+This test is WIP
+*/
+func TestHandleCheckout(t *testing.T) {
+	// creating fake loggedIn user with test account
+	sessionManager := api.GetSessionManager()
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to create a fake session")
+	}
+
+	USER_ID, err := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	if err != nil {
+		t.Fatal("Failed to generate objectID for fake session")
+	}
+	session1.Store["userid"] = USER_ID
+
+	// mock checkout data
+	checkoutInfo := api.CheckoutInfo{
+		ShoppingCart: []api.FurnitureItem{
+			"65b433dd8d3c8f926b88cd7a",
+		},
+		Payment: api.PaymentInfo{
+			StripeToken:   "token_foo",
+			PaymentMethod: "Credit",
+			Amount:        7500,
+			Currency:      "usd",
+		},
+		ShippingAddress: api.ShippingAddress{
+			State:   "RI",
+			City:    "Providence",
+			Street:  "999 Holy St.",
+			ZipCode: "02907",
+		},
+	}
+
+	// mock expected receipt
+	expectedReceipt := api.Receipt{
+		ShippingAddress: checkoutInfo.ShippingAddress,
+		PaymentMethod:   "Credit",
+		TotalCost:       7500,
+		Items:           []string{string(checkoutInfo.ShoppingCart[0])},
+		UserID:          session1.Store["userid"].(primitive.ObjectID),
+	}
+
+	// encode checkoutInfo
+	checkoutJSONData, err := json.Marshal(checkoutInfo)
+	if err != nil {
+		t.Fatal("Failed to encode checkoutInfo into JSON")
+	}
+
+	// encode expectedReceipt
+	receiptJSONData, err := json.Marshal(expectedReceipt)
+	if err != nil {
+		t.Fatal("Failed to encode expectedReceipt into JSON")
+	}
+
+	tests := []struct {
+		name               string
+		method             string
+		sessionid          string
+		payload            string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{ // unauthorized user
+			name:               "Test 1",
+			method:             "POST",
+			sessionid:          "unauthorized",
+			payload:            string(checkoutJSONData),
+			expectedStatusCode: http.StatusUnauthorized,
+			expectedMsg:        api.ErrUnauthorized,
+		},
+		{ // invalid method
+			name:               "Test 2",
+			method:             "GET",
+			sessionid:          session1.SessionID,
+			payload:            string(checkoutJSONData),
+			expectedStatusCode: http.StatusMethodNotAllowed,
+			expectedMsg:        api.ErrPostMethod,
+		},
+		{ // valid
+			name:               "Test 3",
+			method:             "POST",
+			sessionid:          session1.SessionID,
+			payload:            string(checkoutJSONData),
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        string(receiptJSONData),
+		},
+	}
+
+	db.Init()
+	defer db.Close()
+	server := api.NewServer(":3000")
+	server.Post("/checkout", server.HandleCheckout, api.AuthMiddleware)
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, "/checkout", strings.NewReader(tc.payload))
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionid,
+			})
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			res := strings.TrimSpace(w.Body.String())
+
+			if w.Code != tc.expectedStatusCode {
+				t.Fatalf("Expected code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+			}
+
+			if res != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+			}
+		})
+	}
 }

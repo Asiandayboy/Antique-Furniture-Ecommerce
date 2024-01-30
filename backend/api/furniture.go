@@ -45,19 +45,6 @@ If no errors occur, the ID hex string of the ObjectID of the new
 furniture listing document will be returned in the response.
 */
 func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Request must be a POST request", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// client must be authenticated to create a furniture listing
-	sessionManager := GetSessionManager()
-	_, loggedIn := sessionManager.IsLoggedIn(r)
-	if !loggedIn {
-		http.Error(w, "You must be logged in to create a furniture listing", http.StatusUnauthorized)
-		return
-	}
-
 	// decode request body into struct
 	var newListing types.FurnitureListing
 	err := util.ReadJSONReq[types.FurnitureListing](r, &newListing)
@@ -74,17 +61,7 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get session to get userID from session store
-	sessionID, err := sessionManager.GetSessionID(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	session, exists := sessionManager.GetSession(sessionID)
-	if !exists {
-		http.Error(w, "Session not found. Log in.", http.StatusUnauthorized)
-		return
-	}
+	session := r.Context().Value(SessionKey).(*Session)
 
 	// add userID to newListing
 	newListing.UserID = session.Store["userid"].(primitive.ObjectID)
@@ -112,11 +89,6 @@ is provided in the request URL
 500 - furniture listing not found in DB
 */
 func (s *Server) HandleGetFurniture(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Request must be a GET request", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// get id from url query params
 	// listingid param might not be set; check for that 1/26
 	id := r.URL.Query().Get("listingid")
@@ -147,11 +119,6 @@ For now, this endpoint returns every single document in the listings collection
 at the same time for each request
 */
 func (s *Server) HandleGetFurnitures(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Request must be a GET request", http.StatusMethodNotAllowed)
-		return
-	}
-
 	collection := db.GetCollection("listings")
 	cursor, err := collection.Find(context.Background(), bson.D{})
 	if err != nil {
