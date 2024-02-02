@@ -50,26 +50,26 @@ This type represents a furniture listing with all
 appropriate form details about the furniture
 */
 type FurnitureListing struct {
-	Title       string  `json:"title"`
-	Description string  `json:"desc"`
-	Cost        float64 `json:"cost"`
+	Title       string  `bson:"title" json:"title"`
+	Description string  `bson:"desc" json:"desc"`
+	Cost        float64 `bson:"cost" json:"cost"`
 
 	// Bed, Table, Desk, Chair, Chest, Nightstand, Cabinet
-	Type string `json:"type"`
+	Type string `bson:"type" json:"type"`
 
 	// Victorian, English, Baroque, Federal, Rococo, Sheraton, Unknown
-	Style string `json:"style"`
+	Style string `bson:"style" json:"style"`
 
 	// Mint, Excellent, Good, Worn, Restored, Original Finish
-	Condition string `json:"condition"`
+	Condition string `bson:"condition" json:"condition"`
 
 	// Tiger Maple, Cherry, Oak, Walnut, Mahogany, Maple, Chestnut, Paine, Rosewood, Birch
-	Material string `json:"material"`
+	Material string `bson:"material" json:"material"`
 
 	// images are stored as based64 encoded strings
-	Images []string `json:"images"`
+	Images []string `bson:"images" json:"images"`
 
-	// UserID of the client who created the listing; the owner of the post
+	// UserID of the client who created the listing; the owner of the post; the seller
 	UserID primitive.ObjectID `bson:"userid"`
 
 	ListingID primitive.ObjectID `bson:"_id"`
