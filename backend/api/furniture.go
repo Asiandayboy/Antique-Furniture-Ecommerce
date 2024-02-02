@@ -13,26 +13,86 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// this has to be the ugliest thiing ever
-func ValidateListFormFields(listing types.FurnitureListing) (bool, string) {
-	if listing.Title == "" {
-		return false, "Title not provided"
-	} else if listing.Condition == "" {
-		return false, "Condition not provided"
-	} else if listing.Cost == 0 {
-		return false, "Cost not provided"
-	} else if listing.Description == "" {
-		return false, "Description not provided"
-	} else if listing.Type == "" {
-		return false, "Furniture type not provided"
-	} else if listing.Material == "" {
-		return false, "Material not provided"
-	} else if listing.Style == "" {
-		return false, "Style not provided"
-	} else if len(listing.Images) == 0 {
-		return false, "Images not provided"
+const (
+	ErrListFormNoCondition       = "Furniture condition not provided"
+	ErrListFormNoCost            = "Furniture cost not provided"
+	ErrListFormNoDescription     = "Furniture description not provided"
+	ErrListFormNoImages          = "Furniture images not provided"
+	ErrListFormNoMaterial        = "Furniture material not provided"
+	ErrListFormNoStyle           = "Furniture style not provided"
+	ErrListFormNoTitle           = "Furniture title not provided"
+	ErrListFormNoType            = "Furniture type not provided"
+	ErrListFormEveryFieldMissing = "Every field is missing"
+)
+
+const NUMBER_OF_LIST_FORM_FIELDS = 8
+
+type ListFormErrors struct {
+	FormErrors []string `json:"formErrors"`
+	length     int8
+}
+
+func (l ListFormErrors) Error() string {
+	if l.length == NUMBER_OF_LIST_FORM_FIELDS {
+		return ErrListFormEveryFieldMissing
 	}
-	return true, ""
+	jsonData, _ := json.Marshal(l.FormErrors)
+	return string(jsonData)
+}
+
+/*
+Returns nil or an error if any of the fields for the
+FurnitureListing form is empty or not provided
+
+Calling .Error() on the error will return a string of the array
+of each error in alphabetical order, where <ErrListFormNoCondition>
+is the first, <ErrListFormNoCost> second, and so on.
+
+If every field is missing, then .Error() will return <ErrListFormEveryFieldMissing>
+*/
+func ValidateListFormFields(listing types.FurnitureListing) error {
+	formErrs := make([]string, 0, 8)
+	var length int8 = 0
+	if listing.Condition == "" {
+		formErrs = append(formErrs, ErrListFormNoCondition)
+		length++
+	}
+	if listing.Cost == 0 {
+		formErrs = append(formErrs, ErrListFormNoCost)
+		length++
+	}
+	if listing.Description == "" {
+		formErrs = append(formErrs, ErrListFormNoDescription)
+		length++
+	}
+	if len(listing.Images) == 0 {
+		formErrs = append(formErrs, ErrListFormNoImages)
+		length++
+	}
+	if listing.Material == "" {
+		formErrs = append(formErrs, ErrListFormNoMaterial)
+		length++
+	}
+	if listing.Style == "" {
+		formErrs = append(formErrs, ErrListFormNoStyle)
+		length++
+	}
+	if listing.Title == "" {
+		formErrs = append(formErrs, ErrListFormNoTitle)
+		length++
+	}
+	if listing.Type == "" {
+		formErrs = append(formErrs, ErrListFormNoType)
+		length++
+	}
+
+	if length == 0 {
+		return nil
+	}
+	return ListFormErrors{
+		FormErrors: formErrs,
+		length:     length,
+	}
 }
 
 /*
@@ -54,9 +114,9 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate form inputs
-	validated, errMsg := ValidateListFormFields(newListing)
-	if !validated {
-		http.Error(w, errMsg, http.StatusBadRequest)
+	err = ValidateListFormFields(newListing)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -86,7 +146,7 @@ This endpoint handler returns the furniture listing given the listingID
 is provided in the request URL
 
 200 - furniture listing found
-500 - furniture listing not found in DB
+500 - furniture listing not found in DB or 400??
 */
 func (s *Server) HandleGetFurniture(w http.ResponseWriter, r *http.Request) {
 	// get id from url query params

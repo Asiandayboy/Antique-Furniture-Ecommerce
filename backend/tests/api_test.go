@@ -514,52 +514,66 @@ func TestHandleListFurniture(t *testing.T) {
 Unit test for ValidateListFormFields
 */
 func TestValidateListFormFields(t *testing.T) {
+	payload1 := types.FurnitureListing{
+		Title:       "something",
+		Description: "something",
+		Type:        types.Bed,
+		Cost:        34.99,
+		Style:       "English",
+		Condition:   "Great",
+		Material:    types.Pine,
+		Images:      []string{"1", "2"},
+	}
+
+	payload2 := types.FurnitureListing{
+		Title:       "",
+		Description: "something",
+		Type:        types.Bed,
+		Cost:        34.99,
+		Style:       "English",
+		Material:    types.Pine,
+		Images:      []string{"1", "2"},
+	}
+
+	payload3 := types.FurnitureListing{}
+
 	tests := []struct {
-		name     string
-		payload  types.FurnitureListing
-		expected bool
+		name           string
+		payload        types.FurnitureListing
+		expected       bool
+		expectedErrMsg string
 	}{
 		{ // valid FurnitureListing
-			name: "Test 1",
-			payload: types.FurnitureListing{
-				Title:       "something",
-				Description: "something",
-				Type:        types.Bed,
-				Cost:        34.99,
-				Style:       "English",
-				Condition:   "Great",
-				Material:    types.Pine,
-				Images:      []string{"1", "2"},
-			},
+			name:     "Test 1",
+			payload:  payload1,
 			expected: true,
 		},
 		{ // missing title
-			name: "Test 2",
-			payload: types.FurnitureListing{
-				Title:       "",
-				Description: "something",
-				Type:        types.Bed,
-				Cost:        34.99,
-				Style:       "English",
-				Condition:   "Great",
-				Material:    types.Pine,
-				Images:      []string{"1", "2"},
-			},
-			expected: false,
+			name:           "Test 2",
+			payload:        payload2,
+			expected:       false,
+			expectedErrMsg: `["Furniture condition not provided","Furniture title not provided"]`,
 		},
 		{ // empty values for all fields
-			name:     "Test 3",
-			payload:  types.FurnitureListing{},
-			expected: false,
+			name:           "Test 3",
+			payload:        payload3,
+			expected:       false,
+			expectedErrMsg: api.ErrListFormEveryFieldMissing,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			validated, _ := api.ValidateListFormFields(tc.payload)
+			err := api.ValidateListFormFields(tc.payload)
 
-			if validated != tc.expected {
-				t.Fatalf("Expected: %v, got: %v", tc.expected, validated)
+			if tc.expected {
+				if err != nil {
+					t.Fatalf("Expected: %v, got: %v", tc.expected, err)
+				}
+			} else {
+				if err.Error() != tc.expectedErrMsg {
+					t.Fatalf("Expected: %s, got: %s", tc.expectedErrMsg, err.Error())
+				}
 			}
 		})
 	}
@@ -680,6 +694,7 @@ func TestHandleGetFurniture(t *testing.T) {
 	}
 }
 
+/*
 // 1/28 [WIP]
 // func TestHandleAccountGet(t *testing.T) {
 // 	// creating fake logged in clients
@@ -748,125 +763,138 @@ func TestHandleGetFurniture(t *testing.T) {
 // 		})
 // 	}
 // }
+*/
 
 /*
-This test is WIP
+This test validates that the client receives the expected
+receipt. This test is currently simulating a fake user
+buying their own furniture just so we can compare the response
+
+What to check:
+- check status code
+- check expected receipt
+- check seller's balance
+
+THIS TEST IS NOT DONE YET; IM WORKING BACK AND FORTH
 */
-func TestHandleCheckout(t *testing.T) {
-	// creating fake loggedIn user with test account
-	sessionManager := api.GetSessionManager()
-	session1, err := sessionManager.CreateSession(api.SessionTemplate{
-		SessionID: "testtest-test-test-test-testtesttest",
-	})
-	if err != nil {
-		t.Fatal("Failed to create a fake session")
-	}
+// func TestHandleCheckout(t *testing.T) {
+// 	// creating fake loggedIn user with test account
+// 	sessionManager := api.GetSessionManager()
+// 	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+// 		SessionID: "testtest-test-test-test-testtesttest",
+// 	})
+// 	if err != nil {
+// 		t.Fatal("Failed to create a fake session")
+// 	}
 
-	USER_ID, err := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
-	if err != nil {
-		t.Fatal("Failed to generate objectID for fake session")
-	}
-	session1.Store["userid"] = USER_ID
+// 	USER_ID, err := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+// 	if err != nil {
+// 		t.Fatal("Failed to generate objectID for fake session")
+// 	}
+// 	session1.Store["userid"] = USER_ID
 
-	// mock checkout data
-	checkoutInfo := api.CheckoutInfo{
-		ShoppingCart: []api.FurnitureItem{
-			"65b433dd8d3c8f926b88cd7a",
-		},
-		Payment: api.PaymentInfo{
-			StripeToken:   "token_foo",
-			PaymentMethod: "Credit",
-			Amount:        7500,
-			Currency:      "usd",
-		},
-		ShippingAddress: api.ShippingAddress{
-			State:   "RI",
-			City:    "Providence",
-			Street:  "999 Holy St.",
-			ZipCode: "02907",
-		},
-	}
+// 	// mock checkout input data
+// 	checkoutInfo := api.CheckoutInfo{
+// 		ShoppingCart: []string{
+// 			"65b433dd8d3c8f926b88cd7a",
+// 		},
+// 		Payment: api.PaymentInfo{
+// 			StripeToken:   "token_foo",
+// 			PaymentMethod: "Credit",
+// 			Amount:        7500,
+// 			Currency:      "usd",
+// 		},
+// 		ShippingAddress: api.ShippingAddress{
+// 			State:   "RI",
+// 			City:    "Providence",
+// 			Street:  "999 Holy St.",
+// 			ZipCode: "02907",
+// 		},
+// 	}
 
-	// mock expected receipt
-	expectedReceipt := api.Receipt{
-		ShippingAddress: checkoutInfo.ShippingAddress,
-		PaymentMethod:   "Credit",
-		TotalCost:       7500,
-		Items:           []string{string(checkoutInfo.ShoppingCart[0])},
-		UserID:          session1.Store["userid"].(primitive.ObjectID),
-	}
+// 	// mock checkout ouput expected receipt
+// 	expectedReceipt := api.ReceiptResponse{
+// 		ShippingAddress: checkoutInfo.ShippingAddress,
+// 		PaymentMethod:   "Credit",
+// 		TotalCost:       7500,
+// 		Items: []api.ProductItemClient{{
+// 			ListingID: "65b433dd8d3c8f926b88cd7a",
+// 			SellerID:  "65b094f4a2cb3bf5e40d42d7",
+// 		}},
+// 		UserID: session1.Store["userid"].(primitive.ObjectID).Hex(),
+// 	}
 
-	// encode checkoutInfo
-	checkoutJSONData, err := json.Marshal(checkoutInfo)
-	if err != nil {
-		t.Fatal("Failed to encode checkoutInfo into JSON")
-	}
+// 	// encode checkoutInfo
+// 	checkoutJSONData, err := json.Marshal(checkoutInfo)
+// 	if err != nil {
+// 		t.Fatal("Failed to encode checkoutInfo into JSON")
+// 	}
 
-	// encode expectedReceipt
-	receiptJSONData, err := json.Marshal(expectedReceipt)
-	if err != nil {
-		t.Fatal("Failed to encode expectedReceipt into JSON")
-	}
+// 	// encode expectedReceipt
+// 	receiptJSONData, err := json.Marshal(expectedReceipt)
+// 	if err != nil {
+// 		t.Fatal("Failed to encode expectedReceipt into JSON")
+// 	}
 
-	tests := []struct {
-		name               string
-		method             string
-		sessionid          string
-		payload            string
-		expectedStatusCode int
-		expectedMsg        string
-	}{
-		{ // unauthorized user
-			name:               "Test 1",
-			method:             "POST",
-			sessionid:          "unauthorized",
-			payload:            string(checkoutJSONData),
-			expectedStatusCode: http.StatusUnauthorized,
-			expectedMsg:        api.ErrUnauthorized,
-		},
-		{ // invalid method
-			name:               "Test 2",
-			method:             "GET",
-			sessionid:          session1.SessionID,
-			payload:            string(checkoutJSONData),
-			expectedStatusCode: http.StatusMethodNotAllowed,
-			expectedMsg:        api.ErrPostMethod,
-		},
-		{ // valid
-			name:               "Test 3",
-			method:             "POST",
-			sessionid:          session1.SessionID,
-			payload:            string(checkoutJSONData),
-			expectedStatusCode: http.StatusOK,
-			expectedMsg:        string(receiptJSONData),
-		},
-	}
+// 	tests := []struct {
+// 		name               string
+// 		method             string
+// 		sessionid          string
+// 		payload            string
+// 		expectedStatusCode int
+// 		expectedMsg        string
+// 	}{
+// 		{ // unauthorized user
+// 			name:               "Test 1",
+// 			method:             "POST",
+// 			sessionid:          "unauthorized",
+// 			payload:            string(checkoutJSONData),
+// 			expectedStatusCode: http.StatusUnauthorized,
+// 			expectedMsg:        api.ErrUnauthorized,
+// 		},
+// 		{ // invalid method
+// 			name:               "Test 2",
+// 			method:             "GET",
+// 			sessionid:          session1.SessionID,
+// 			payload:            string(checkoutJSONData),
+// 			expectedStatusCode: http.StatusMethodNotAllowed,
+// 			expectedMsg:        api.ErrPostMethod,
+// 		},
+// 		{ // valid
+// 			name:               "Test 3",
+// 			method:             "POST",
+// 			sessionid:          session1.SessionID,
+// 			payload:            string(checkoutJSONData),
+// 			expectedStatusCode: http.StatusOK,
+// 			expectedMsg:        string(receiptJSONData),
+// 		},
+// 	}
 
-	db.Init()
-	defer db.Close()
-	server := api.NewServer(":3000")
-	server.Post("/checkout", server.HandleCheckout, api.AuthMiddleware)
+// 	db.Init()
+// 	defer db.Close()
+// 	server := api.NewServer(":3000")
+// 	server.Post("/checkout", server.HandleCheckout, api.AuthMiddleware)
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(tc.method, "/checkout", strings.NewReader(tc.payload))
-			r.AddCookie(&http.Cookie{
-				Name:  api.SESSIONID_COOKIE_NAME,
-				Value: tc.sessionid,
-			})
-			w := httptest.NewRecorder()
+// 	for _, tc := range tests {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			r := httptest.NewRequest(tc.method, "/checkout", strings.NewReader(tc.payload))
+// 			r.AddCookie(&http.Cookie{
+// 				Name:  api.SESSIONID_COOKIE_NAME,
+// 				Value: tc.sessionid,
+// 			})
+// 			w := httptest.NewRecorder()
 
-			server.Mux.ServeHTTP(w, r)
+// 			server.Mux.ServeHTTP(w, r)
 
-			res := strings.TrimSpace(w.Body.String())
+// 			res := strings.TrimSpace(w.Body.String())
 
-			if w.Code != tc.expectedStatusCode {
-				t.Fatalf("Expected code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
-			}
+// 			if w.Code != tc.expectedStatusCode {
+// 				t.Fatalf("Expected code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+// 			}
 
-			if res != tc.expectedMsg {
-				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
-			}
-		})
-	}
-}
+// 			if res != tc.expectedMsg {
+// 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+// 			}
+// 		})
+// 	}
+// }
