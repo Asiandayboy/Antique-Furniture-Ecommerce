@@ -769,14 +769,16 @@ func TestHandleGetFurniture(t *testing.T) {
 /*
 This test validates that the client receives the expected
 receipt. This test is currently simulating a fake user
-buying their own furniture just so we can compare the response
+initiating a checkout session
 
-What to check:
-- check status code
-- check expected receipt
-- check seller's balance
+This test is merely being used to see if a checkout session is
+being created, if it triggers the webhook endpoint, and if it can
+retrieve the session data that was passed as metadata; it's not
+really a conventional test.
 
-THIS TEST IS NOT DONE YET; IM WORKING BACK AND FORTH
+THIS TEST IS NOT REALLY A TEST; I JUST WANNA SEE IF I INTEGRATED
+STRIPE CORRECTLY. The other way I'll test this is when I create my
+frontend
 */
 func TestHandleCheckout(t *testing.T) {
 	// creating fake loggedIn user with test account
@@ -814,16 +816,16 @@ func TestHandleCheckout(t *testing.T) {
 	}
 
 	// mock checkout ouput expected receipt
-	expectedReceipt := api.ReceiptResponse{
-		ShippingAddress: checkoutInfo.ShippingAddress,
-		PaymentMethod:   "Credit",
-		TotalCost:       7500.00,
-		Items: []api.ProductItemClient{{
-			ListingID: "65b433dd8d3c8f926b88cd7a",
-			SellerID:  "65b094f4a2cb3bf5e40d42d7",
-		}},
-		UserID: session1.Store["userid"].(primitive.ObjectID).Hex(),
-	}
+	// expectedReceipt := api.ReceiptResponse{
+	// 	ShippingAddress: checkoutInfo.ShippingAddress,
+	// 	PaymentMethod:   "Credit",
+	// 	TotalCost:       7500.00,
+	// 	Items: []api.ProductItemClient{{
+	// 		ListingID: "65b433dd8d3c8f926b88cd7a",
+	// 		SellerID:  "65b094f4a2cb3bf5e40d42d7",
+	// 	}},
+	// 	UserID: session1.Store["userid"].(primitive.ObjectID).Hex(),
+	// }
 
 	// encode checkoutInfo
 	checkoutJSONData, err := json.Marshal(checkoutInfo)
@@ -832,10 +834,10 @@ func TestHandleCheckout(t *testing.T) {
 	}
 
 	// encode expectedReceipt
-	receiptJSONData, err := json.Marshal(expectedReceipt)
-	if err != nil {
-		t.Fatal("Failed to encode expectedReceipt into JSON")
-	}
+	// receiptJSONData, err := json.Marshal(expectedReceipt)
+	// if err != nil {
+	// 	t.Fatal("Failed to encode expectedReceipt into JSON")
+	// }
 
 	tests := []struct {
 		name               string
@@ -866,8 +868,8 @@ func TestHandleCheckout(t *testing.T) {
 			method:             "POST",
 			sessionid:          session1.SessionID,
 			payload:            string(checkoutJSONData),
-			expectedStatusCode: http.StatusOK,
-			expectedMsg:        string(receiptJSONData),
+			expectedStatusCode: http.StatusSeeOther,
+			expectedMsg:        "",
 		},
 	}
 
@@ -875,7 +877,6 @@ func TestHandleCheckout(t *testing.T) {
 	defer db.Close()
 	server := api.NewServer(":3000")
 	go server.Start()
-	// server.Post("/checkout", server.HandleCheckout, api.AuthMiddleware)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -894,7 +895,7 @@ func TestHandleCheckout(t *testing.T) {
 				t.Fatalf("Expected code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
 			}
 
-			if res != tc.expectedMsg {
+			if res != tc.expectedMsg && tc.expectedMsg != "" {
 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
 			}
 		})
