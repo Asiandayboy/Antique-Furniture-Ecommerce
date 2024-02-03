@@ -51,7 +51,7 @@ appropriate form details about the furniture
 */
 type FurnitureListing struct {
 	Title       string  `bson:"title" json:"title"`
-	Description string  `bson:"desc" json:"desc"`
+	Description string  `bson:"description" json:"description"`
 	Cost        float64 `bson:"cost" json:"cost"`
 
 	// Bed, Table, Desk, Chair, Chest, Nightstand, Cabinet
