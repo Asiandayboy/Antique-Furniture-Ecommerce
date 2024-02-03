@@ -57,6 +57,9 @@ func (s *Server) Start() {
 	s.Post("/account", s.HandleAccount, AuthMiddleware)
 	s.Post("/checkout", s.HandleCheckout, AuthMiddleware)
 
+	// handle auth in the handler bc cookies aren't sent when Stripe sends the webhook
+	s.Post("/checkout_webhook", s.HandleStripeWebhook)
+
 	// initialize SessionManager
 	GetSessionManager()
 

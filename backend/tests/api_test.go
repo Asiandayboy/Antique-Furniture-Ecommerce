@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -777,124 +778,129 @@ What to check:
 
 THIS TEST IS NOT DONE YET; IM WORKING BACK AND FORTH
 */
-// func TestHandleCheckout(t *testing.T) {
-// 	// creating fake loggedIn user with test account
-// 	sessionManager := api.GetSessionManager()
-// 	session1, err := sessionManager.CreateSession(api.SessionTemplate{
-// 		SessionID: "testtest-test-test-test-testtesttest",
-// 	})
-// 	if err != nil {
-// 		t.Fatal("Failed to create a fake session")
-// 	}
+func TestHandleCheckout(t *testing.T) {
+	// creating fake loggedIn user with test account
+	sessionManager := api.GetSessionManager()
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to create a fake session")
+	}
 
-// 	USER_ID, err := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
-// 	if err != nil {
-// 		t.Fatal("Failed to generate objectID for fake session")
-// 	}
-// 	session1.Store["userid"] = USER_ID
+	USER_ID, err := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	if err != nil {
+		t.Fatal("Failed to generate objectID for fake session")
+	}
+	session1.Store["userid"] = USER_ID
 
-// 	// mock checkout input data
-// 	checkoutInfo := api.CheckoutInfo{
-// 		ShoppingCart: []string{
-// 			"65b433dd8d3c8f926b88cd7a",
-// 		},
-// 		Payment: api.PaymentInfo{
-// 			StripeToken:   "token_foo",
-// 			PaymentMethod: "Credit",
-// 			Amount:        7500,
-// 			Currency:      "usd",
-// 		},
-// 		ShippingAddress: api.ShippingAddress{
-// 			State:   "RI",
-// 			City:    "Providence",
-// 			Street:  "999 Holy St.",
-// 			ZipCode: "02907",
-// 		},
-// 	}
+	// mock checkout input data
+	checkoutInfo := api.CheckoutInfo{
+		ShoppingCart: []string{
+			"65b433dd8d3c8f926b88cd7a",
+		},
+		Payment: api.PaymentInfo{
+			StripeToken:   "token_foo",
+			PaymentMethod: "Credit",
+			Amount:        7500,
+			Currency:      "usd",
+		},
+		ShippingAddress: api.ShippingAddress{
+			State:   "RI",
+			City:    "Providence",
+			Street:  "999 Holy St.",
+			ZipCode: "02907",
+		},
+	}
 
-// 	// mock checkout ouput expected receipt
-// 	expectedReceipt := api.ReceiptResponse{
-// 		ShippingAddress: checkoutInfo.ShippingAddress,
-// 		PaymentMethod:   "Credit",
-// 		TotalCost:       7500,
-// 		Items: []api.ProductItemClient{{
-// 			ListingID: "65b433dd8d3c8f926b88cd7a",
-// 			SellerID:  "65b094f4a2cb3bf5e40d42d7",
-// 		}},
-// 		UserID: session1.Store["userid"].(primitive.ObjectID).Hex(),
-// 	}
+	// mock checkout ouput expected receipt
+	expectedReceipt := api.ReceiptResponse{
+		ShippingAddress: checkoutInfo.ShippingAddress,
+		PaymentMethod:   "Credit",
+		TotalCost:       7500.00,
+		Items: []api.ProductItemClient{{
+			ListingID: "65b433dd8d3c8f926b88cd7a",
+			SellerID:  "65b094f4a2cb3bf5e40d42d7",
+		}},
+		UserID: session1.Store["userid"].(primitive.ObjectID).Hex(),
+	}
 
-// 	// encode checkoutInfo
-// 	checkoutJSONData, err := json.Marshal(checkoutInfo)
-// 	if err != nil {
-// 		t.Fatal("Failed to encode checkoutInfo into JSON")
-// 	}
+	// encode checkoutInfo
+	checkoutJSONData, err := json.Marshal(checkoutInfo)
+	if err != nil {
+		t.Fatal("Failed to encode checkoutInfo into JSON")
+	}
 
-// 	// encode expectedReceipt
-// 	receiptJSONData, err := json.Marshal(expectedReceipt)
-// 	if err != nil {
-// 		t.Fatal("Failed to encode expectedReceipt into JSON")
-// 	}
+	// encode expectedReceipt
+	receiptJSONData, err := json.Marshal(expectedReceipt)
+	if err != nil {
+		t.Fatal("Failed to encode expectedReceipt into JSON")
+	}
 
-// 	tests := []struct {
-// 		name               string
-// 		method             string
-// 		sessionid          string
-// 		payload            string
-// 		expectedStatusCode int
-// 		expectedMsg        string
-// 	}{
-// 		{ // unauthorized user
-// 			name:               "Test 1",
-// 			method:             "POST",
-// 			sessionid:          "unauthorized",
-// 			payload:            string(checkoutJSONData),
-// 			expectedStatusCode: http.StatusUnauthorized,
-// 			expectedMsg:        api.ErrUnauthorized,
-// 		},
-// 		{ // invalid method
-// 			name:               "Test 2",
-// 			method:             "GET",
-// 			sessionid:          session1.SessionID,
-// 			payload:            string(checkoutJSONData),
-// 			expectedStatusCode: http.StatusMethodNotAllowed,
-// 			expectedMsg:        api.ErrPostMethod,
-// 		},
-// 		{ // valid
-// 			name:               "Test 3",
-// 			method:             "POST",
-// 			sessionid:          session1.SessionID,
-// 			payload:            string(checkoutJSONData),
-// 			expectedStatusCode: http.StatusOK,
-// 			expectedMsg:        string(receiptJSONData),
-// 		},
-// 	}
+	tests := []struct {
+		name               string
+		method             string
+		sessionid          string
+		payload            string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{ // unauthorized user
+			name:               "Test 1",
+			method:             "POST",
+			sessionid:          "unauthorized",
+			payload:            string(checkoutJSONData),
+			expectedStatusCode: http.StatusUnauthorized,
+			expectedMsg:        api.ErrUnauthorized,
+		},
+		{ // invalid method
+			name:               "Test 2",
+			method:             "GET",
+			sessionid:          session1.SessionID,
+			payload:            string(checkoutJSONData),
+			expectedStatusCode: http.StatusMethodNotAllowed,
+			expectedMsg:        api.ErrPostMethod,
+		},
+		{ // valid [*This test doesn't pass yet]
+			name:               "Test 3",
+			method:             "POST",
+			sessionid:          session1.SessionID,
+			payload:            string(checkoutJSONData),
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        string(receiptJSONData),
+		},
+	}
 
-// 	db.Init()
-// 	defer db.Close()
-// 	server := api.NewServer(":3000")
-// 	server.Post("/checkout", server.HandleCheckout, api.AuthMiddleware)
+	db.Init()
+	defer db.Close()
+	server := api.NewServer(":3000")
+	go server.Start()
+	// server.Post("/checkout", server.HandleCheckout, api.AuthMiddleware)
 
-// 	for _, tc := range tests {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			r := httptest.NewRequest(tc.method, "/checkout", strings.NewReader(tc.payload))
-// 			r.AddCookie(&http.Cookie{
-// 				Name:  api.SESSIONID_COOKIE_NAME,
-// 				Value: tc.sessionid,
-// 			})
-// 			w := httptest.NewRecorder()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, "/checkout", strings.NewReader(tc.payload))
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionid,
+			})
+			w := httptest.NewRecorder()
 
-// 			server.Mux.ServeHTTP(w, r)
+			server.Mux.ServeHTTP(w, r)
 
-// 			res := strings.TrimSpace(w.Body.String())
+			res := strings.TrimSpace(w.Body.String())
 
-// 			if w.Code != tc.expectedStatusCode {
-// 				t.Fatalf("Expected code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
-// 			}
+			if w.Code != tc.expectedStatusCode {
+				t.Fatalf("Expected code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+			}
 
-// 			if res != tc.expectedMsg {
-// 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
-// 			}
-// 		})
-// 	}
-// }
+			if res != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+			}
+		})
+	}
+
+	for {
+		time.Sleep(time.Second)
+	}
+}
