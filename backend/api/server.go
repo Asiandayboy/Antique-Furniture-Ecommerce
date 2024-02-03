@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/exec"
+
+	"github.com/stripe/stripe-go/v76"
 )
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
@@ -60,11 +64,33 @@ func (s *Server) Start() {
 	// handle auth in the handler bc cookies aren't sent when Stripe sends the webhook
 	s.Post("/checkout_webhook", s.HandleStripeWebhook)
 
+	/*----------STRIPE-----------*/
+
+	stripe.Key = os.Getenv("STRIPE_TEST_KEY")
+
+	webhookURL := fmt.Sprintf("http://localhost%s/checkout_webhook", s.Port)
+
+	/*
+		Since this project is not hosted on the internet, we don't have a public
+		URL. So, we need to add a local listener to watch for webhook requests
+
+		You need to have the stripe.exe directory added to your PATH env variables,
+		which you can do by installing the Stripe CLI, in order to execute this command
+	*/
+	command := exec.Command("stripe", "listen", "--forward-to", webhookURL)
+	err := command.Start()
+	if err != nil {
+		log.Fatal("Failed to execute stripe listen command")
+	}
+	log.Println("\x1b[34mConnected local webhook listener\x1b[0m")
+
+	/*---------------------------*/
+
 	// initialize SessionManager
 	GetSessionManager()
 
 	log.Printf("\x1b[34mListening on port %s\x1b[0m\n", s.Port)
-	err := s.httpServer.ListenAndServe()
+	err = s.httpServer.ListenAndServe()
 	if err != nil {
 		log.Fatal("Error starting server:", err)
 	}
