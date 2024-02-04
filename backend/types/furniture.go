@@ -72,5 +72,5 @@ type FurnitureListing struct {
 	// UserID of the client who created the listing; the owner of the post; the seller
 	UserID primitive.ObjectID `bson:"userid"`
 
-	ListingID primitive.ObjectID `bson:"_id"`
+	ListingID primitive.ObjectID `bson:"_id,omitempty"`
 }
