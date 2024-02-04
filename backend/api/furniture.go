@@ -103,6 +103,8 @@ will be returned in the response.
 
 If no errors occur, the ID hex string of the ObjectID of the new
 furniture listing document will be returned in the response.
+
+TODO: MUST CHANGE TO ACCEPT FILE UPLOAD FOR IMAGES (MULTIPART) 2/3
 */
 func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	// decode request body into struct

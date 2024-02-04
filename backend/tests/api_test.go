@@ -299,7 +299,6 @@ Sample sessionID (which belongs to a test acc in the DB) to be used when testing
 sessionID -> "testtest-test-test-test-testtesttest"
 */
 func TestHandleListFurniture(t *testing.T) {
-
 	// prepare images to simulate http request from client
 	imgData1, err := util.EncodeImageToBase64("../tests/test_images/tiger_maple1.jpg")
 	if err != nil {
@@ -344,7 +343,8 @@ func TestHandleListFurniture(t *testing.T) {
 		t.Fatal("Failed to encode payload2 into JSON")
 	}
 
-	// creating a fake loggedIn client using the test account
+	/*-----------------Create fake logged in user-----------------*/
+
 	const TEST_SESS_ID string = "testtest-test-test-test-testtesttest"
 	sessionManager := api.GetSessionManager()
 	session, err := sessionManager.CreateSession(api.SessionTemplate{
@@ -363,6 +363,8 @@ func TestHandleListFurniture(t *testing.T) {
 
 	// when logging in, the userid gets saved into the session store
 	session.Store["userid"] = TEST_OBJID
+
+	/*-------------------------------------------------------------*/
 
 	// create test cases
 	tests := []struct {
@@ -386,7 +388,7 @@ func TestHandleListFurniture(t *testing.T) {
 			payload:            string(payload2),
 			sessionID:          session.SessionID,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedMessage:    "Images not provided",
+			expectedMessage:    `["Furniture images not provided"]`,
 		},
 		{ // invalid payload format type
 			name:               "Test 3",
@@ -404,13 +406,13 @@ func TestHandleListFurniture(t *testing.T) {
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    "Failed to decode JSON",
 		},
-		{ // missing condition
+		{ // every field missing, except title
 			name:               "Test 5",
 			method:             "POST",
 			sessionID:          session.SessionID,
 			payload:            `{"Title":"Oak Nightstand with refinish"}`,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedMessage:    "Condition not provided",
+			expectedMessage:    `["Furniture condition not provided","Furniture cost not provided","Furniture description not provided","Furniture images not provided","Furniture material not provided","Furniture style not provided","Furniture type not provided"]`,
 		},
 		{ // not logged in
 			name:               "Test 6",
@@ -492,7 +494,7 @@ func TestHandleListFurniture(t *testing.T) {
 				to validate that the listing was added to the DB
 			*/
 
-			var objectID primitive.ObjectID = session.Store["userid"].(primitive.ObjectID)
+			var objectID primitive.ObjectID = actualListing.UserID
 			listingObjectID, err := primitive.ObjectIDFromHex(res)
 			if err != nil {
 				t.Fatal("Hex string is not a valid objectID")
@@ -779,6 +781,20 @@ really a conventional test.
 THIS TEST IS NOT REALLY A TEST; I JUST WANNA SEE IF I INTEGRATED
 STRIPE CORRECTLY. The other way I'll test this is when I create my
 frontend
+
+# Test card used to send test funds from test transactions to platform account balance
+
+Find here and scroll down to Available balance ---> https://stripe.com/docs/testing
+
+- number: 4000000000000077
+- CVC: any 3 digit number
+- Expiration Date : any date in the future
+- ZipCode: any 5 digit number
+
+All funds go to the platform account. Then when users go to their dashboard,
+look at their funds that they've received from selling their antique furnitures,
+they can press a "payout" button, enter the amount they have available, and it
+will take from the platform account the funds and transfer it to their bank
 */
 func TestHandleCheckout(t *testing.T) {
 	// creating fake loggedIn user with test account
