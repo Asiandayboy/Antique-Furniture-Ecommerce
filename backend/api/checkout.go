@@ -159,9 +159,9 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 			Name:        &furniture.Title,
 			Description: &furniture.Description,
 			Metadata: map[string]string{
-				"Material":  furniture.Type,
-				"Condition": furniture.Material,
-				"Style":     furniture.Style,
+				"Material":  string(furniture.Type),
+				"Condition": string(furniture.Material),
+				"Style":     string(furniture.Style),
 				"ListingID": furniture.ListingID.Hex(),
 			},
 			Images: imageURLs,

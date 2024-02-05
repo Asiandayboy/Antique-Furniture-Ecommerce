@@ -5,16 +5,16 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 const Unknown string = "Unknown"
 
 // Bed, Table, Desk, Chair, Chest, Nightstand, Cabinet
-type FurnitureType = string
+type FurnitureType string
 
 // Mint, Excellent, Good, Worn, Restored, Original Finish
-type FurnitureCondition = string
+type FurnitureCondition string
 
 // Victorian, English, Baroque, Federal, Rococo, Sheraton, Unknown
-type FurnitureStyle = string
+type FurnitureStyle string
 
 // Tiger Maple, Cherry, Oak, Walnut, Mahogany, Maple, Chestnut, Paine, Rosewood, Birch
-type FurnitureMaterial = string
+type FurnitureMaterial string
 
 const (
 	Bed        FurnitureType = "Bed"
