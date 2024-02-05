@@ -144,7 +144,7 @@ func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 type CtxSessionKey string
 
-// Key name for attached session value to request context AuthMiddleware
+// Key name for the attached context session value from AuthMiddleware
 const SessionKey CtxSessionKey = "session"
 
 /*

@@ -58,7 +58,9 @@ func (s *Server) Start() {
 	s.Get("/get_furnitures", s.HandleGetFurnitures)
 	s.Get("/get_furniture", s.HandleGetFurniture)
 
-	s.Post("/account", s.HandleAccount, AuthMiddleware)
+	s.Get("/account", s.HandleAccountGET, AuthMiddleware)
+	s.Put("/account", s.HandleAccountPUT, AuthMiddleware)
+
 	s.Post("/checkout", s.HandleCheckout, AuthMiddleware)
 
 	// handle auth in the handler bc cookies aren't sent when Stripe sends the webhook
@@ -67,7 +69,6 @@ func (s *Server) Start() {
 	/*----------STRIPE-----------*/
 
 	stripe.Key = os.Getenv("STRIPE_TEST_KEY")
-
 	webhookURL := fmt.Sprintf("http://localhost%s/checkout_webhook", s.Port)
 
 	/*

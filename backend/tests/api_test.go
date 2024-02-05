@@ -738,76 +738,124 @@ func TestHandleGetFurniture(t *testing.T) {
 	}
 }
 
-/*
-// 1/28 [WIP]
-// func TestHandleAccountGet(t *testing.T) {
-// 	// creating fake logged in clients
-// 	sessionManager := api.GetSessionManager()
-// 	session1, err := sessionManager.CreateSession(api.SessionTemplate{
-// 		SessionID: "",
-// 	})
-// 	if err != nil {
-// 		t.Fatal("Failed to generate session1")
-// 	}
-// 	session1.Store["userid"] = "testuser1"
+func TestHandleAccountGET(t *testing.T) {
+	db.Init()
+	defer db.Close()
+	usersCollection := db.GetCollection("users")
 
-// 	session2, err := sessionManager.CreateSession(api.SessionTemplate{
-// 		SessionID: "",
-// 	})
-// 	if err != nil {
-// 		t.Fatal("Failed to generate session1")
-// 	}
-// 	session2.Store["userid"] = "testuser2"
+	/*-----------------Fake logged in user 1-----------------*/
 
-// 	tests := []struct {
-// 		name        string
-// 		method      string
-// 		sessionid   string
-// 		expectedMsg string
-// 	}{
-// 		{ // valid, authorized
-// 			name:        "Test 1",
-// 			method:      "GET",
-// 			sessionid:   session1.SessionID,
-// 			expectedMsg: "success",
-// 		},
-// 		{ // valid, authorized
-// 			name:        "Test 2",
-// 			method:      "GET",
-// 			sessionid:   session2.SessionID,
-// 			expectedMsg: "success",
-// 		},
-// 		{ // unauthorized
-// 			name:        "Test 3",
-// 			method:      "GET",
-// 			sessionid:   "foo",
-// 			expectedMsg: api.ErrUnauthorized,
-// 		},
-// 	}
+	sessionManager := api.GetSessionManager()
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to generate session1")
+	}
 
-// 	server := api.NewServer(":3000")
-// 	server.Use("/account", server.HandleAccount, api.AuthMiddleware)
+	objID1, _ := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	session1.Store["userid"] = objID1
 
-// 	for _, tc := range tests {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			r := httptest.NewRequest(tc.method, "/account", nil)
-// 			r.AddCookie(&http.Cookie{
-// 				Name:  api.SESSIONID_COOKIE_NAME,
-// 				Value: tc.sessionid,
-// 			})
-// 			w := httptest.NewRecorder()
+	// prepare expected data
+	var testuser1ExpectedData types.User
+	err = usersCollection.FindOne(context.Background(), bson.M{
+		"_id": objID1,
+	}).Decode(&testuser1ExpectedData)
 
-// 			server.Mux.ServeHTTP(w, r)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 			res := strings.TrimSpace(w.Body.String())
+	expectedJSON1, err := json.Marshal(testuser1ExpectedData)
+	if err != nil {
+		t.Fatal("Failed to marshal testdata1")
+	}
 
-// 			if res != tc.expectedMsg {
-// 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
-// 			}
-// 		})
-// 	}
-// }
-*/
+	/*----------------Fake logged in user 2------------------*/
+
+	session2, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "bobbobbo-bobb-bobb-bobb-bobbobbobbob",
+	})
+	if err != nil {
+		t.Fatal("Failed to generate session1")
+	}
+
+	objID2, _ := primitive.ObjectIDFromHex("65a5a07f062510f606cbd0ae")
+	session2.Store["userid"] = objID2
+
+	// prepare expected data
+	var testuser2ExpectedData types.User
+	err = usersCollection.FindOne(context.Background(), bson.M{
+		"_id": objID2,
+	}).Decode(&testuser2ExpectedData)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedJSON2, err := json.Marshal(testuser2ExpectedData)
+	if err != nil {
+		t.Fatal("Failed to marshal testdata2")
+	}
+
+	/*-----------------------test cases------------------------*/
+
+	tests := []struct {
+		name               string
+		method             string
+		sessionid          string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{ // valid, authorized
+			name:               "Test 1",
+			method:             "GET",
+			sessionid:          session1.SessionID,
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        string(expectedJSON1),
+		},
+		{ // valid, authorized
+			name:               "Test 2",
+			method:             "GET",
+			sessionid:          session2.SessionID,
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        string(expectedJSON2),
+		},
+		{ // unauthorized
+			name:               "Test 3",
+			method:             "GET",
+			sessionid:          "foo",
+			expectedStatusCode: http.StatusUnauthorized,
+			expectedMsg:        api.ErrUnauthorized,
+		},
+	}
+
+	server := api.NewServer(":3000")
+	server.Use("/account", server.HandleAccountGET, api.AuthMiddleware)
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, "/account", nil)
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionid,
+			})
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			res := strings.TrimSpace(w.Body.String())
+
+			if w.Code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+			}
+
+			if res != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+			}
+		})
+	}
+}
 
 /*
 This test validates that the client receives the expected
