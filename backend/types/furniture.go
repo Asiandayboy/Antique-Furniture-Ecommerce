@@ -66,8 +66,8 @@ type FurnitureListing struct {
 	// Tiger Maple, Cherry, Oak, Walnut, Mahogany, Maple, Chestnut, Paine, Rosewood, Birch
 	Material string `bson:"material" json:"material"`
 
-	// images are stored as based64 encoded strings
-	Images []string `bson:"images" json:"images"`
+	// // images are stored as an array of byte slices
+	Images [][]byte `bson:"images" json:"images"`
 
 	// UserID of the client who created the listing; the owner of the post; the seller
 	UserID primitive.ObjectID `bson:"userid"`

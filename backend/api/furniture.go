@@ -3,9 +3,10 @@ package api
 import (
 	"backend/db"
 	"backend/types"
-	"backend/util"
+	// "backend/util"
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 
@@ -25,7 +26,8 @@ const (
 	ErrListFormEveryFieldMissing = "Every field is missing"
 )
 
-const NUMBER_OF_LIST_FORM_FIELDS = 8
+const NUMBER_OF_LIST_FORM_FIELDS = 8 // removed images
+// const NUMBER_OF_LIST_FORM_FIELDS = 7
 
 type ListFormErrors struct {
 	FormErrors []string `json:"formErrors"`
@@ -107,12 +109,46 @@ furniture listing document will be returned in the response.
 TODO: MUST CHANGE TO ACCEPT FILE UPLOAD FOR IMAGES (MULTIPART) 2/3
 */
 func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
-	// decode request body into struct
-	var newListing types.FurnitureListing
-	err := util.ReadJSONReq[types.FurnitureListing](r, &newListing)
+	// Parse form
+	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
+		http.Error(w, err.Error()+" --> err1", http.StatusBadRequest)
 		return
+	}
+
+	// decode request body into struct
+	jsonData := r.MultipartForm.Value["json_data"]
+	if len(jsonData) == 0 {
+		http.Error(w, "JSON data not provided in the form", http.StatusBadRequest)
+		return
+	}
+
+	var newListing types.FurnitureListing
+	if err := json.Unmarshal([]byte(jsonData[0]), &newListing); err != nil {
+		http.Error(w, "Failed to unmarshal JSON data", http.StatusBadRequest)
+		return
+	}
+
+	// get images
+	files := r.MultipartForm.File["furniture_images"]
+	for _, file := range files {
+		// open file
+		fileReader, err := file.Open()
+		if err != nil {
+			http.Error(w, "Failed to open file", http.StatusInternalServerError)
+			return
+		}
+		defer fileReader.Close()
+
+		// read file
+		fileData, err := io.ReadAll(fileReader)
+		if err != nil {
+			http.Error(w, "Failed to read file", http.StatusInternalServerError)
+			return
+		}
+
+		// add image data to newListing
+		newListing.Images = append(newListing.Images, fileData)
 	}
 
 	// validate form inputs
@@ -122,10 +158,8 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get session to get userID from session store
-	session := r.Context().Value(SessionKey).(*Session)
-
 	// add userID to newListing
+	session := r.Context().Value(SessionKey).(*Session)
 	newListing.UserID = session.Store["userid"].(primitive.ObjectID)
 
 	// save new listing in database
@@ -140,7 +174,6 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	insertedId := result.InsertedID.(primitive.ObjectID)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(insertedId.Hex()))
-
 }
 
 /*

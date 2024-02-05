@@ -4,7 +4,12 @@ import (
 	"backend/api"
 	"backend/db"
 	"backend/types"
-	"backend/util"
+	"io"
+	"mime/multipart"
+	"os"
+	"path/filepath"
+
+	// "backend/util"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -299,18 +304,9 @@ Sample sessionID (which belongs to a test acc in the DB) to be used when testing
 sessionID -> "testtest-test-test-test-testtesttest"
 */
 func TestHandleListFurniture(t *testing.T) {
-	// prepare images to simulate http request from client
-	imgData1, err := util.EncodeImageToBase64("../tests/test_images/tiger_maple1.jpg")
-	if err != nil {
-		t.Fatalf("Error encoding image1 to base64 string")
-	}
 
-	imgData2, err := util.EncodeImageToBase64("../tests/test_images/tiger_maple2.jpg")
-	if err != nil {
-		t.Fatalf("Error encoding image2 to base64 string")
-	}
+	/*------------------Test Data 1 (valid)-------------------*/
 
-	// creating sample listing
 	furnitureListing1 := types.FurnitureListing{
 		Title:       "English Tiger maple queen bed",
 		Description: "My favorite bed",
@@ -319,8 +315,44 @@ func TestHandleListFurniture(t *testing.T) {
 		Style:       types.English,
 		Condition:   "Great",
 		Material:    types.TigerMaple,
-		Images:      []string{imgData1, imgData2},
 	}
+
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// add JSON data to multipart writer
+	jsonPart, err := writer.CreateFormField("json_data")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := json.NewEncoder(jsonPart).Encode(furnitureListing1); err != nil {
+		t.Fatal(err)
+	}
+
+	// add images to multipart writer
+	filePaths := []string{"../tests/test_images/tiger_maple1.jpg", "../tests/test_images/tiger_maple2.jpg"}
+
+	for _, filePath := range filePaths {
+		file, err := os.Open(filePath)
+		if err != nil {
+			t.Fatal("Failed to open file", err)
+		}
+		defer file.Close()
+
+		filePart, err := writer.CreateFormFile("furniture_images", filepath.Base(filePath))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if _, err := io.Copy(filePart, file); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	writer.Close()
+
+	/*------------------Test Data 2 (no images provided)-------------------*/
 
 	furnitureListing2 := types.FurnitureListing{
 		Title:       "Cherry Farm Table Sheraton Style",
@@ -332,16 +364,35 @@ func TestHandleListFurniture(t *testing.T) {
 		Material:    types.Cherry,
 	}
 
-	// simulating JSON.stringify(obj) in TS
-	payload1, err := json.Marshal(furnitureListing1)
+	var requestBody2 bytes.Buffer
+	writer2 := multipart.NewWriter(&requestBody2)
+
+	jsonPart2, err := writer2.CreateFormField("json_data")
 	if err != nil {
-		t.Fatal("Failed to encode payload1 into JSON")
+		t.Fatal(err)
 	}
 
-	payload2, err := json.Marshal(furnitureListing2)
-	if err != nil {
-		t.Fatal("Failed to encode payload2 into JSON")
+	if err := json.NewEncoder(jsonPart2).Encode(furnitureListing2); err != nil {
+		t.Fatal(err)
 	}
+
+	writer2.Close()
+
+	/*------------------Test Data 3 (all list form fields empty)-------------------*/
+
+	var requestBody3 bytes.Buffer
+	writer3 := multipart.NewWriter(&requestBody3)
+
+	jsonPart3, err := writer3.CreateFormField("json_data")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := json.NewEncoder(jsonPart3).Encode(types.FurnitureListing{}); err != nil {
+		t.Fatal(err)
+	}
+
+	writer3.Close()
 
 	/*-----------------Create fake logged in user-----------------*/
 
@@ -371,61 +422,51 @@ func TestHandleListFurniture(t *testing.T) {
 		name               string
 		method             string
 		sessionID          string
-		payload            string
+		payload            *bytes.Buffer
+		writer             *multipart.Writer
 		expectedStatusCode int
 		expectedMessage    string
 	}{
 		{ // valid
 			name:               "Test 1",
 			method:             "POST",
-			payload:            string(payload1),
+			payload:            &requestBody,
+			writer:             writer,
 			sessionID:          session.SessionID,
 			expectedStatusCode: http.StatusOK,
 		},
 		{ // missing image
 			name:               "Test 2",
 			method:             "POST",
-			payload:            string(payload2),
+			payload:            &requestBody2,
+			writer:             writer2,
 			sessionID:          session.SessionID,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedMessage:    `["Furniture images not provided"]`,
 		},
-		{ // invalid payload format type
+		{ // every field missing
 			name:               "Test 3",
 			method:             "POST",
-			payload:            "34",
 			sessionID:          session.SessionID,
+			payload:            &requestBody3,
+			writer:             writer3,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedMessage:    "Failed to decode JSON",
-		},
-		{ // invalid json formatting
-			name:               "Test 4",
-			method:             "POST",
-			sessionID:          session.SessionID,
-			payload:            `{"Title":"Oak Nightstand with refinish}`,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedMessage:    "Failed to decode JSON",
-		},
-		{ // every field missing, except title
-			name:               "Test 5",
-			method:             "POST",
-			sessionID:          session.SessionID,
-			payload:            `{"Title":"Oak Nightstand with refinish"}`,
-			expectedStatusCode: http.StatusBadRequest,
-			expectedMessage:    `["Furniture condition not provided","Furniture cost not provided","Furniture description not provided","Furniture images not provided","Furniture material not provided","Furniture style not provided","Furniture type not provided"]`,
+			expectedMessage:    api.ErrListFormEveryFieldMissing,
 		},
 		{ // not logged in
-			name:               "Test 6",
+			name:               "Test 4",
 			method:             "POST",
-			payload:            string(payload1),
+			payload:            &requestBody,
+			writer:             writer,
 			sessionID:          "foo",
 			expectedStatusCode: http.StatusUnauthorized,
 			expectedMessage:    api.ErrUnauthorized,
 		},
 		{ // invalid method
-			name:               "Test 7",
+			name:               "Test 5",
 			method:             "PUT",
-			payload:            string(payload1),
+			payload:            &requestBody,
+			writer:             writer,
 			sessionID:          "foo",
 			expectedStatusCode: http.StatusMethodNotAllowed,
 			expectedMessage:    api.ErrPostMethod,
@@ -438,8 +479,8 @@ func TestHandleListFurniture(t *testing.T) {
 	server.Post("/list_furniture", server.HandleListFurniture, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-
-			r := httptest.NewRequest(tc.method, "/list_furniture", strings.NewReader(tc.payload))
+			r := httptest.NewRequest(tc.method, "/list_furniture", tc.payload)
+			r.Header.Add("Content-Type", tc.writer.FormDataContentType())
 			r.AddCookie(&http.Cookie{
 				Name:  api.SESSIONID_COOKIE_NAME,
 				Value: tc.sessionID,
@@ -454,15 +495,15 @@ func TestHandleListFurniture(t *testing.T) {
 			*/
 			server.Mux.ServeHTTP(w, r)
 
-			status := w.Code
-			if status != tc.expectedStatusCode {
-				t.Fatalf("Expected status code: %d, got: %v\n", tc.expectedStatusCode, status)
-			}
-
 			// validate that body was inserted into MongoDB correctly
 			res := strings.TrimSpace(w.Body.String())
 			if res == "" {
 				t.Fatal("Response did not return an anything")
+			}
+
+			status := w.Code
+			if status != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %v\n", tc.expectedStatusCode, status)
 			}
 
 			// find the document in the listings collection with the listingID and userID
@@ -470,7 +511,7 @@ func TestHandleListFurniture(t *testing.T) {
 
 			// compare expected message
 			if tc.expectedMessage != "" && res != tc.expectedMessage {
-				t.Fatalf("Expected: '%s', got: '%s'\n", tc.expectedMessage, res)
+				t.Fatalf("Expected msg: '%s', got: '%s'\n", tc.expectedMessage, res)
 			}
 			// stop testcase when an error is reached
 			if err != nil {
@@ -525,7 +566,7 @@ func TestValidateListFormFields(t *testing.T) {
 		Style:       "English",
 		Condition:   "Great",
 		Material:    types.Pine,
-		Images:      []string{"1", "2"},
+		// Images:      []string{"1", "2"},
 	}
 
 	payload2 := types.FurnitureListing{
@@ -535,7 +576,7 @@ func TestValidateListFormFields(t *testing.T) {
 		Cost:        34.99,
 		Style:       "English",
 		Material:    types.Pine,
-		Images:      []string{"1", "2"},
+		// Images:      []string{"1", "2"},
 	}
 
 	payload3 := types.FurnitureListing{}
@@ -815,7 +856,7 @@ func TestHandleCheckout(t *testing.T) {
 	// mock checkout input data
 	checkoutInfo := api.CheckoutInfo{
 		ShoppingCart: []string{
-			"65b433dd8d3c8f926b88cd7a",
+			"65bf607585af14e593096ea1",
 		},
 		Payment: api.PaymentInfo{
 			StripeToken:   "token_foo",
