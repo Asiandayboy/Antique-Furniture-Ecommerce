@@ -4,6 +4,7 @@ import (
 	"backend/api"
 	"backend/db"
 	"backend/types"
+	"backend/util"
 	"io"
 	"mime/multipart"
 	"os"
@@ -742,10 +743,10 @@ func TestHandleAccountGET(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	usersCollection := db.GetCollection("users")
+	sessionManager := api.GetSessionManager()
 
 	/*-----------------Fake logged in user 1-----------------*/
 
-	sessionManager := api.GetSessionManager()
 	session1, err := sessionManager.CreateSession(api.SessionTemplate{
 		SessionID: "testtest-test-test-test-testtesttest",
 	})
@@ -855,6 +856,125 @@ func TestHandleAccountGET(t *testing.T) {
 			}
 		})
 	}
+}
+
+/*
+Be sure to change the payload for each testcase to something different
+each time you run the test. Or else, you really won't be testing anything
+because the data will stay the same, which is to be expected. But, that's
+not what we're testing for, ofc.
+*/
+func TestHandleAccountPUT(t *testing.T) {
+	db.Init()
+	defer db.Close()
+	// usersCollection := db.GetCollection("users")
+	sessionManager := api.GetSessionManager()
+
+	/*---------------fake logged in user1------------------*/
+
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to generate session1")
+	}
+
+	objID1, _ := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	session1.Store["userid"] = objID1
+
+	// change payload before you run the test
+	accountEdit1 := api.AccountEdit{
+		NewPhone: "444-444-4444",
+	}
+
+	payload1, err := json.Marshal(accountEdit1)
+	if err != nil {
+		t.Fatal("Failed to marshal payload1")
+	}
+
+	/*---------------------testcases----------------------*/
+
+	tests := []struct {
+		name               string
+		sessionID          string
+		userID             primitive.ObjectID
+		payload            string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{
+			name:               "Test 1",
+			sessionID:          session1.SessionID,
+			userID:             objID1,
+			payload:            string(payload1),
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        "success",
+		},
+	}
+
+	server := api.NewServer(":3000")
+	server.Put("/account", server.HandleAccountPUT, api.AuthMiddleware)
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest("PUT", "/account", strings.NewReader(tc.payload))
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionID,
+			})
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			res := strings.TrimSpace(w.Body.String())
+
+			if w.Code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+			}
+
+			if res != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+			}
+
+			/*----------------check db to see if the changes went through--------------*/
+
+			usersCollection := db.GetCollection("users")
+			var user types.User
+			err := usersCollection.FindOne(context.Background(), bson.M{
+				"_id": tc.userID,
+			}).Decode(&user)
+
+			if err != nil {
+				t.Fatal("Failed to find user document for test")
+			}
+
+			var changes api.AccountEdit
+			err = json.Unmarshal([]byte(tc.payload), &changes)
+			if err != nil {
+				t.Fatal("Failed to unmarshal payload for test")
+			}
+
+			if changes.NewEmail != "" && changes.NewEmail != user.Email {
+				t.Fatalf("Expected email: %s, got: %s\n", changes.NewEmail, user.Email)
+			}
+
+			if changes.NewPhone != "" && changes.NewPhone != user.Phone {
+				t.Fatalf("Expected phone: %s, got: %s\n", changes.NewPhone, user.Phone)
+			}
+
+			if changes.NewPassword != "" {
+				newPassHash, err := util.HashPassword(changes.NewPassword)
+				if err != nil {
+					t.Fatal("Failed to hash password for test")
+				}
+
+				if newPassHash != user.Password {
+					t.Fatalf("Expected pass: %s, got: %s\n", newPassHash, user.Password)
+				}
+			}
+		})
+	}
+
 }
 
 /*
