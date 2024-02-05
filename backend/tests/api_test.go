@@ -884,7 +884,8 @@ func TestHandleAccountPUT(t *testing.T) {
 
 	// change payload before you run the test
 	accountEdit1 := api.AccountEdit{
-		NewPhone: "444-444-4444",
+		NewPhone:    "101-111-4444",
+		NewPassword: "test1234",
 	}
 
 	payload1, err := json.Marshal(accountEdit1)
@@ -963,13 +964,10 @@ func TestHandleAccountPUT(t *testing.T) {
 			}
 
 			if changes.NewPassword != "" {
-				newPassHash, err := util.HashPassword(changes.NewPassword)
+				// compare the plain text of the new password and the resulting hash of it
+				err = util.CheckPassword(changes.NewPassword, user.Password)
 				if err != nil {
-					t.Fatal("Failed to hash password for test")
-				}
-
-				if newPassHash != user.Password {
-					t.Fatalf("Expected pass: %s, got: %s\n", newPassHash, user.Password)
+					t.Fatal("Passwords are not the same")
 				}
 			}
 		})

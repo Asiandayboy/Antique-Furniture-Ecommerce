@@ -3,6 +3,7 @@ package api
 import (
 	"backend/db"
 	"backend/types"
+	"backend/util"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,16 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 )
+
+/*
+This type is used to represent changes a user makes to their account and
+is used as the response to the client to inform them of the changes
+*/
+type AccountEdit struct {
+	NewPassword string `bson:"password,omitempty" json:"newPassword,omitempty"`
+	NewPhone    string `bson:"phone,omitempty" json:"newPhone,omitempty"`
+	NewEmail    string `bson:"email,omitempty" json:"newEmail,omitempty"`
+}
 
 /*
 Retrieve account information
@@ -52,6 +63,43 @@ Update current account information
 func (s *Server) HandleAccountPUT(w http.ResponseWriter, r *http.Request) {
 	log.Println("\x1b[35mENDPOINT HIT -> /account PUT\x1b[0m")
 
+	var changes AccountEdit
+	if err := util.ReadJSONReq[AccountEdit](r, &changes); err != nil {
+		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		return
+	}
+
+	/*
+		If the user is changing their password, the request will contain the plain
+		text password. We must hash it before saving it
+	*/
+	if changes.NewPassword != "" {
+		// hash new password
+		hashedPass, err := util.HashPassword(changes.NewPassword)
+		if err != nil {
+			http.Error(w, "Failed to hash new password", http.StatusInternalServerError)
+			return
+		}
+
+		changes.NewPassword = hashedPass
+	}
+
+	session := r.Context().Value(SessionKey).(*Session)
+
+	usersCollection := db.GetCollection("users")
+	_, err := usersCollection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": session.Store["userid"]},
+		bson.M{"$set": changes},
+	)
+
+	if err != nil {
+		http.Error(w, "Failed to update account information", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
 }
 
 /*
