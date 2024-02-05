@@ -4,45 +4,57 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 const Unknown string = "Unknown"
 
+// Bed, Table, Desk, Chair, Chest, Nightstand, Cabinet
+type FurnitureType = string
+
+// Mint, Excellent, Good, Worn, Restored, Original Finish
+type FurnitureCondition = string
+
+// Victorian, English, Baroque, Federal, Rococo, Sheraton, Unknown
+type FurnitureStyle = string
+
+// Tiger Maple, Cherry, Oak, Walnut, Mahogany, Maple, Chestnut, Paine, Rosewood, Birch
+type FurnitureMaterial = string
+
 const (
-	Bed        string = "Bed"
-	Table      string = "Table"
-	Desk       string = "Desk"
-	Chair      string = "Chair"
-	Chest      string = "Chest"
-	Nightstand string = "Nightstand"
-	Cabinet    string = "Cabinet"
+	Bed        FurnitureType = "Bed"
+	Table      FurnitureType = "Table"
+	Desk       FurnitureType = "Desk"
+	Chair      FurnitureType = "Chair"
+	Chest      FurnitureType = "Chest"
+	Nightstand FurnitureType = "Nightstand"
+	Cabinet    FurnitureType = "Cabinet"
 )
 
 const (
-	Mint           string = "Mint"
-	Excellent      string = "Excellent"
-	Good           string = "Good"
-	Worn           string = "Worn"
-	Restored       string = "Restored"
-	OriginalFinish string = "Original Finish"
+	Mint           FurnitureCondition = "Mint"
+	Excellent      FurnitureCondition = "Excellent"
+	Good           FurnitureCondition = "Good"
+	Worn           FurnitureCondition = "Worn"
+	Restored       FurnitureCondition = "Restored"
+	OriginalFinish FurnitureCondition = "Original Finish"
 )
 
 const (
-	Victorian string = "Victorian"
-	English   string = "English"
-	Baroque   string = "Baroque"
-	Federal   string = "Federal"
-	Rococo    string = "Rococo"
-	Sheraton  string = "Sheraton"
+	Victorian FurnitureStyle = "Victorian"
+	English   FurnitureStyle = "English"
+	Baroque   FurnitureStyle = "Baroque"
+	Federal   FurnitureStyle = "Federal"
+	Rococo    FurnitureStyle = "Rococo"
+	Sheraton  FurnitureStyle = "Sheraton"
 )
 
 const (
-	TigerMaple string = "Tiger Maple"
-	Cherry     string = "Cherry"
-	Oak        string = "Oak"
-	Walnut     string = "Walnut"
-	Mahogany   string = "Mahogany"
-	Maple      string = "Maple"
-	Chestnut   string = "Chestnut"
-	Pine       string = "Pine"
-	Rosewood   string = "Rosewood"
-	Birch      string = "Birch"
+	TigerMaple FurnitureMaterial = "Tiger Maple"
+	Cherry     FurnitureMaterial = "Cherry"
+	Oak        FurnitureMaterial = "Oak"
+	Walnut     FurnitureMaterial = "Walnut"
+	Mahogany   FurnitureMaterial = "Mahogany"
+	Maple      FurnitureMaterial = "Maple"
+	Chestnut   FurnitureMaterial = "Chestnut"
+	Pine       FurnitureMaterial = "Pine"
+	Rosewood   FurnitureMaterial = "Rosewood"
+	Birch      FurnitureMaterial = "Birch"
 )
 
 /*
@@ -50,27 +62,15 @@ This type represents a furniture listing with all
 appropriate form details about the furniture
 */
 type FurnitureListing struct {
-	Title       string  `bson:"title" json:"title"`
-	Description string  `bson:"description" json:"description"`
-	Cost        float64 `bson:"cost" json:"cost"`
-
-	// Bed, Table, Desk, Chair, Chest, Nightstand, Cabinet
-	Type string `bson:"type" json:"type"`
-
-	// Victorian, English, Baroque, Federal, Rococo, Sheraton, Unknown
-	Style string `bson:"style" json:"style"`
-
-	// Mint, Excellent, Good, Worn, Restored, Original Finish
-	Condition string `bson:"condition" json:"condition"`
-
-	// Tiger Maple, Cherry, Oak, Walnut, Mahogany, Maple, Chestnut, Paine, Rosewood, Birch
-	Material string `bson:"material" json:"material"`
-
-	// // images are stored as an array of byte slices
-	Images [][]byte `bson:"images" json:"images"`
-
-	// UserID of the client who created the listing; the owner of the post; the seller
-	UserID primitive.ObjectID `bson:"userid"`
-
-	ListingID primitive.ObjectID `bson:"_id,omitempty"`
+	ListingID   primitive.ObjectID `bson:"_id,omitempty"`
+	Title       string             `bson:"title" json:"title"`
+	Description string             `bson:"description" json:"description"`
+	Cost        float64            `bson:"cost" json:"cost"`
+	Type        FurnitureType      `bson:"type" json:"type"`
+	Style       FurnitureStyle     `bson:"style" json:"style"`
+	Condition   FurnitureCondition `bson:"condition" json:"condition"`
+	Material    FurnitureMaterial  `bson:"material" json:"material"`
+	Images      [][]byte           `bson:"images" json:"images"` // images are stored as an array of byte slices
+	UserID      primitive.ObjectID `bson:"userid"`               // UserID of the client who created the listing; the owner of the post; the seller
+	Bought      bool               `bson:"bought" json:"bought"` // this filed will be used to not render the items that have already been bought
 }

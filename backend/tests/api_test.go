@@ -859,7 +859,6 @@ func TestHandleCheckout(t *testing.T) {
 			"65bf607585af14e593096ea1",
 		},
 		Payment: api.PaymentInfo{
-			StripeToken:   "token_foo",
 			PaymentMethod: "Credit",
 			Amount:        7500,
 			Currency:      "usd",

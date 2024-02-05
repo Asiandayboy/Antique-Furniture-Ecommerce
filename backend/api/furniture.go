@@ -161,6 +161,7 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 	// add userID to newListing
 	session := r.Context().Value(SessionKey).(*Session)
 	newListing.UserID = session.Store["userid"].(primitive.ObjectID)
+	newListing.Bought = false
 
 	// save new listing in database
 	listingsCollection := db.GetCollection("listings")
