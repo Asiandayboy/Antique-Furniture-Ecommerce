@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 /*
@@ -102,41 +103,50 @@ func (s *Server) HandleAccountPUT(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-/*
-This handler processes requests for fetching the client's addresses,
-creating addresses, updating them, or deleteing them
-*/
-func (s *Server) HandleAddresses(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		handleAddressesGet(w, r)
-	case "POST":
-		handleAddressesPost(w, r)
-	case "PUT":
-		handleAddressesPut(w, r)
-	case "DELETE":
-		handleAddressesDelete(w, r)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
 // Used to retrieve addresses
-func handleAddressesGet(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleAddressGET(w http.ResponseWriter, r *http.Request) {
+	log.Println("\x1b[35mENDPOINT HIT -> /account/address GET\x1b[0m")
 
+	http.Error(w, "test", http.StatusInternalServerError)
 }
 
 // Used to create a new address
-func handleAddressesPost(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleAddressPOST(w http.ResponseWriter, r *http.Request) {
+	log.Println("\x1b[35mENDPOINT HIT -> /account/address POST\x1b[0m")
 
+	var address types.ShippingAddress
+	err := util.ReadJSONReq[types.ShippingAddress](r, &address)
+	if err != nil {
+		http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
+		return
+	}
+
+	session := r.Context().Value(SessionKey).(*Session)
+
+	// set userID before updatting users document
+	address.UserID = session.Store["userid"].(primitive.ObjectID)
+
+	addressesCollection := db.GetCollection("shippingAddresses")
+	_, err = addressesCollection.InsertOne(context.Background(), address)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
 }
 
 // Used to edit and update an existing address
-func handleAddressesPut(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleAddressPUT(w http.ResponseWriter, r *http.Request) {
+	log.Println("\x1b[35mENDPOINT HIT -> /account/address PUT\x1b[0m")
+	http.Error(w, "test", http.StatusInternalServerError)
 
 }
 
 // Used to delete an address
-func handleAddressesDelete(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleAddressDELETE(w http.ResponseWriter, r *http.Request) {
+	log.Println("\x1b[35mENDPOINT HIT -> /account/address DELETE\x1b[0m")
+	http.Error(w, "test", http.StatusInternalServerError)
 
 }

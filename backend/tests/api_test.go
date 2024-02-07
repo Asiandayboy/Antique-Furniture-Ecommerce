@@ -24,6 +24,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func trimSpaceAndNewline(s string) string {
@@ -1125,5 +1126,168 @@ func TestHandleCheckout(t *testing.T) {
 
 	for {
 		time.Sleep(time.Second)
+	}
+}
+
+func TestHandleAddressGET(t *testing.T) {
+	db.Init()
+	defer db.Close()
+	sessionManager := api.GetSessionManager()
+
+	/*-----------Fake logged in user 1-------------*/
+
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to create session for testuser1")
+	}
+	userID1, _ := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	session1.Store["userid"] = userID1
+
+	// generating expected msg
+	var expectedAddresses1 types.ShippingAddress
+	usersCollection := db.GetCollection("users")
+	err = usersCollection.FindOne(
+		context.Background(),
+		bson.M{"_id": userID1},
+		options.FindOne().SetProjection(bson.M{
+			"shippingAddress": 1,
+		}),
+	).Decode(&expectedAddresses1)
+
+	if err != nil {
+		t.Fatalf("Failed to get expected addresses: %s\n", err.Error())
+	}
+
+	jsonData1, err := json.Marshal(expectedAddresses1)
+	if err != nil {
+		t.Fatal("Failed to marshal expectedAddresses1")
+	}
+
+	expectedMsg1 := string(jsonData1)
+
+	/*-----------------test cases------------------*/
+
+	tests := []struct {
+		name               string
+		sessionID          string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{
+			name:               "Test 1",
+			sessionID:          session1.SessionID,
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        expectedMsg1,
+		},
+	}
+
+	server := api.NewServer(":3000")
+	server.Get("/account/address", server.HandleAddressGET, api.AuthMiddleware)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest("GET", "/account/address", nil)
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionID,
+			})
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			res := strings.TrimSpace(w.Body.String())
+			code := w.Code
+
+			if code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, code)
+			}
+
+			if res != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+			}
+		})
+	}
+}
+
+func TestHandleAddressPOST(t *testing.T) {
+	db.Init()
+	defer db.Close()
+	sessionManager := api.GetSessionManager()
+
+	/*-----------Fake logged in user 1-------------*/
+
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to create session for testuser1")
+	}
+	userID1, _ := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	session1.Store["userid"] = userID1
+
+	// addressID1, _ := primitive.ObjectIDFromHex("abcdefabcdefabcdefabcde1")
+	var testInputAddress1 types.ShippingAddress = types.ShippingAddress{
+		// AddressID: addressID1,
+		// UserID:    userID1,
+		State:   "RI",
+		City:    "Providence",
+		Street:  "23 Something Street",
+		ZipCode: "11111",
+		Default: false,
+	}
+
+	jsonData1, err := json.Marshal(testInputAddress1)
+	if err != nil {
+		t.Fatal("Failed to marshal address1")
+	}
+
+	/*-----------------test cases------------------*/
+
+	/*
+		Should expect the address to be returned in JSON and
+		match the one that was inserted into the DB
+	*/
+
+	tests := []struct {
+		name               string
+		sessionID          string
+		payload            string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{
+			name:               "Test 1",
+			sessionID:          session1.SessionID,
+			payload:            string(jsonData1),
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        "success",
+		},
+	}
+
+	server := api.NewServer(":3000")
+	server.Post("/account/address", server.HandleAddressPOST, api.AuthMiddleware)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest("POST", "/account/address", strings.NewReader(tc.payload))
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionID,
+			})
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			res := strings.TrimSpace(w.Body.String())
+			code := w.Code
+
+			if code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, code)
+			}
+
+			if res != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
+			}
+		})
 	}
 }

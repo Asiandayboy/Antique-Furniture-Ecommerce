@@ -11,15 +11,13 @@ Type used to save into users collections and to
 represent client signup and login info, and account info
 */
 type User struct {
-	UserID    primitive.ObjectID `bson:"_id"`
-	Username  string             `bson:"username" json:"username"`
-	Password  string             `bson:"password" json:"password"`
-	Email     string             `bson:"email" json:"email"`
-	Phone     string             `bson:"phone" json:"phone"`
-	SessionID string             `bson:"sessionid"`
-
-	// The amount of money from sales in the user's account
-	Balance primitive.Decimal128 `bson:"balance" json:"balance"`
+	UserID    primitive.ObjectID   `bson:"_id"`
+	Username  string               `bson:"username" json:"username"`
+	Password  string               `bson:"password" json:"password"`
+	Email     string               `bson:"email" json:"email"`
+	Phone     string               `bson:"phone" json:"phone"`
+	SessionID string               `bson:"sessionid"`
+	Balance   primitive.Decimal128 `bson:"balance" json:"balance"` // The amount of money from sales in the user's account
 }
 
 /*
@@ -39,10 +37,13 @@ func (u *User) UpdateBalance(amountToAdd float64) float64 {
 /*
 A user can create multiple shipping addresses and can choose
 to set a default address to use when buying furniture
+
+When decoding from JSON into this struct type, provide a custom
+unmarshaling to handle the primitive.ObjectID types
 */
-type Address struct {
-	AddressID primitive.ObjectID `bson:"_id" json:"addressId"`
-	UserID    primitive.ObjectID `bson:"userid"`
+type ShippingAddress struct {
+	AddressID primitive.ObjectID `bson:"_id,omitempty" json:"addressId"`
+	UserID    primitive.ObjectID `bson:"userid" json:"userId"`
 	State     string             `bson:"state" json:"state"`
 	City      string             `bson:"city" json:"city"`
 	Street    string             `bson:"street" json:"street"`
