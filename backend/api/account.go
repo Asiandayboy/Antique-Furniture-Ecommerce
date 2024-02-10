@@ -14,6 +14,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	ErrAddressNoChanges = "Empty fields; no address changes provided"
+)
+
 /*
 This type is used to represent changes a user makes to their account and
 is used as the response to the client to inform them of the changes
@@ -22,6 +26,25 @@ type AccountEdit struct {
 	NewPassword string `bson:"password,omitempty" json:"newPassword,omitempty"`
 	NewPhone    string `bson:"phone,omitempty" json:"newPhone,omitempty"`
 	NewEmail    string `bson:"email,omitempty" json:"newEmail,omitempty"`
+}
+
+/*
+Represents user changes to an existing address
+*/
+type AddressUpdate struct {
+	NewState   string `bson:"state,omitempty" json:"state"`
+	NewCity    string `bson:"city,omitempty" json:"city"`
+	NewStreet  string `bson:"street,omitempty" json:"street"`
+	NewZipCode string `bson:"zipCode,omitempty" json:"zipCode"`
+	NewDefault bool   `bson:"default,omitempty" json:"default"`
+}
+
+/*
+Represents the JSON input format for PUT /account/address
+*/
+type AddressUpdateInput struct {
+	AddressID string        `json:"addressID"` // The hex string ID of the document to edit
+	Changes   AddressUpdate `json:"changes"`   // User changes for the the address
 }
 
 /*
@@ -71,7 +94,7 @@ func (s *Server) HandleAccountPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/*
-		If the user is changing their password, the request will contain the plain
+		If the user is changing their password, the input will contain the plain
 		text password. We must hash it before saving it
 	*/
 	if changes.NewPassword != "" {
@@ -141,7 +164,6 @@ func (s *Server) HandleAddressPOST(w http.ResponseWriter, r *http.Request) {
 func (s *Server) HandleAddressPUT(w http.ResponseWriter, r *http.Request) {
 	log.Println("\x1b[35mENDPOINT HIT -> /account/address PUT\x1b[0m")
 	http.Error(w, "test", http.StatusInternalServerError)
-
 }
 
 // Used to delete an address

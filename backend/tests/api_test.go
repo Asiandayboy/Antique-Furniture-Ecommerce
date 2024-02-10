@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	// "backend/util"
 	"bytes"
@@ -1288,6 +1289,162 @@ func TestHandleAddressPOST(t *testing.T) {
 			if res != tc.expectedMsg {
 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, res)
 			}
+		})
+	}
+}
+
+/*
+Be sure to change all the inputs to something different
+every time you run this test.
+
+The AddressID should stay the same to make this test
+simpler by just checking for changes in the same document
+*/
+func TestHandleAddressPUT(t *testing.T) {
+	db.Init()
+	defer db.Close()
+	sessionManager := api.GetSessionManager()
+
+	/*-----------Fake logged in user 1-------------*/
+
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to create session for testuser1")
+	}
+	userID1, _ := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	session1.Store["userid"] = userID1
+
+	/*-----------------test cases------------------*/
+
+	// valid input
+	input1 := api.AddressUpdateInput{
+		AddressID: "65c3f9c52dd8587a26714756",
+		Changes: api.AddressUpdate{
+			NewStreet: "101 Wizard Avenue",
+		},
+	}
+	jsonData1, err := json.Marshal(input1)
+	if err != nil {
+		t.Fatal("Failed to marshal test input1")
+	}
+
+	// valid input
+	input2 := api.AddressUpdateInput{
+		AddressID: "65c3f9c52dd8587a26714756",
+		Changes: api.AddressUpdate{
+			NewZipCode: "90491",
+			NewCity:    "Boston",
+			NewState:   "MA",
+		},
+	}
+	jsonData2, err := json.Marshal(input2)
+	if err != nil {
+		t.Fatal("Failed to marshal test input1")
+	}
+
+	// empty input
+	input3 := api.AddressUpdateInput{}
+	jsonData3, err := json.Marshal(input3)
+	if err != nil {
+		t.Fatal("Failed to marshal test input1")
+	}
+
+	tests := []struct {
+		name               string
+		sessionID          string
+		payload            string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{
+			name:               "Test 1",
+			sessionID:          session1.SessionID,
+			payload:            string(jsonData1),
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        "success",
+		},
+		{
+			name:               "Test 2",
+			sessionID:          session1.SessionID,
+			payload:            string(jsonData2),
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        "success",
+		},
+		{
+			name:               "Test 3",
+			sessionID:          session1.SessionID,
+			payload:            string(jsonData3),
+			expectedStatusCode: http.StatusBadRequest,
+			expectedMsg:        api.ErrAddressNoChanges,
+		},
+	}
+
+	server := api.NewServer(":3000")
+	server.Put("/account/address", server.HandleAddressPUT, api.AuthMiddleware)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest("PUT", "/account/address", strings.NewReader(tc.payload))
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionID,
+			})
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			code := w.Code
+			resMsg := strings.TrimSpace(w.Body.String())
+
+			if code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, code)
+			}
+
+			if resMsg != tc.expectedMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, resMsg)
+			}
+
+			/*------------compare with DB--------------*/
+
+			/*
+				Compare the expected changes with the current state of the
+				document in the database to ensure the changes actually saved
+			*/
+
+			var inputChanges api.AddressUpdateInput
+			err := json.Unmarshal([]byte(tc.payload), &inputChanges)
+			if err != nil {
+				t.Fatal("Failed to unmarshal payload into <inputChanges>")
+			}
+
+			shippingAddrCollection := db.GetCollection("shippingAddresses")
+
+			inputKey := reflect.TypeOf(inputChanges.Changes)
+			inputValue := reflect.ValueOf(inputChanges.Changes)
+			for i := 0; i < inputKey.NumField(); i++ {
+				field := inputKey.Field(i)
+				value := inputValue.Field(i)
+
+				if !value.IsZero() {
+					var addressInDB api.ShippingAddress
+					id, _ := primitive.ObjectIDFromHex(inputChanges.AddressID)
+					err := shippingAddrCollection.FindOne(
+						context.Background(),
+						bson.M{"_id": id},
+						options.FindOne().SetProjection(bson.M{field.Name: 1}),
+					).Decode(&addressInDB)
+
+					if err != nil {
+						t.Fatal("Failed to find document with addressID")
+					}
+
+					if addressInDB.Street != value.String() {
+						t.Fatalf("Expected change: %s, got: %s\n", value, addressInDB.Street)
+					}
+				}
+			}
+
 		})
 	}
 }
