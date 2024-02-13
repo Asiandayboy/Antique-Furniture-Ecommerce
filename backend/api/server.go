@@ -14,10 +14,7 @@ import (
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
 
 const (
-	ErrPostMethod   = "Request must be a POST request"
-	ErrGetMethod    = "Request must be a GET request"
-	ErrPutMethod    = "Request must be a PUT request"
-	ErrDeleteMethod = "Request must be a DELETE request"
+	ErrMethodNotAllowed = "Method Not Allowed"
 )
 
 type Server struct {
@@ -50,25 +47,25 @@ Starts the server to begin listening for requests
 */
 func (s *Server) Start() {
 	s.Mux.HandleFunc("/", s.HandleRoot)
-	s.Post("/login", s.HandleLogin)
-	s.Post("/signup", s.HandleSignup)
-	s.Post("/logout", s.HandleLogout, AuthMiddleware)
+	s.Use("POST /login", s.HandleLogin)
+	s.Use("POST /signup", s.HandleSignup)
+	s.Use("POST /logout", s.HandleLogout, AuthMiddleware)
 
-	s.Post("/list_furniture", s.HandleListFurniture, AuthMiddleware)
-	s.Get("/get_furnitures", s.HandleGetFurnitures)
-	s.Get("/get_furniture", s.HandleGetFurniture)
+	s.Use("POST /list_furniture", s.HandleListFurniture, AuthMiddleware)
+	s.Use("GET /get_furnitures", s.HandleGetFurnitures)
+	s.Use("GET /get_furniture", s.HandleGetFurniture)
 
-	s.Get("/account", s.HandleAccountGET, AuthMiddleware)
-	s.Put("/account", s.HandleAccountPUT, AuthMiddleware)
-	s.Get("/account/address", s.HandleAddressGET, AuthMiddleware)
-	s.Post("/account/address", s.HandleAddressPOST, AuthMiddleware)
-	s.Put("/account/address", s.HandleAddressPUT, AuthMiddleware)
-	s.Delete("/account/address", s.HandleAddressDELETE, AuthMiddleware)
+	s.Use("GET /account", s.HandleAccountGET, AuthMiddleware)
+	s.Use("PUT /account", s.HandleAccountPUT, AuthMiddleware)
+	s.Use("GET /account/address", s.HandleAddressGET, AuthMiddleware)
+	s.Use("POST /account/address", s.HandleAddressPOST, AuthMiddleware)
+	s.Use("PUT /account/address", s.HandleAddressPUT, AuthMiddleware)
+	s.Use("DELETE /account/address", s.HandleAddressDELETE, AuthMiddleware)
 
-	s.Post("/checkout", s.HandleCheckout, AuthMiddleware)
+	s.Use("POST /checkout", s.HandleCheckout, AuthMiddleware)
 
 	// handle auth in the handler bc cookies aren't sent when Stripe sends the webhook
-	s.Post("/checkout_webhook", s.HandleStripeWebhook)
+	s.Use("POST /checkout_webhook", s.HandleStripeWebhook)
 
 	/*----------STRIPE-----------*/
 
@@ -107,93 +104,6 @@ func (s *Server) Shutdown() {
 	if err != nil {
 		log.Fatal("Failed to shutdown server")
 	}
-}
-
-// Middleware to verify request method
-func requestMethodMiddleware(method string) MiddlewareFunc {
-	return func(next http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != method {
-				var errMsg string
-				switch method {
-				case "GET":
-					errMsg = ErrGetMethod
-				case "POST":
-					errMsg = ErrPostMethod
-				case "PUT":
-					errMsg = ErrPutMethod
-				case "DELETE":
-					errMsg = ErrDeleteMethod
-				default:
-					errMsg = fmt.Sprintf("Unsupported method: %s", method)
-				}
-				http.Error(w, errMsg, http.StatusMethodNotAllowed)
-				return
-			}
-
-			next.ServeHTTP(w, r)
-		}
-	}
-}
-
-/*
-Registers the given handler for the
-given pattern for POST request methods only. The
-Post middleware is appended last to <middlewares>
-argument
-*/
-func (s *Server) Post(
-	pattern string,
-	handler http.HandlerFunc,
-	middlewares ...MiddlewareFunc,
-) {
-	middlewares = append(middlewares, requestMethodMiddleware("POST"))
-	s.Use(pattern, handler, middlewares...)
-}
-
-/*
-Registers the given handler for the
-given pattern for GET request methods only. The
-Get middleware is appended last to <middlewares>
-argument
-*/
-func (s *Server) Get(
-	pattern string,
-	handler http.HandlerFunc,
-	middlewares ...MiddlewareFunc,
-) {
-	middlewares = append(middlewares, requestMethodMiddleware("GET"))
-	s.Use(pattern, handler, middlewares...)
-}
-
-/*
-Registers the given handler for the
-given pattern for PUT request methods only. The
-Put middleware is appended last to <middlewares>
-argument
-*/
-func (s *Server) Put(
-	pattern string,
-	handler http.HandlerFunc,
-	middlewares ...MiddlewareFunc,
-) {
-	middlewares = append(middlewares, requestMethodMiddleware("PUT"))
-	s.Use(pattern, handler, middlewares...)
-}
-
-/*
-Registers the given handler for the
-given pattern for DELETE request methods only. The
-Delete middleware is appended last to <middlewares>
-argument
-*/
-func (s *Server) Delete(
-	pattern string,
-	handler http.HandlerFunc,
-	middlewares ...MiddlewareFunc,
-) {
-	middlewares = append(middlewares, requestMethodMiddleware("DELETE"))
-	s.Use(pattern, handler, middlewares...)
 }
 
 /*

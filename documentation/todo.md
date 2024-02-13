@@ -92,6 +92,10 @@ any large amounts of data besides the images. Ur fine. Just do it
 2/8
 - wrote test for PUT /account/address
 
+2/13
+As of go version 1.22, there is now enhanced routing patterns and wildcards
+- don't need the custom method middleware anymore
+
 
 
 # ENDPOINTS

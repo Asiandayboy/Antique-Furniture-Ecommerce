@@ -36,7 +36,7 @@ func TestHandleSignup(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	server.Post("/signup", server.HandleSignup)
+	server.Use("POST /signup", server.HandleSignup)
 
 	tests := []struct {
 		name               string
@@ -56,7 +56,7 @@ func TestHandleSignup(t *testing.T) {
 			name:               "Test 2",
 			method:             "GET",
 			payload:            `{"username": "testuser1", "password": "testpassword1", "email": "test@gmail.com"}`,
-			expectedResMsg:     "Request must be a POST request",
+			expectedResMsg:     api.ErrMethodNotAllowed,
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // testing invalid json decode
@@ -114,7 +114,7 @@ func TestHandleLogin(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	server.Post("/login", server.HandleLogin)
+	server.Use("POST /login", server.HandleLogin)
 
 	tests := []struct {
 		name               string
@@ -134,7 +134,7 @@ func TestHandleLogin(t *testing.T) {
 			name:               "Test 2",
 			method:             "GET",
 			payload:            `{"username": "bob", "password": "bob"}`,
-			expectedResMsg:     "Request must be a POST request",
+			expectedResMsg:     api.ErrMethodNotAllowed,
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // test invalid login/invalid username
@@ -213,7 +213,7 @@ func TestHandleLogout(t *testing.T) {
 			name:        "Test 2",
 			sessionID:   session2.SessionID,
 			method:      "GET",
-			expectedMsg: api.ErrPostMethod,
+			expectedMsg: api.ErrMethodNotAllowed,
 		},
 		{ // valid
 			name:        "Test 3",
@@ -230,7 +230,7 @@ func TestHandleLogout(t *testing.T) {
 	}
 
 	server := api.NewServer(":3000")
-	server.Post("/logout", server.HandleLogout, api.AuthMiddleware)
+	server.Use("POST /logout", server.HandleLogout, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest(tc.method, "/logout", nil)
@@ -272,7 +272,7 @@ func TestLoginCookie(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	server.Post("/login", server.HandleLogin)
+	server.Use("POST /login", server.HandleLogin)
 
 	payload := `{"username": "testuser1", "password": "testpassword1"}`
 	r := httptest.NewRequest("POST", "/login", bytes.NewBufferString(payload))
@@ -472,14 +472,14 @@ func TestHandleListFurniture(t *testing.T) {
 			writer:             writer,
 			sessionID:          "foo",
 			expectedStatusCode: http.StatusMethodNotAllowed,
-			expectedMessage:    api.ErrPostMethod,
+			expectedMessage:    api.ErrMethodNotAllowed,
 		},
 	}
 
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	server.Post("/list_furniture", server.HandleListFurniture, api.AuthMiddleware)
+	server.Use("POST /list_furniture", server.HandleListFurniture, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest(tc.method, "/list_furniture", tc.payload)
@@ -642,14 +642,14 @@ func TestHandleGetFurnitures(t *testing.T) {
 			name:               "Test 2",
 			method:             "POST",
 			expectedStatusCode: http.StatusMethodNotAllowed,
-			expectedMessage:    "Request must be a GET request",
+			expectedMessage:    api.ErrMethodNotAllowed,
 		},
 	}
 
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	server.Get("/get_furnitures", server.HandleGetFurnitures)
+	server.Use("GET /get_furnitures", server.HandleGetFurnitures)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest(tc.method, "/get_furnitures", nil)
@@ -697,14 +697,14 @@ func TestHandleGetFurniture(t *testing.T) {
 		{ // invalid method
 			name:               "Test 3",
 			method:             "POST",
-			expectedMessage:    "Request must be a GET request",
+			expectedMessage:    api.ErrMethodNotAllowed,
 			payload:            "234324324234324",
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // invalid method
 			name:               "Test 4",
 			method:             "DELETE",
-			expectedMessage:    "Request must be a GET request",
+			expectedMessage:    api.ErrMethodNotAllowed,
 			payload:            "6783",
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
@@ -720,7 +720,7 @@ func TestHandleGetFurniture(t *testing.T) {
 	db.Init()
 	defer db.Close()
 	server := api.NewServer(":3000")
-	server.Get("/get_furniture", server.HandleGetFurniture)
+	server.Use("GET /get_furniture", server.HandleGetFurniture)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			var target string = fmt.Sprintf("/get_furniture?listingid=%s", tc.payload)
@@ -916,7 +916,7 @@ func TestHandleAccountPUT(t *testing.T) {
 	}
 
 	server := api.NewServer(":3000")
-	server.Put("/account", server.HandleAccountPUT, api.AuthMiddleware)
+	server.Use("PUT /account", server.HandleAccountPUT, api.AuthMiddleware)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1085,7 +1085,7 @@ func TestHandleCheckout(t *testing.T) {
 			sessionid:          session1.SessionID,
 			payload:            string(checkoutJSONData),
 			expectedStatusCode: http.StatusMethodNotAllowed,
-			expectedMsg:        api.ErrPostMethod,
+			expectedMsg:        api.ErrMethodNotAllowed,
 		},
 		{ // valid [*This test doesn't pass yet]
 			name:               "Test 3",
@@ -1185,7 +1185,7 @@ func TestHandleAddressGET(t *testing.T) {
 	}
 
 	server := api.NewServer(":3000")
-	server.Get("/account/address", server.HandleAddressGET, api.AuthMiddleware)
+	server.Use("GET /account/address", server.HandleAddressGET, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest("GET", "/account/address", nil)
@@ -1267,7 +1267,7 @@ func TestHandleAddressPOST(t *testing.T) {
 	}
 
 	server := api.NewServer(":3000")
-	server.Post("/account/address", server.HandleAddressPOST, api.AuthMiddleware)
+	server.Use("POST /account/address", server.HandleAddressPOST, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest("POST", "/account/address", strings.NewReader(tc.payload))
@@ -1382,7 +1382,7 @@ func TestHandleAddressPUT(t *testing.T) {
 	}
 
 	server := api.NewServer(":3000")
-	server.Put("/account/address", server.HandleAddressPUT, api.AuthMiddleware)
+	server.Use("PUT /account/address", server.HandleAddressPUT, api.AuthMiddleware)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest("PUT", "/account/address", strings.NewReader(tc.payload))
