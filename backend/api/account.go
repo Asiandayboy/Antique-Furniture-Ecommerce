@@ -19,8 +19,8 @@ const (
 )
 
 /*
-This type is used to represent changes a user makes to their account and
-is used as the response to the client to inform them of the changes
+Represent changes a user makes to their account and is also used
+as the response to the client to inform them of their changes
 */
 type AccountEdit struct {
 	NewPassword string `bson:"password,omitempty" json:"newPassword,omitempty"`
@@ -37,6 +37,18 @@ type AddressUpdate struct {
 	NewStreet  string `bson:"street,omitempty" json:"street"`
 	NewZipCode string `bson:"zipCode,omitempty" json:"zipCode"`
 	NewDefault bool   `bson:"default,omitempty" json:"default"`
+}
+
+func (a AddressUpdate) IsEmpty() bool {
+	// ignore NewDefault field because its zero value is false by default
+	if a.NewCity == "" &&
+		a.NewState == "" &&
+		a.NewStreet == "" &&
+		a.NewZipCode == "" {
+		return true
+	}
+
+	return false
 }
 
 /*
@@ -163,7 +175,46 @@ func (s *Server) HandleAddressPOST(w http.ResponseWriter, r *http.Request) {
 // Used to edit and update an existing address
 func (s *Server) HandleAddressPUT(w http.ResponseWriter, r *http.Request) {
 	log.Println("\x1b[35mENDPOINT HIT -> /account/address PUT\x1b[0m")
-	http.Error(w, "test", http.StatusInternalServerError)
+
+	var changes AddressUpdateInput
+	err := util.ReadJSONReq[AddressUpdateInput](r, &changes)
+	if err != nil {
+		http.Error(w, "Failed decode from JSON", http.StatusBadRequest)
+		return
+	}
+
+	// validate input to ensure fields are not empty
+	if changes.Changes.IsEmpty() {
+		http.Error(w, ErrAddressNoChanges, http.StatusBadRequest)
+		return
+	}
+
+	addressID, err := primitive.ObjectIDFromHex(changes.AddressID)
+	if err != nil {
+		http.Error(w, primitive.ErrInvalidHex.Error(), http.StatusBadRequest)
+		return
+	}
+
+	addressesCollection := db.GetCollection("shippingAddresses")
+	res, err := addressesCollection.UpdateByID(
+		context.Background(),
+		addressID,
+		bson.M{"$set": changes.Changes},
+	)
+	if err != nil {
+		http.Error(w, "Failed to update record", http.StatusInternalServerError)
+		return
+	}
+	if res.MatchedCount == 0 {
+		http.Error(
+			w,
+			"Document with provided addressID does not exist",
+			http.StatusBadRequest,
+		)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
 }
 
 // Used to delete an address

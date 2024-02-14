@@ -1322,7 +1322,7 @@ func TestHandleAddressPUT(t *testing.T) {
 	input1 := api.AddressUpdateInput{
 		AddressID: "65c3f9c52dd8587a26714756",
 		Changes: api.AddressUpdate{
-			NewStreet: "101 Wizard Avenue",
+			NewStreet: "105 Wizard Avenue",
 		},
 	}
 	jsonData1, err := json.Marshal(input1)
@@ -1334,9 +1334,9 @@ func TestHandleAddressPUT(t *testing.T) {
 	input2 := api.AddressUpdateInput{
 		AddressID: "65c3f9c52dd8587a26714756",
 		Changes: api.AddressUpdate{
-			NewZipCode: "90491",
-			NewCity:    "Boston",
-			NewState:   "MA",
+			NewZipCode: "02907",
+			NewCity:    "Providence",
+			NewState:   "RI",
 		},
 	}
 	jsonData2, err := json.Marshal(input2)
@@ -1345,7 +1345,10 @@ func TestHandleAddressPUT(t *testing.T) {
 	}
 
 	// empty input
-	input3 := api.AddressUpdateInput{}
+	input3 := api.AddressUpdateInput{
+		AddressID: "65c3f9c52dd8587a26714756",
+		Changes:   api.AddressUpdate{},
+	}
 	jsonData3, err := json.Marshal(input3)
 	if err != nil {
 		t.Fatal("Failed to marshal test input1")
@@ -1397,12 +1400,11 @@ func TestHandleAddressPUT(t *testing.T) {
 			code := w.Code
 			resMsg := strings.TrimSpace(w.Body.String())
 
-			if code != tc.expectedStatusCode {
-				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, code)
-			}
-
 			if resMsg != tc.expectedMsg {
 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, resMsg)
+			}
+			if code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, code)
 			}
 
 			/*------------compare with DB--------------*/
@@ -1426,21 +1428,27 @@ func TestHandleAddressPUT(t *testing.T) {
 				field := inputKey.Field(i)
 				value := inputValue.Field(i)
 
+				// find the changed value in the DB to confirm changes
 				if !value.IsZero() {
-					var addressInDB api.ShippingAddress
+					// remove "New" and transform to lower to match field name in DB
+					cleanedStr1 := strings.Replace(field.Name, "New", "", 1)
+
+					/*
+						only transform the first uppercase char after removing "new"
+						to lower case to maintain camel case
+
+						NewZipCode -> ZipCode -> zipCode
+						NewStreet -> Street -> street
+					*/
+					field.Name = strings.ToLower(string(cleanedStr1[0])) + cleanedStr1[1:]
+
 					id, _ := primitive.ObjectIDFromHex(inputChanges.AddressID)
-					err := shippingAddrCollection.FindOne(
+					res := shippingAddrCollection.FindOne(
 						context.Background(),
-						bson.M{"_id": id},
-						options.FindOne().SetProjection(bson.M{field.Name: 1}),
-					).Decode(&addressInDB)
-
-					if err != nil {
-						t.Fatal("Failed to find document with addressID")
-					}
-
-					if addressInDB.Street != value.String() {
-						t.Fatalf("Expected change: %s, got: %s\n", value, addressInDB.Street)
+						bson.M{"_id": id, field.Name: value.String()},
+					)
+					if res.Err() != nil {
+						t.Fatal("Failed to find document; failed to confirm changes")
 					}
 				}
 			}
