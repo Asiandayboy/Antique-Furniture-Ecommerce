@@ -1457,8 +1457,6 @@ func TestHandleAddressPUT(t *testing.T) {
 	}
 }
 
-/*
- */
 func TestHandleAddressDELETE(t *testing.T) {
 	db.Init()
 	defer db.Close()
@@ -1537,6 +1535,20 @@ func TestHandleAddressDELETE(t *testing.T) {
 			})
 			w := httptest.NewRecorder()
 
+			/*
+				Ensure mock document was inserted for valid request tests
+			*/
+			id, _ := primitive.ObjectIDFromHex(tc.shippAddrID)
+			if tc.expectedMsg == "success" {
+				res := shippingAddrColl.FindOne(
+					context.Background(),
+					bson.M{"_id": id},
+				)
+				if res.Err() != nil {
+					t.Fatal("Document did not get insert into DB properly")
+				}
+			}
+
 			server.Mux.ServeHTTP(w, r)
 
 			if w.Code != tc.expectedStatusCode {
@@ -1548,6 +1560,18 @@ func TestHandleAddressDELETE(t *testing.T) {
 				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, resMsg)
 			}
 
+			/*------------check to verify document was deleted-----------*/
+
+			if w.Code == http.StatusOK && resMsg == "success" {
+				res := shippingAddrColl.FindOne(
+					context.Background(),
+					bson.M{"_id": id},
+				)
+
+				if res.Err() != mongo.ErrNoDocuments {
+					t.Fatal("Documented not deleted")
+				}
+			}
 		})
 	}
 }
