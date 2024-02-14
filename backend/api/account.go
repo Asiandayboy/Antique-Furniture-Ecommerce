@@ -138,11 +138,37 @@ func (s *Server) HandleAccountPUT(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-// Used to retrieve addresses
+// Used to retrieve all of the user's addresses
 func (s *Server) HandleAddressGET(w http.ResponseWriter, r *http.Request) {
 	log.Println("\x1b[35mENDPOINT HIT -> /account/address GET\x1b[0m")
 
-	http.Error(w, "test", http.StatusInternalServerError)
+	session := r.Context().Value(SessionKey).(*Session)
+
+	shippingAddrColl := db.GetCollection("shippingAddresses")
+	cursor, err := shippingAddrColl.Find(
+		context.Background(),
+		bson.M{"userid": session.Store["userid"]},
+	)
+	if err != nil {
+		http.Error(w, "Failed to fetch shipping addresses", http.StatusInternalServerError)
+		return
+	}
+
+	var documents []types.ShippingAddress
+	err = cursor.All(context.Background(), &documents)
+	if err != nil {
+		http.Error(w, "Failed to cursor.All", http.StatusInternalServerError)
+		return
+	}
+
+	json, err := json.Marshal(documents)
+	if err != nil {
+		http.Error(w, "Failed to encode into JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
 }
 
 // Used to create a new address

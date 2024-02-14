@@ -25,7 +25,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func trimSpaceAndNewline(s string) string {
@@ -1147,18 +1146,18 @@ func TestHandleAddressGET(t *testing.T) {
 	session1.Store["userid"] = userID1
 
 	// generating expected msg
-	var expectedAddresses1 types.ShippingAddress
-	usersCollection := db.GetCollection("users")
-	err = usersCollection.FindOne(
+	var expectedAddresses1 []types.ShippingAddress
+	usersCollection := db.GetCollection("shippingAddresses")
+	cursor, err := usersCollection.Find(
 		context.Background(),
-		bson.M{"_id": userID1},
-		options.FindOne().SetProjection(bson.M{
-			"shippingAddress": 1,
-		}),
-	).Decode(&expectedAddresses1)
-
+		bson.M{"userid": userID1},
+	)
 	if err != nil {
-		t.Fatalf("Failed to get expected addresses: %s\n", err.Error())
+		t.Fatal("Failed to find documents")
+	}
+	err = cursor.All(context.Background(), &expectedAddresses1)
+	if err != nil {
+		t.Fatal(err.Error())
 	}
 
 	jsonData1, err := json.Marshal(expectedAddresses1)
@@ -1176,11 +1175,17 @@ func TestHandleAddressGET(t *testing.T) {
 		expectedStatusCode int
 		expectedMsg        string
 	}{
-		{
+		{ // valid
 			name:               "Test 1",
 			sessionID:          session1.SessionID,
 			expectedStatusCode: http.StatusOK,
 			expectedMsg:        expectedMsg1,
+		},
+		{ // unauthorized
+			name:               "Test 2",
+			sessionID:          "notloggedin",
+			expectedStatusCode: http.StatusUnauthorized,
+			expectedMsg:        api.ErrUnauthorized,
 		},
 	}
 
@@ -1295,7 +1300,7 @@ func TestHandleAddressPOST(t *testing.T) {
 
 /*
 Be sure to change all the inputs to something different
-every time you run this test.
+every time you run this test if you want to see the changes
 
 The AddressID should stay the same to make this test
 simpler by just checking for changes in the same document
