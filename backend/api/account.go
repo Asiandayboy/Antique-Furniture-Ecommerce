@@ -220,6 +220,32 @@ func (s *Server) HandleAddressPUT(w http.ResponseWriter, r *http.Request) {
 // Used to delete an address
 func (s *Server) HandleAddressDELETE(w http.ResponseWriter, r *http.Request) {
 	log.Println("\x1b[35mENDPOINT HIT -> /account/address DELETE\x1b[0m")
-	http.Error(w, "test", http.StatusInternalServerError)
+
+	session := r.Context().Value(SessionKey).(*Session)
+
+	var addressID string = r.PathValue("addressID")
+
+	objID, err := primitive.ObjectIDFromHex(addressID)
+	if err != nil {
+		http.Error(w, primitive.ErrInvalidHex.Error(), http.StatusBadRequest)
+		return
+	}
+
+	shippingAddrColl := db.GetCollection("shippingAddresses")
+	res, err := shippingAddrColl.DeleteOne(
+		context.Background(),
+		bson.M{"_id": objID, "userid": session.Store["userid"]},
+	)
+	if err != nil {
+		http.Error(w, "Failed to delete document", http.StatusInternalServerError)
+		return
+	}
+	if res.DeletedCount == 0 {
+		http.Error(w, "Could not find document with ID", http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
 
 }

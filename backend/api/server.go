@@ -60,7 +60,7 @@ func (s *Server) Start() {
 	s.Use("GET /account/address", s.HandleAddressGET, AuthMiddleware)
 	s.Use("POST /account/address", s.HandleAddressPOST, AuthMiddleware)
 	s.Use("PUT /account/address", s.HandleAddressPUT, AuthMiddleware)
-	s.Use("DELETE /account/address", s.HandleAddressDELETE, AuthMiddleware)
+	s.Use("DELETE /account/address/{addressID}", s.HandleAddressDELETE, AuthMiddleware)
 
 	s.Use("POST /checkout", s.HandleCheckout, AuthMiddleware)
 

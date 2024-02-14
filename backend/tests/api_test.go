@@ -1456,3 +1456,98 @@ func TestHandleAddressPUT(t *testing.T) {
 		})
 	}
 }
+
+/*
+ */
+func TestHandleAddressDELETE(t *testing.T) {
+	db.Init()
+	defer db.Close()
+	sessionManager := api.GetSessionManager()
+	/*-----------Fake logged in user 1-------------*/
+
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to create session for testuser1")
+	}
+	userID1, _ := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	session1.Store["userid"] = userID1
+
+	/*----------------------tests--------------------*/
+
+	// create a dummy address document to delete
+	shippingAddrColl := db.GetCollection("shippingAddresses")
+	mockAddr := types.ShippingAddress{
+		UserID:  userID1,
+		State:   "RI",
+		City:    "Providence",
+		Street:  "111 Urmom Avenue",
+		ZipCode: "02905",
+		Default: false,
+	}
+	res, err := shippingAddrColl.InsertOne(context.Background(), mockAddr)
+	if err != nil {
+		t.Fatal("Failed to insert mock document")
+	}
+
+	tests := []struct {
+		name               string
+		sessionID          string
+		method             string
+		shippAddrID        string
+		expectedStatusCode int
+		expectedMsg        string
+	}{
+		{ // valid
+			name:               "Test 1",
+			sessionID:          session1.SessionID,
+			method:             "DELETE",
+			shippAddrID:        res.InsertedID.(primitive.ObjectID).Hex(),
+			expectedStatusCode: http.StatusOK,
+			expectedMsg:        "success",
+		},
+		{ // invalid ID
+			name:               "Test 2",
+			sessionID:          session1.SessionID,
+			method:             "DELETE",
+			shippAddrID:        "testing-testing",
+			expectedStatusCode: http.StatusBadRequest,
+			expectedMsg:        primitive.ErrInvalidHex.Error(),
+		},
+		{ // method not allowed
+			name:               "Test 3",
+			sessionID:          session1.SessionID,
+			method:             "POST",
+			shippAddrID:        "testing-testing",
+			expectedStatusCode: http.StatusMethodNotAllowed,
+			expectedMsg:        api.ErrMethodNotAllowed,
+		},
+	}
+
+	server := api.NewServer(":3000")
+	server.Use("DELETE /account/address/{addressID}", server.HandleAddressDELETE, api.AuthMiddleware)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			target := fmt.Sprintf("/account/address/%s", tc.shippAddrID)
+			r := httptest.NewRequest(tc.method, target, nil)
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionID,
+			})
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatusCode {
+				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+			}
+
+			resMsg := strings.TrimSpace(w.Body.String())
+			if tc.expectedMsg != resMsg {
+				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMsg, resMsg)
+			}
+
+		})
+	}
+}
