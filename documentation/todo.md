@@ -96,6 +96,11 @@ any large amounts of data besides the images. Ur fine. Just do it
 As of go version 1.22, there is now enhanced routing patterns and wildcards
 - don't need the custom method middleware anymore
 
+2/14
+- committed test/impl address GET
+- committed test/impl address DELETE
+- committed test/impl address PUT
+
 
 
 # ENDPOINTS
