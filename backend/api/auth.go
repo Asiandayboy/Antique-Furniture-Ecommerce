@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -70,6 +71,14 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//set balance to 0
+	balance, err := primitive.ParseDecimal128("0")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	signupInfo.Balance = balance
+
 	// create new session before saving info to database
 	sessionManager := GetSessionManager()
 	session, err := sessionManager.CreateSession(SessionTemplate{SessionID: ""})
@@ -97,6 +106,7 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	/*
 		On the frontend, the client should be redirected to the login page
 	*/
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("success"))
 }
 

@@ -11,11 +11,11 @@ Type used to save into users collections and to
 represent client signup and login info, and account info
 */
 type User struct {
-	UserID      primitive.ObjectID   `bson:"_id"`
+	UserID      primitive.ObjectID   `bson:"_id,omitempty"`
 	Username    string               `bson:"username" json:"username"`
 	Email       string               `bson:"email" json:"email"`
 	Password    string               `bson:"password" json:"password"`
-	ConfirmPass string               `json:"confirm"`
+	ConfirmPass string               `bson:"-" json:"confirm"`
 	Phone       string               `bson:"phone" json:"phone"`
 	SessionID   string               `bson:"sessionid"`
 	Balance     primitive.Decimal128 `bson:"balance" json:"balance"` // The amount of money from sales in the user's account
@@ -25,7 +25,7 @@ type User struct {
 Provide a negative number to subtract; positive to add
 Returns the updated balance
 */
-func (u *User) UpdateBalance(amountToAdd float64) float64 {
+func (u *User) UpdateBalance(amountToAdd float64) (updatedBalance float64) {
 	currBalance := util.Decimal128ToFloat64(u.Balance)
 	newTotal := currBalance + amountToAdd
 
