@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/google/uuid v1.5.0
+	github.com/rs/cors v1.10.1
 	github.com/stripe/stripe-go/v76 v76.14.0
 	go.mongodb.org/mongo-driver v1.13.1
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d

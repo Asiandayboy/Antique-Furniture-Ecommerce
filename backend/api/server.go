@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/rs/cors"
 	"github.com/stripe/stripe-go/v76"
 )
 
@@ -92,7 +93,14 @@ func (s *Server) Start() {
 	GetSessionManager()
 
 	log.Printf("\x1b[34mListening on port %s\x1b[0m\n", s.Port)
-	err = s.httpServer.ListenAndServe()
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://127.0.0.1:5173"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+
+	err = http.ListenAndServe(s.Port, c.Handler(s.Mux))
 	if err != nil {
 		log.Fatal("Error starting server:", err)
 	}
