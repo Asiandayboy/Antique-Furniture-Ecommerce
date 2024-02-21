@@ -44,40 +44,54 @@ func TestHandleSignup(t *testing.T) {
 		expectedResMsg     string
 		expectedStatusCode int
 	}{
-		// { // test valid signup; if this test fails, it's bc the payload is already in the db; just delete it and test again
+		// { // test valid signup; if this test fails, it's bc the payload is already in the db; use different data
 		// 	name:               "Test 1",
 		// 	method:             "POST",
-		// 	payload:            `{"username": "testuser1", "password": "testpassword1", "email": "test@gmail.com"}`,
+		// 	payload:            `{"username": "testuser1", "password": "testpassword1", "confirm": "testpassword1", "email": "test@gmail.com"}`,
 		// 	expectedResMsg:     "success",
 		// 	expectedStatusCode: http.StatusOK,
 		// },
 		{ // test invalid method
 			name:               "Test 2",
 			method:             "GET",
-			payload:            `{"username": "testuser1", "password": "testpassword1", "email": "test@gmail.com"}`,
+			payload:            `{"username": "testuser1", "password": "testpassword1", "confirm": "testpassword1", "email": "test@gmail.com"}`,
 			expectedResMsg:     api.ErrMethodNotAllowed,
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // testing invalid json decode
 			name:               "Test 3",
 			method:             "POST",
-			payload:            `{"username": "testuser1", "password": "testpassword1, "email": "test@gmail.com"}`,
+			payload:            `{"username": "testuser1", "password": "testpassword1, "confirm": "testpassword1", "email": "test@gmail.com"}`,
 			expectedResMsg:     "Could not decode request body into JSON",
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{ // testing username against existing username -> "bob"
 			name:               "Test 4",
 			method:             "POST",
-			payload:            `{"username": "bob", "password": "testpassword1", "email": "test@gmail.com"}`,
+			payload:            `{"username": "bob", "password": "testpassword1", "confirm": "testpassword1", "email": "test@gmail.com"}`,
 			expectedResMsg:     "Username is taken",
 			expectedStatusCode: http.StatusConflict,
 		},
 		{ // testing email against existing email -> "johnsmith@gmail.com"
 			name:               "Test 5",
 			method:             "POST",
-			payload:            `{"username": "testuser123", "password": "testpassword1", "email": "johnsmith@gmail.com"}`,
+			payload:            `{"username": "testuser123", "password": "testpassword1", "confirm": "testpassword1", "email": "johnsmith@gmail.com"}`,
 			expectedResMsg:     "Email is taken",
 			expectedStatusCode: http.StatusConflict,
+		},
+		{ // testing password mismatch
+			name:               "Test 6",
+			method:             "POST",
+			payload:            `{"username": "testuser123", "password": "password", "confirm": "testpassword1", "email": "johnsmith@gmail.com"}`,
+			expectedResMsg:     api.ErrPasswordMismatch,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{ // testing empty fields
+			name:               "Test 7",
+			method:             "POST",
+			payload:            `{"username": "testuser123", "password": "password"}`,
+			expectedResMsg:     api.ErrBlankFields,
+			expectedStatusCode: http.StatusBadRequest,
 		},
 	}
 

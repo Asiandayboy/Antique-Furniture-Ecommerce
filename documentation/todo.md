@@ -101,6 +101,9 @@ As of go version 1.22, there is now enhanced routing patterns and wildcards
 - committed test/impl address DELETE
 - committed test/impl address PUT
 
+2/20
+- need to add confirmPass check in auth.go
+
 
 
 # ENDPOINTS

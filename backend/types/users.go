@@ -11,13 +11,14 @@ Type used to save into users collections and to
 represent client signup and login info, and account info
 */
 type User struct {
-	UserID    primitive.ObjectID   `bson:"_id"`
-	Username  string               `bson:"username" json:"username"`
-	Password  string               `bson:"password" json:"password"`
-	Email     string               `bson:"email" json:"email"`
-	Phone     string               `bson:"phone" json:"phone"`
-	SessionID string               `bson:"sessionid"`
-	Balance   primitive.Decimal128 `bson:"balance" json:"balance"` // The amount of money from sales in the user's account
+	UserID      primitive.ObjectID   `bson:"_id"`
+	Username    string               `bson:"username" json:"username"`
+	Email       string               `bson:"email" json:"email"`
+	Password    string               `bson:"password" json:"password"`
+	ConfirmPass string               `json:"confirm"`
+	Phone       string               `bson:"phone" json:"phone"`
+	SessionID   string               `bson:"sessionid"`
+	Balance     primitive.Decimal128 `bson:"balance" json:"balance"` // The amount of money from sales in the user's account
 }
 
 /*

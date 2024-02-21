@@ -11,22 +11,50 @@ import (
 )
 
 const (
-	// Authentication failed; session not found
-	ErrUnauthorized = "Session not found; you must be logged in"
-	// Invalid login credentials
-	ErrInvalidLogin  = "Invalid login"
-	ErrUsernameTaken = "Username is taken"
-	ErrEmailTaken    = "Email is taken"
-	// New account failed to save into DB
-	ErrSignupSave = "Failed to save user account"
+	ErrUnauthorized     = "Session not found; you must be logged in" // Authentication failed
+	ErrInvalidLogin     = "Invalid login"                            // Invalid login credentials
+	ErrUsernameTaken    = "Username is taken"
+	ErrEmailTaken       = "Email is taken"
+	ErrSignupSave       = "Failed to save user account" // New account failed to save into DB
+	ErrPasswordMismatch = "Passwords do not match"
+	ErrBlankFields      = "One or more fields are blank!"
 )
 
+func arePasswordsSame(signupInfo types.User) bool {
+	return signupInfo.Password == signupInfo.ConfirmPass
+}
+
+// Returns true if any of the signup form fields are blank, else returns false
+func signupFieldsBlank(signupInfo types.User) bool {
+	if signupInfo.Username == "" ||
+		signupInfo.Email == "" ||
+		signupInfo.Password == "" ||
+		signupInfo.ConfirmPass == "" {
+		return true
+	}
+
+	return false
+}
+
+/*
+TODO: add confirm password check 2/20
+*/
 func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	// read json
 	var signupInfo types.User
 	err := util.ReadJSONReq[types.User](r, &signupInfo)
 	if err != nil {
 		http.Error(w, "Could not decode request body into JSON", http.StatusBadRequest)
+		return
+	}
+
+	if signupFieldsBlank(signupInfo) {
+		http.Error(w, ErrBlankFields, http.StatusBadRequest)
+		return
+	}
+
+	if !arePasswordsSame(signupInfo) {
+		http.Error(w, ErrPasswordMismatch, http.StatusBadRequest)
 		return
 	}
 
