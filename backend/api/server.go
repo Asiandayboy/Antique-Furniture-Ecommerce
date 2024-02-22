@@ -48,20 +48,20 @@ Starts the server to begin listening for requests
 */
 func (s *Server) Start() {
 	s.Mux.HandleFunc("/", s.HandleRoot)
-	s.Use("POST /login", s.HandleLogin)
-	s.Use("POST /signup", s.HandleSignup)
-	s.Use("POST /logout", s.HandleLogout, AuthMiddleware)
+	s.Use("POST /login", s.HandleLogin, logEndpointHit)
+	s.Use("POST /signup", s.HandleSignup, logEndpointHit)
+	s.Use("POST /logout", s.HandleLogout, AuthMiddleware, logEndpointHit)
 
-	s.Use("POST /list_furniture", s.HandleListFurniture, AuthMiddleware)
-	s.Use("GET /get_furnitures", s.HandleGetFurnitures)
-	s.Use("GET /get_furniture", s.HandleGetFurniture)
+	s.Use("POST /list_furniture", s.HandleListFurniture, AuthMiddleware, logEndpointHit)
+	s.Use("GET /get_furnitures", s.HandleGetFurnitures, logEndpointHit)
+	s.Use("GET /get_furniture", s.HandleGetFurniture, logEndpointHit)
 
-	s.Use("GET /account", s.HandleAccountGET, AuthMiddleware)
-	s.Use("PUT /account", s.HandleAccountPUT, AuthMiddleware)
-	s.Use("GET /account/address", s.HandleAddressGET, AuthMiddleware)
-	s.Use("POST /account/address", s.HandleAddressPOST, AuthMiddleware)
-	s.Use("PUT /account/address", s.HandleAddressPUT, AuthMiddleware)
-	s.Use("DELETE /account/address/{addressID}", s.HandleAddressDELETE, AuthMiddleware)
+	s.Use("GET /account", s.HandleAccountGET, AuthMiddleware, logEndpointHit)
+	s.Use("PUT /account", s.HandleAccountPUT, AuthMiddleware, logEndpointHit)
+	s.Use("GET /account/address", s.HandleAddressGET, AuthMiddleware, logEndpointHit)
+	s.Use("POST /account/address", s.HandleAddressPOST, AuthMiddleware, logEndpointHit)
+	s.Use("PUT /account/address", s.HandleAddressPUT, AuthMiddleware, logEndpointHit)
+	s.Use("DELETE /account/address/{addressID}", s.HandleAddressDELETE, AuthMiddleware, logEndpointHit)
 
 	s.Use("POST /checkout", s.HandleCheckout, AuthMiddleware)
 
@@ -130,4 +130,19 @@ func (s *Server) Use(
 	}
 
 	s.Mux.HandleFunc(pattern, handler)
+}
+
+/*
+A middleware which logs when an endpoint was hit
+*/
+func logEndpointHit(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		url := r.URL.Path
+		method := r.Method
+
+		// format example: ENDPOINT HIT -> GET /account
+		log.Printf("\x1b[35mENDPOINT HIT -> %s %s\x1b[0m\n", method, url)
+
+		next.ServeHTTP(w, r)
+	}
 }

@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -63,8 +62,6 @@ type AddressUpdateInput struct {
 Retrieve account information
 */
 func (s *Server) HandleAccountGET(w http.ResponseWriter, r *http.Request) {
-	log.Println("\x1b[35mENDPOINT HIT -> /account GET\x1b[0m")
-
 	session := r.Context().Value(SessionKey).(*Session)
 
 	var userInfo types.User
@@ -97,8 +94,6 @@ func (s *Server) HandleAccountGET(w http.ResponseWriter, r *http.Request) {
 Update current account information
 */
 func (s *Server) HandleAccountPUT(w http.ResponseWriter, r *http.Request) {
-	log.Println("\x1b[35mENDPOINT HIT -> /account PUT\x1b[0m")
-
 	var changes AccountEdit
 	if err := util.ReadJSONReq[AccountEdit](r, &changes); err != nil {
 		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
@@ -140,8 +135,6 @@ func (s *Server) HandleAccountPUT(w http.ResponseWriter, r *http.Request) {
 
 // Used to retrieve all of the user's addresses
 func (s *Server) HandleAddressGET(w http.ResponseWriter, r *http.Request) {
-	log.Println("\x1b[35mENDPOINT HIT -> /account/address GET\x1b[0m")
-
 	session := r.Context().Value(SessionKey).(*Session)
 
 	shippingAddrColl := db.GetCollection("shippingAddresses")
@@ -173,8 +166,6 @@ func (s *Server) HandleAddressGET(w http.ResponseWriter, r *http.Request) {
 
 // Used to create a new address
 func (s *Server) HandleAddressPOST(w http.ResponseWriter, r *http.Request) {
-	log.Println("\x1b[35mENDPOINT HIT -> /account/address POST\x1b[0m")
-
 	var address types.ShippingAddress
 	err := util.ReadJSONReq[types.ShippingAddress](r, &address)
 	if err != nil {
@@ -200,8 +191,6 @@ func (s *Server) HandleAddressPOST(w http.ResponseWriter, r *http.Request) {
 
 // Used to edit and update an existing address
 func (s *Server) HandleAddressPUT(w http.ResponseWriter, r *http.Request) {
-	log.Println("\x1b[35mENDPOINT HIT -> /account/address PUT\x1b[0m")
-
 	var changes AddressUpdateInput
 	err := util.ReadJSONReq[AddressUpdateInput](r, &changes)
 	if err != nil {
@@ -245,8 +234,6 @@ func (s *Server) HandleAddressPUT(w http.ResponseWriter, r *http.Request) {
 
 // Used to delete an address
 func (s *Server) HandleAddressDELETE(w http.ResponseWriter, r *http.Request) {
-	log.Println("\x1b[35mENDPOINT HIT -> /account/address DELETE\x1b[0m")
-
 	session := r.Context().Value(SessionKey).(*Session)
 
 	var addressID string = r.PathValue("addressID")
