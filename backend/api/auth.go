@@ -163,6 +163,7 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	cookie := http.Cookie{
 		Name:     SESSIONID_COOKIE_NAME,
 		Value:    session.SessionID,
+		MaxAge:   86400,
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
