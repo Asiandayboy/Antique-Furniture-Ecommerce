@@ -1,8 +1,10 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -64,7 +66,8 @@ Creates a new session and adds it to the map of currently running sessions.
 - Provide a template with a string to create a session with that string as the sessionID.
 This will error if another session with that ID already exists
 
-This method will return an error if an error occurs when generating a new sessionId.
+This method will return an error if an error occurs when generating a new sessionId
+or if a session is already found (account is already logged in).
 */
 func (s *SessionManager) CreateSession(template SessionTemplate) (*Session, error) {
 	var session *Session
@@ -133,6 +136,24 @@ func (s *SessionManager) GetSessionID(r *http.Request) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
+}
+
+/*
+Returns true if the sessionID cookie is expired or not found, else returns false
+*/
+func (s *SessionManager) IsSessionExpired(r *http.Request) bool {
+	cookie, err := r.Cookie(SESSIONID_COOKIE_NAME)
+	if err != nil {
+		return true
+	}
+
+	fmt.Println("cookie found:", cookie.Value)
+
+	if cookie.Expires.Before(time.Now()) {
+		return false
+	} else {
+		return true
+	}
 }
 
 /*

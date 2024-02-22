@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -89,6 +90,9 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	signupInfo.SessionID = session.SessionID
 
+	// delete session since we don't want to store the session in memory yet
+	sessionManager.DeleteSession(session.SessionID)
+
 	// hash password
 	hashedPassword, err := util.HashPassword(signupInfo.Password)
 	if err != nil {
@@ -110,6 +114,8 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("success"))
 }
+
+const CookieExpiration = 30 // 30 minutes
 
 func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	// read json
@@ -153,30 +159,57 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// save appropriate session data to session store
 	sessionManager := GetSessionManager()
-	session, exists := sessionManager.GetSession(userResult.SessionID)
-	if !exists {
-		// create new session
+	sessionExpired := sessionManager.IsSessionExpired(r)
+
+	var session *Session
+
+	if sessionExpired {
+		// generate a new sessionID
 		session, err = sessionManager.CreateSession(SessionTemplate{SessionID: ""})
 		if err != nil {
-			http.Error(w, "Failed to create session", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("new session created:", session.SessionID)
+
+		_, err = usersCollection.UpdateByID(
+			context.Background(),
+			userResult.UserID,
+			bson.M{"$set": bson.M{"sessionid": session.SessionID}},
+		)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("New session created:", session.SessionID)
+
+		// generate cookie
+		expiration := time.Now().Add(CookieExpiration * time.Minute)
+		cookie := http.Cookie{
+			Name:     SESSIONID_COOKIE_NAME,
+			Value:    session.SessionID,
+			Path:     "http://127.0.0.1:1573",
+			Expires:  expiration,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+		}
+
+		http.SetCookie(w, &cookie)
+	} else {
+		// Client has sessionID cookie already stored in DB and it's not expired
+		session, err = sessionManager.CreateSession(SessionTemplate{
+			SessionID: userResult.SessionID,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("Existing session found:", userResult.SessionID)
 	}
+
 	session.Store["username"] = userResult.Username
 	session.Store["userid"] = userResult.UserID
 
-	// send back response with cookie
-	cookie := http.Cookie{
-		Name:     SESSIONID_COOKIE_NAME,
-		Value:    session.SessionID,
-		MaxAge:   86400,
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-	}
-
-	http.SetCookie(w, &cookie)
 	w.Write([]byte("success"))
 }
 
