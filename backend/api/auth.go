@@ -5,6 +5,7 @@ import (
 	"backend/types"
 	"backend/util"
 	"context"
+	"fmt"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -153,19 +154,21 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to create session", http.StatusInternalServerError)
 			return
 		}
+		fmt.Println("new session created:", session.SessionID)
 	}
 	session.Store["username"] = userResult.Username
 	session.Store["userid"] = userResult.UserID
 
 	// send back response with cookie
 	cookie := http.Cookie{
-		Name:  SESSIONID_COOKIE_NAME,
-		Value: session.SessionID,
-		Path:  "/",
+		Name:     SESSIONID_COOKIE_NAME,
+		Value:    session.SessionID,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 	}
 
 	http.SetCookie(w, &cookie)
-
 	w.Write([]byte("success"))
 }
 
