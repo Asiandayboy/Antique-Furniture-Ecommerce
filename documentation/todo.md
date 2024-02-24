@@ -133,3 +133,18 @@ FRONTEND
 - conditionally render navbar links [DONE]
 - use some sort of react context to pass auth prop down component tree [DONE]
 - build fundamenetal design of dashboard
+
+
+
+# Planned
+=========
+- CSS styles for login and signup
+- CSS styles for navbar
+- CSS styles for dashboard
+- populate dashboard with user data
+- populate market with user data
+- create component for listing furniture
+- email subscription notification for new listings
+  - backend: write logic
+  - frontend: create button with CSS styles on market page
+
