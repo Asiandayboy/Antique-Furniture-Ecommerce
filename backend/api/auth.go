@@ -150,13 +150,6 @@ func (s *Server) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*	--TODO--> 2/22
-
-		Edit signup and login handlers to maintain and save
-		the sessionID appropriately
-
-	*/
-
 	// save appropriate session data to session store
 	sessionManager := GetSessionManager()
 	sessionExpired := sessionManager.IsSessionExpired(r)

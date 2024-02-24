@@ -106,6 +106,8 @@ As of go version 1.22, there is now enhanced routing patterns and wildcards
 
 
 
+
+
 # ENDPOINTS
 ===========
 /login                            **DONE**
@@ -118,3 +120,16 @@ As of go version 1.22, there is now enhanced routing patterns and wildcards
 /account?userid={id}              **DONE**[i think?]
 
 
+
+FRONTEND
+
+
+
+2/21
+- session management could use some work cuz it's kinda stupid rn [DONE]
+- delete session id cookie when /logout is hit [DONE]
+
+2/22
+- conditionally render navbar links [DONE]
+- use some sort of react context to pass auth prop down component tree [DONE]
+- build fundamenetal design of dashboard
