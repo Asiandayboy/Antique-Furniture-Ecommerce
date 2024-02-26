@@ -103,3 +103,81 @@ nav {
   }
 
 }
+
+.market_wrapper {
+  background-color: tomato;
+
+
+
+  .market-filter_wrapper {
+    border: 2px solid black;
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 2em;
+    background-color: wheat;
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+
+    .filters_wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: .5em;
+
+      width: fit-content;
+      margin: 0 auto;
+
+      .select_filters {
+        display: flex;
+        gap: 1em;
+      }
+
+      .price-range_filter {
+        width: 100%;
+
+        
+        > div {
+          display: flex;
+          gap: 1em;
+          /* justify-content: center; */
+
+          .price-ranges >* {
+            display: flex;
+          }
+        }
+      }
+    }
+
+    .search-bar {
+      display: flex;
+
+      border: 1px solid black;
+
+      label {
+        width: 15%;
+      }
+
+      div {
+        background-color: tomato;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+
+        input {
+          width: 100%;
+          outline: none;
+        }
+        
+        button {
+          width: 10%;
+        }
+      }
+
+    }
+  }
+
+  
+
+}
