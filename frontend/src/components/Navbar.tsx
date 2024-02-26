@@ -53,31 +53,34 @@ export default function Navbar({  }: Props) {
   return (
     <nav>
       <ol>
-        <li>
+        <li className="nav-1">
           <Link to="/">Home</Link>
         </li>
-        <li>
-          <Link to="/market">Market</Link>
-        </li>
-        {!authState.auth &&
-          <>
-            <li>
-              <Link to="/login">Login</Link>
-            </li>
-            <li>
-              <Link to="/signup">Signup</Link>
-            </li>
-          </>
-          ||
-          <>
-            <li>
-              <button onClick={onLogoutClick}>Logout</button>
-            </li>
-            <li>
-              <Link to="/dashboard">Dashboard</Link>
-            </li>
-          </>
-        }
+        <div className="nav-2">
+          <li>
+            <Link to="/market">Market</Link>
+          </li>
+          {!authState.auth &&
+            <>
+              <li>
+                <Link to="/login">Login</Link>
+              </li>
+              <li className="signup-link">
+                <button><Link to="/signup">Signup</Link></button>
+              </li>
+            </>
+            ||
+            <>
+              <li>
+                <button onClick={onLogoutClick}>Logout</button>
+              </li>
+              <li>
+                <Link to="/dashboard">Account</Link>
+              </li>
+            </>
+          }
+          <li>Cart (0)</li>
+        </div>
       </ol>
     </nav>
   )
