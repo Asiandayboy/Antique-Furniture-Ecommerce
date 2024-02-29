@@ -16,7 +16,7 @@ export default function Navbar({  }: Props) {
 
   const authState = useAuthContext()
 
-  async function onLogoutClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+  async function onLogoutClick(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     try {
       const res = await fetch("http://localhost:3000/logout", {
         method: "POST",
@@ -72,10 +72,19 @@ export default function Navbar({  }: Props) {
             ||
             <>
               <li>
-                <button onClick={onLogoutClick}>Logout</button>
-              </li>
-              <li>
-                <Link to="/dashboard">Account</Link>
+                <div className="acc-dropdown">
+                  <Link className="acc-dropdown_btn" to="/dashboard">Account</Link>
+                  <div className="acc-dropdown-content">
+                    <div className="acc-balance">Balance: $100.000</div>
+                    <Link to="/dashboard">Account</Link>
+                    <Link to="/dashboard/purchase-history">Purchase History</Link>
+                    <Link to="/dashboard/furniture-listings">Furniture Listings</Link>
+                    <Link to="/dashboard/addresses">My Addresses</Link>
+                    <Link to="" onClick={
+                      (e) => onLogoutClick(e)
+                    } className="logout-link">Logout</Link>
+                  </div>
+                </div>
               </li>
             </>
           }
