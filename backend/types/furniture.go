@@ -62,7 +62,7 @@ This type represents a furniture listing with all
 appropriate form details about the furniture
 */
 type FurnitureListing struct {
-	ListingID   primitive.ObjectID `bson:"_id,omitempty"`
+	ListingID   primitive.ObjectID `bson:"_id,omitempty" json:"listingID"`
 	Title       string             `bson:"title" json:"title"`
 	Description string             `bson:"description" json:"description"`
 	Cost        float64            `bson:"cost" json:"cost"`
@@ -71,6 +71,6 @@ type FurnitureListing struct {
 	Condition   FurnitureCondition `bson:"condition" json:"condition"`
 	Material    FurnitureMaterial  `bson:"material" json:"material"`
 	Images      [][]byte           `bson:"images" json:"images"` // images are stored as an array of byte slices
-	UserID      primitive.ObjectID `bson:"userid"`               // UserID of the client who created the listing; the owner of the post; the seller
-	Bought      bool               `bson:"bought" json:"bought"` // this filed will be used to not render the items that have already been bought
+	UserID      primitive.ObjectID `bson:"userid" json:"userID"` // UserID of the client who created the listing; the owner of the post; the seller
+	Bought      bool               `bson:"bought" json:"bought"` // this field will be used to not render the items that have already been bought
 }
