@@ -9,6 +9,9 @@ import SignupSuccess from './pages/SignupSuccess';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import { AuthContext } from './contexts/authContext';
+import PurchaseHistory from './pages/PurchaseHistory';
+import FurnitureListings from './pages/FurnitureListings';
+import MyAddresses from './pages/MyAddresses';
 
 
 
@@ -17,7 +20,6 @@ function App() {
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn")
-    console.log("localstorage:", loggedIn)
 
     if (loggedIn == "true") {
       setIsLoggedIn(true)
@@ -37,6 +39,7 @@ function App() {
           {/* public routes */}
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
           <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
+          <Route path="/checkout" />
 
           {/* Routes only accessible when logged out */}
           <Route element={<ProtectedRoutes auth={!isLoggedIn} redirect='/dashboard' />}>
@@ -48,6 +51,9 @@ function App() {
           {/* Routes only accessible when logged in */}
           <Route element={<ProtectedRoutes auth={isLoggedIn} redirect='/login' />}>
             <Route path='/dashboard' element={<Dashboard />} />
+            <Route path='/dashboard/purchase-history' element={<PurchaseHistory />} />
+            <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
+            <Route path='/dashboard/addresses' element={<MyAddresses />} />
           </Route>
         </Routes>
       </BrowserRouter>
