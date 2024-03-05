@@ -139,7 +139,7 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
         flag = categories.material.some(word => listing.material.toLowerCase().includes(word))
       }
 
-      if (listing.type.toLowerCase() == "bed" && categories.bedSize.length > 0) {
+      if (categories.bedSize.length > 0) {
         flag = categories.bedSize.some(word => listing.title.toLowerCase().includes(word))
       }
       
