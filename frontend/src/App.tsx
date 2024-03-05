@@ -24,7 +24,7 @@ function App() {
     if (isLoggedIn) {
       localStorage.setItem("isLoggedIn", "true")
     } else if (!isLoggedIn && loggedIn == "true") {
-      localStorage.setItem("isLoggedIn", "false")
+      setIsLoggedIn(true)
     } else {
       localStorage.setItem("isLoggedIn", "false")
     }

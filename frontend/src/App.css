@@ -255,3 +255,112 @@ nav {
 }
 
 
+.address_wrapper {
+  border: 2px solid rgb(156, 37, 37);
+
+  max-width: min(80%, 800px);
+  margin: 0 auto;
+  padding: 1em;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1em;
+
+  >* {
+    border-radius: 10px;
+    padding: 1em;
+    aspect-ratio: 1;
+  }
+
+  .add-addr_btn {
+    background-color: white;
+    border: 2px dashed rgb(185, 185, 185);
+
+    &:hover {
+      background-color: rgb(228, 228, 228);
+    }
+  }
+
+  div {
+    background-color: orange;
+  }
+}
+
+.address-form_wrapper {
+  padding: 1em;
+  max-width: min(95%, 550px);
+  margin: 5em auto;
+
+  .address-form {
+    /* border: 1px solid black; */
+    border-radius: 10px;
+    padding: 1em;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5em;
+
+    h1 {
+      margin: 0;
+    }
+
+    input {
+      padding: .5em;
+      border-radius: 5px;
+      border: none;
+      outline: 1px dashed grey;
+    }
+
+    input[type="checkbox"] {
+      outline: none;
+      cursor: pointer;
+    }
+
+    button {
+      padding: .75em 1.25em;
+      width: max-content;
+      background-color: white;
+      border: none;
+      outline: 1px dashed grey;
+      border-radius: 10px;
+      transition: .1s linear;
+
+      margin-right: 1em;
+
+      &:hover {
+        background-color: orange;
+        outline: none;
+      }
+    }
+
+
+    .street {
+      width: 100%;
+    }
+
+    .first-fields {
+      display: flex;
+      flex-direction: column;
+      gap: .25em;
+    }
+
+    .second-fields {
+      display: flex;
+      gap: 1em;
+      justify-content: center;
+
+      .city {
+        width: 50%;
+      }
+      .state {
+        width: 25%;
+      }
+      .zip {
+        width: 25%;
+      }
+    }
+
+  }
+}
+
