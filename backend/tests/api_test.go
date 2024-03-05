@@ -324,13 +324,13 @@ func TestHandleListFurniture(t *testing.T) {
 	/*------------------Test Data 1 (valid)-------------------*/
 
 	furnitureListing1 := types.FurnitureListing{
-		Title:       "English Tiger maple queen bed",
-		Description: "My favorite bed",
-		Type:        types.Bed,
-		Cost:        7500,
-		Style:       types.English,
-		Condition:   "Great",
-		Material:    types.TigerMaple,
+		Title:       "Oak nightstand double drawers",
+		Description: "Fit all your personal belongings",
+		Type:        types.Nightstand,
+		Cost:        1000,
+		Style:       types.Federal,
+		Condition:   types.Good,
+		Material:    types.Oak,
 	}
 
 	var requestBody bytes.Buffer
