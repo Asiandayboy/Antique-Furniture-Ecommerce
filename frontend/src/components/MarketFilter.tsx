@@ -4,7 +4,7 @@ import * as FurnitureTypes from "../types/furnitureTypes"
 import { deepEqual } from "../util/obj"
 
 
-const MAX_PRICE_RANGE = 500_000
+const MAX_PRICE_RANGE = 100_000
 
 
 type PriceRange = {
@@ -108,31 +108,43 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
 
   function onSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const searchString = searchQuery.searchString.toLowerCase()
 
-
+    // search all if filters are set to default, including search bar
     if (deepEqual(searchQuery, defaultSearchQuery)) {
       setDataSet(dataSet)
       return
     }
 
-    const words = searchString.split(" ").filter(word => word !== "")
+    const words = searchQuery.searchString
+    .toLowerCase()
+    .split(" ")
+    .filter(word => word !== "")
+    
     const categories = createSearchCategories(words)
 
     console.log(categories)
 
     setDataSet(dataSet.filter((listing) => {
-      let flag = false;
+      let flag = true;
 
-      words.forEach(word => {
-        flag = 
-        listing.title.toLowerCase().includes(word) ||
-        listing.description.toLowerCase().includes(word) ||
-        listing.type.toLowerCase().includes(word) ||
-        listing.style.toLowerCase().includes(word) ||
-        listing.material.toLowerCase().includes(word)
-      })
+      if (categories.type.length > 0) {
+        flag = categories.type.some(word => listing.type.toLowerCase().includes(word))
+      } 
 
+      if (categories.style.length > 0) {
+        flag = categories.style.some(word => listing.style.toLowerCase().includes(word))
+      }
+
+      if (categories.material.length > 0) {
+        flag = categories.material.some(word => listing.material.toLowerCase().includes(word))
+      }
+
+      if (listing.type.toLowerCase() == "bed" && categories.bedSize.length > 0) {
+        flag = categories.bedSize.some(word => listing.title.toLowerCase().includes(word))
+      }
+      
+
+      // match listing attribute with appropriate filter type
       if (searchQuery.type != "All" 
       && listing.type.toLowerCase() != searchQuery.type) {
         return false
@@ -150,6 +162,10 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
 
       if (searchQuery.style != "All" 
       && listing.style.toLowerCase() != searchQuery.style) {
+        return false
+      }
+
+      if (+listing.cost < priceInput.priceMin || +listing.cost > priceInput.priceMax) {
         return false
       }
 
@@ -191,6 +207,8 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
               <option value="cherry">Cherry</option>
               <option value="mahagony">Mahagony</option>
               <option value="maple">Maple</option>
+              <option value="rosewood">Rosewood</option>
+              <option value="birch">Birch</option>
             </select>
           </div>
 
@@ -237,7 +255,10 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
                     setSearchQuery({...searchQuery, priceRange: priceInput})
                   }
                 } type="range" min="0" max={MAX_PRICE_RANGE} value={priceInput.priceMin}/>
-                <div className="price_text">${priceInput.priceMin}</div>
+                {/* <div className="price_text">${priceInput.priceMin}</div> */}
+                <input onChange={(e) => {
+                  setPriceInput({...priceInput, priceMin: +e.currentTarget.value})
+                }} className="price_text" type="text" value={priceInput.priceMin} />
               </div>
               <div>
                 <label htmlFor="">max</label>
@@ -247,7 +268,10 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
                     setSearchQuery({...searchQuery, priceRange: priceInput})
                   }
                 } type="range" min="0" max={MAX_PRICE_RANGE} value={priceInput.priceMax}/>
-                <div className="price_text">${priceInput.priceMax}</div>
+                {/* <div className="price_text">${priceInput.priceMax}</div> */}
+                <input onChange={(e) => {
+                  setPriceInput({...priceInput, priceMax: +e.currentTarget.value})
+                }}  className="price_text" type="text" value={priceInput.priceMax} />
               </div>
             </div>
           </div>
