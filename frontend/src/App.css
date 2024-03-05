@@ -19,6 +19,10 @@ a {
   text-decoration: none;
 }
 
+button {
+  cursor: pointer;
+}
+
 nav {
   padding: 1em 2em;
   /* background-color: tomato; */
@@ -148,6 +152,10 @@ nav {
           }
         }
       }
+
+      .clear-filter_btn {
+        width: max-content;
+      }
     }
 
     .search-bar {
@@ -159,19 +167,20 @@ nav {
         width: 15%;
       }
 
-      div {
+      form {
         background-color: tomato;
         width: 100%;
         display: flex;
         justify-content: space-between;
 
-        input {
+        .input_bar {
           width: 100%;
           outline: none;
         }
         
-        button {
+        .input_btn {
           width: 10%;
+          cursor: pointer;
         }
       }
 

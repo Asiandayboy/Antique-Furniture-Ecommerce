@@ -8,7 +8,7 @@ type Props = {
 }
 
 
-type FurnitureListing = {
+export type FurnitureListing = {
   listingID: string,
   title: string,
   description: string,
@@ -24,21 +24,8 @@ type FurnitureListing = {
 
 
 export default function Market({ isLoggedIn }: Props) {
-  const [data, setData] = useState<FurnitureListing[]>([
-    // {
-    //   listingID: "4444",
-    //   title: "bruh",
-    //   description: "hello world",
-    //   cost: "44..44",
-    //   type: "bed",
-    //   style: "sheraton",
-    //   condition: "mint",
-    //   material: "walnut",
-    //   images: ["iamge1", "image2"],
-    //   userID: "41231231",
-    //   bought: "false",
-    // }
-  ])
+  const [data, setData] = useState<FurnitureListing[]>([])
+  const [filteredData, setFilteredData] = useState<FurnitureListing[]>([])
 
   useEffect(() => {
     console.log("FETCHING FURNITURE LISTINGS");
@@ -53,13 +40,11 @@ export default function Market({ isLoggedIn }: Props) {
       .then((data: FurnitureListing[]) => {
         console.log(data);
         setData(data)
+        setFilteredData(data)
       })
       .catch((err: any) => {
         console.log("Error caught:", err)
       })
-
-
-
 
 
   }, [])
@@ -69,10 +54,10 @@ export default function Market({ isLoggedIn }: Props) {
       <Navbar />
       <main>
         <section className="market_wrapper">
-          <MarketFilter />
+          <MarketFilter dataSet={data} setDataSet={setFilteredData} />
           <div className="furniture-listings_wrapper">
             {
-              data.map((listing) => (
+              filteredData.map((listing) => (
                 <FurnitureListing key={listing.listingID} {...listing} />
               ))
             }
@@ -82,3 +67,18 @@ export default function Market({ isLoggedIn }: Props) {
     </>
   )
 }
+
+
+// {
+//   listingID: "4444",
+//   title: "bruh",
+//   description: "hello world",
+//   cost: "44..44",
+//   type: "bed",
+//   style: "sheraton",
+//   condition: "mint",
+//   material: "walnut",
+//   images: ["iamge1", "image2"],
+//   userID: "41231231",
+//   bought: "false",
+// }

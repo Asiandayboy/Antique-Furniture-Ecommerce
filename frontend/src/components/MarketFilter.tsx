@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { FurnitureListing } from "../pages/Market"
+import * as FurnitureTypes from "../types/furnitureTypes"
+import { deepEqual } from "../util/obj"
 
 
-const MAX_PRICE_RANGE = 1_000_000
+const MAX_PRICE_RANGE = 500_000
+
 
 type PriceRange = {
   priceMin: number,
   priceMax: number,
 }
-
 
 type SearchQuery = {
   searchString: string,
@@ -18,28 +21,143 @@ type SearchQuery = {
   priceRange: PriceRange,
 }
 
+type SearchCategories = {
+  type: FurnitureTypes.FurnitureType[],
+  style: FurnitureTypes.FurnitureStyle[],
+  material: FurnitureTypes.FurnitureMaterial[]
+  bedSize: FurnitureTypes.FurnitureBedSize[]
+}
 
 
-export default function MarketFilter() {
-  const [priceInput, setPriceInput] = useState<PriceRange>({
-    priceMin: 0,
-    priceMax: MAX_PRICE_RANGE/2
+type Props = {
+  dataSet: FurnitureListing[]
+  setDataSet: React.Dispatch<React.SetStateAction<FurnitureListing[]>>
+}
+
+
+
+function createSearchCategories(words: string[]): SearchCategories {
+  const categories: SearchCategories = {
+    type: [],
+    style: [],
+    material: [],
+    bedSize: []
+  }
+
+  words.forEach((word) => {
+    if (FurnitureTypes.isFurnitureBedSize(word)) {
+      categories.bedSize.push(word)
+    } else if (FurnitureTypes.isFurnitureMaterial(word)) {
+      categories.material.push(word)
+    } else if (FurnitureTypes.isFurnitureStyle(word)) {
+      categories.style.push(word)
+    } else if (FurnitureTypes.isFurnitureType(word)) {
+      categories.type.push(word)
+    }
   })
-  const [searchInput, setSearchInput] = useState<SearchQuery>({
-    searchString: "",
-    type: "All",
-    material: "All",
-    condition: "All",
-    style: "All",
-    priceRange: priceInput
-  })
+
+  return categories
+}
+
+const defaultPriceRange: PriceRange = {
+  priceMin: 0,
+  priceMax: MAX_PRICE_RANGE/2
+}
+
+const defaultSearchQuery: SearchQuery = {
+  searchString: "",
+  type: "All",
+  material: "All",
+  condition: "All",
+  style: "All",
+  priceRange: defaultPriceRange
+}
 
 
 
+export default function MarketFilter({ dataSet, setDataSet }: Props) {
+  const [priceInput, setPriceInput] = useState<PriceRange>(defaultPriceRange)
+  const [searchQuery, setSearchQuery] = useState<SearchQuery>(defaultSearchQuery)
 
-  useEffect(() => {
-    console.log(searchInput)
-  }, [searchInput])
+  const typeRef = useRef<HTMLSelectElement>(null)
+  const materialRef = useRef<HTMLSelectElement>(null)
+  const conditionRef = useRef<HTMLSelectElement>(null)
+  const styleRef = useRef<HTMLSelectElement>(null)
+  const priceMinRef = useRef(null)
+  const priceMaxRef = useRef(null)
+
+
+  function clearFilter(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    if (typeRef.current) {
+      typeRef.current.selectedIndex = 0
+    }
+    if (materialRef.current) {
+      materialRef.current.selectedIndex = 0
+    }
+    if (conditionRef.current) {
+      conditionRef.current.selectedIndex = 0
+    }
+    if (styleRef.current) {
+      styleRef.current.selectedIndex = 0
+    }
+
+    setPriceInput(defaultPriceRange)
+    setSearchQuery(defaultSearchQuery)
+  }
+
+
+  function onSearch(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const searchString = searchQuery.searchString.toLowerCase()
+
+
+    if (deepEqual(searchQuery, defaultSearchQuery)) {
+      setDataSet(dataSet)
+      return
+    }
+
+    const words = searchString.split(" ").filter(word => word !== "")
+    const categories = createSearchCategories(words)
+
+    console.log(categories)
+
+    setDataSet(dataSet.filter((listing) => {
+      let flag = false;
+
+      words.forEach(word => {
+        flag = 
+        listing.title.toLowerCase().includes(word) ||
+        listing.description.toLowerCase().includes(word) ||
+        listing.type.toLowerCase().includes(word) ||
+        listing.style.toLowerCase().includes(word) ||
+        listing.material.toLowerCase().includes(word)
+      })
+
+      if (searchQuery.type != "All" 
+      && listing.type.toLowerCase() != searchQuery.type) {
+        return false
+      }
+
+      if (searchQuery.material != "All" 
+      && listing.material.toLowerCase() != searchQuery.material) {
+        return false
+      }
+
+      if (searchQuery.condition != "All" 
+      && listing.condition.toLowerCase() != searchQuery.condition) {
+        return false
+      }
+
+      if (searchQuery.style != "All" 
+      && listing.style.toLowerCase() != searchQuery.style) {
+        return false
+      }
+
+      return flag
+
+    }))
+  }
+
 
 
   return (
@@ -48,53 +166,53 @@ export default function MarketFilter() {
         <div className="select_filters">
           <div className="furniture-type_filter">
             <label htmlFor="">Furniture Type </label>
-            <select onChange={
-              (e) => setSearchInput({...searchInput, type: e.currentTarget.value})
+            <select ref={typeRef} onChange={
+              (e) => setSearchQuery({...searchQuery, type: e.currentTarget.value})
             } name="" id="">
               <option value="All">All</option>
-              <option value="Bed">Bed</option>
-              <option value="Table">Table</option>
-              <option value="Chair">Chair</option>
-              <option value="Nightstand">Nightstand</option>
-              <option value="Desk">Desk</option>
-              <option value="Lamp">Lamp</option>
+              <option value="bed">Bed</option>
+              <option value="table">Table</option>
+              <option value="chair">Chair</option>
+              <option value="nightstand">Nightstand</option>
+              <option value="desk">Desk</option>
+              <option value="lamp">Lamp</option>
             </select>
           </div>
 
           <div className="material_filter">
             <label htmlFor="">Material </label>
-            <select onChange={
-              e => setSearchInput({...searchInput, material: e.currentTarget.value})
+            <select ref={materialRef} onChange={
+              e => setSearchQuery({...searchQuery, material: e.currentTarget.value})
             } name="" id="">
               <option value="All">All</option>
-              <option value="TigerMaple">Tiger Maple</option>
-              <option value="Walnut">Walnut</option>
-              <option value="Oak">Oak</option>
-              <option value="Cherry">Cherry</option>
-              <option value="Mahagony">Mahagony</option>
-              <option value="Maple">Maple</option>
+              <option value="tiger maple">Tiger Maple</option>
+              <option value="walnut">Walnut</option>
+              <option value="oak">Oak</option>
+              <option value="cherry">Cherry</option>
+              <option value="mahagony">Mahagony</option>
+              <option value="maple">Maple</option>
             </select>
           </div>
 
           <div className="condition_filter">
             <label htmlFor="">Condition </label>
-            <select onChange={
-              e => setSearchInput({...searchInput, condition: e.currentTarget.value})
+            <select ref={conditionRef} onChange={
+              e => setSearchQuery({...searchQuery, condition: e.currentTarget.value})
             }  name="" id="">
               <option value="All">All</option>
-              <option value="Mint">Mint</option>
-              <option value="Excellent">Excellent</option>
-              <option value="Good">Good</option>
-              <option value="Worn">Worn</option>
-              <option value="Restored">Restored</option>
-              <option value="Original Finish">Original Finish</option>
+              <option value="mint">Mint</option>
+              <option value="excellent">Excellent</option>
+              <option value="good">Good</option>
+              <option value="worn">Worn</option>
+              <option value="restored">Restored</option>
+              <option value="original Finish">Original Finish</option>
             </select>
           </div>
 
           <div className="style_filter">
             <label htmlFor="">Style </label>
-            <select onChange={
-              e => setSearchInput({...searchInput, style: e.currentTarget.value})
+            <select ref={styleRef} onChange={
+              e => setSearchQuery({...searchQuery, style: e.currentTarget.value})
             }  name="" id="">
               <option value="All">All</option>
               <option value="Victorian">Victorian</option>
@@ -113,37 +231,39 @@ export default function MarketFilter() {
             <div className="price-ranges">
               <div>
                 <label htmlFor="">min</label>
-                <input onChange={
+                <input ref={priceMinRef} onChange={
                   (e) => {
                     setPriceInput({...priceInput, priceMin: +e.currentTarget.value})
-                    setSearchInput({...searchInput, priceRange: priceInput})
+                    setSearchQuery({...searchQuery, priceRange: priceInput})
                   }
-                } type="range" min="0" max="1000000" value={priceInput.priceMin}/>
+                } type="range" min="0" max={MAX_PRICE_RANGE} value={priceInput.priceMin}/>
                 <div className="price_text">${priceInput.priceMin}</div>
               </div>
               <div>
                 <label htmlFor="">max</label>
-                <input onChange={
+                <input ref={priceMaxRef} onChange={
                   (e) => {
                     setPriceInput({...priceInput, priceMax: +e.currentTarget.value})
-                    setSearchInput({...searchInput, priceRange: priceInput})
+                    setSearchQuery({...searchQuery, priceRange: priceInput})
                   }
-                } type="range" min="0" max="1000000" value={priceInput.priceMax}/>
+                } type="range" min="0" max={MAX_PRICE_RANGE} value={priceInput.priceMax}/>
                 <div className="price_text">${priceInput.priceMax}</div>
               </div>
             </div>
           </div>
         </div>
+
+        <button className="clear-filter_btn" onClick={clearFilter}>Clear Filter</button>
       </div>
 
       <div className="search-bar">
         <label htmlFor="">Search for furniture:</label>
-        <div>
-          <input onChange={
-            (e) => setSearchInput({...searchInput, searchString: e.currentTarget.value})
+        <form onSubmit={(e) => onSearch(e)}>
+          <input className="input_bar" onChange={
+            (e) => setSearchQuery({...searchQuery, searchString: e.currentTarget.value})
           } type="text" />
-          <button>Search</button>
-        </div>
+          <input className="input_btn" type="submit" value="Search" />
+        </form>
       </div>
 
     </div>
