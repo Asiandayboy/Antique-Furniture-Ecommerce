@@ -38,9 +38,7 @@ export default function Login({ setIsLoggedIn }: Props) {
         setResMsg(msg)
         throw new Error(msg || "Failed to log in")
       } else {
-        // redirect to dashboard
         setIsLoggedIn(true)
-        localStorage.setItem("isLoggedIn", "true")
 
         const msg = await res.text();
         console.log(msg)
