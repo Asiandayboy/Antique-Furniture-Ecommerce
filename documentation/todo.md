@@ -138,13 +138,20 @@ FRONTEND
 
 # Planned
 =========
-- CSS styles for login and signup
+- CSS styles for login and signup 
 - CSS styles for navbar
 - CSS styles for dashboard
-- populate dashboard with user data
-- populate market with user data
+- populate dashboard with user data 
+- populate market with user data [DONE]
+- populate MyAddresses with user data [DONE]
 - create component for listing furniture
 - email subscription notification for new listings
   - backend: write logic
   - frontend: create button with CSS styles on market page
 
+
+plans established on 3/5
+- create form for listing furniture
+- refine rendering for market listings
+  - render images for each listing, etc
+- add styles to MyAddresses
