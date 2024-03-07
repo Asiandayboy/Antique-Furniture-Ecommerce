@@ -56,6 +56,7 @@ export default function Navbar({  }: Props) {
           <Link to="/">Home</Link>
         </li>
         <div className="nav-2">
+          <li><Link to="/list">List a furniture</Link></li>
           <li>
             <Link to="/market">Market</Link>
           </li>

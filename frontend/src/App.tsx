@@ -12,6 +12,7 @@ import { AuthContext } from './contexts/authContext';
 import PurchaseHistory from './pages/PurchaseHistory';
 import FurnitureListings from './pages/FurnitureListings';
 import MyAddresses from './pages/MyAddresses';
+import ListFurniture from './pages/ListFurniture';
 
 
 
@@ -41,6 +42,7 @@ function App() {
           {/* public routes */}
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
           <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
+          <Route path='/list' element={<ListFurniture />}/>
           <Route path="/checkout" />
 
           {/* Routes only accessible when logged out */}
