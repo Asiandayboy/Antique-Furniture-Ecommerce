@@ -62,6 +62,7 @@ func (s *Server) Start() {
 	s.Use("POST /account/address", s.HandleAddressPOST, AuthMiddleware, logEndpointHit)
 	s.Use("PUT /account/address", s.HandleAddressPUT, AuthMiddleware, logEndpointHit)
 	s.Use("DELETE /account/address/{addressID}", s.HandleAddressDELETE, AuthMiddleware, logEndpointHit)
+	s.Use("GET /account/purchase_history", s.HandlePurchaseHistory, AuthMiddleware, logEndpointHit)
 
 	s.Use("POST /checkout", s.HandleCheckout, AuthMiddleware)
 

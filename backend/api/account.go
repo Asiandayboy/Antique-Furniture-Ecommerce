@@ -262,3 +262,34 @@ func (s *Server) HandleAddressDELETE(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 
 }
+
+// Fetches the user's purchase history
+func (s *Server) HandlePurchaseHistory(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(SessionKey).(*Session)
+
+	receiptsCollection := db.GetCollection("receipts")
+	cursor, err := receiptsCollection.Find(
+		context.Background(),
+		bson.M{"userid": session.Store["userid"]},
+	)
+	if err != nil {
+		http.Error(w, "Failed to fetch purchase history", http.StatusInternalServerError)
+		return
+	}
+
+	var receipts []Receipt
+	err = cursor.All(context.Background(), &receipts)
+	if err != nil {
+		http.Error(w, "Failed to cursor.All", http.StatusInternalServerError)
+		return
+	}
+
+	json, err := json.Marshal(receipts)
+	if err != nil {
+		http.Error(w, "Failed to encode into JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
