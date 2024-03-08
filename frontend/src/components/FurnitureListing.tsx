@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom"
+
 type Props = {
   listingID: string,
   title: string,
@@ -14,8 +16,14 @@ type Props = {
 
 
 export default function FurnitureListing(data: Props) {
+  const navigate = useNavigate()
+
+  function onClick(e: React.MouseEvent<HTMLDivElement>) {
+    navigate(`/market/listing/${data.listingID}`)
+  }
+
   return (
-    <div className="furniture-listing">
+    <div onClick={onClick} className="furniture-listing">
       {data.title}
       <div>ListingID: {data.listingID}</div>
       <div>Desc: {data.description}</div>

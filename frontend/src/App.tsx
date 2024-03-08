@@ -14,6 +14,7 @@ import FurnitureListings from './pages/FurnitureListings';
 import MyAddresses from './pages/MyAddresses';
 import ListFurniture from './pages/ListFurniture';
 import PurchaseHistoryDetails from './pages/PurchaseHistoryDetails';
+import DetailedListing from './pages/DetailedListing';
 
 
 
@@ -43,6 +44,7 @@ function App() {
           {/* public routes */}
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
           <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
+          <Route path='/market/listing/:listingId' element={<DetailedListing />}/>
           <Route path='/list' element={<ListFurniture />}/>
           <Route path="/checkout" />
 
