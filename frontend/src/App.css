@@ -110,7 +110,7 @@ nav {
 
 .market_wrapper {
   /* background-color: tomato; */
-
+  padding: 1em;
 
 
   .market-filter_wrapper {
@@ -189,17 +189,37 @@ nav {
 
   .furniture-listings_wrapper {
     background-color: rgb(209, 209, 209);
-    display: flex;
-    gap: .5em;
-
-    padding: 1em 5em;
+    display: grid;
+    padding: 1em 0;
 
     .furniture-listing {
       border: 1px solid black;
       background-color: wheat;
-
+      
       padding: 1em;
     }
+    
+    /* --ideal-size: 250px;
+    --max-column-count: 4;
+    --gap: .5em;
+    grid-template-columns: repeat(
+      auto-fit, 
+      minmax(
+        min(max(100% / var(--max-column-count) - var(--gap), var(--ideal-size)), 100%),
+        1fr)
+    );
+    gap: var(--gap); */
+
+    gap: .5em;
+    @media (max-width: 1200px) {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+
   }
 
 }
