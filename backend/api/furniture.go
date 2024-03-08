@@ -3,6 +3,7 @@ package api
 import (
 	"backend/db"
 	"backend/types"
+
 	// "backend/util"
 	"context"
 	"encoding/json"
@@ -189,7 +190,7 @@ func (s *Server) HandleGetFurniture(w http.ResponseWriter, r *http.Request) {
 	// listingid param might not be set; check for that 1/26
 	id := r.URL.Query().Get("listingid")
 
-	_, err := db.FindByIDInListingsCollection(id)
+	res, err := db.FindByIDInListingsCollection(id)
 	if err != nil {
 		http.Error(
 			w,
@@ -198,9 +199,17 @@ func (s *Server) HandleGetFurniture(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
+	var listing types.FurnitureListing
+	res.Decode(&listing)
+
+	json, err := json.Marshal(listing)
+	if err != nil {
+		http.Error(w, "Failed to encode into json", http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("success"))
+	w.Write(json)
 
 }
 

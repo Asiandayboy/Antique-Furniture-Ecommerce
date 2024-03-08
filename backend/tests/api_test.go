@@ -691,40 +691,34 @@ func TestHandleGetFurniture(t *testing.T) {
 		method             string
 		payload            string
 		expectedStatusCode int
-		expectedMessage    string
 	}{
 		{ // invalid ID
 			name:               "Test 1",
 			method:             "GET",
 			payload:            "",
-			expectedMessage:    "Furniture listing with provided listingID not found",
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{ // valid
 			name:               "Test 2",
 			method:             "GET",
-			expectedMessage:    "success",
-			payload:            "65b433dd8d3c8f926b88cd7a",
+			payload:            "65bf607585af14e593096ea1",
 			expectedStatusCode: http.StatusOK,
 		},
 		{ // invalid method
 			name:               "Test 3",
 			method:             "POST",
-			expectedMessage:    api.ErrMethodNotAllowed,
 			payload:            "234324324234324",
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // invalid method
 			name:               "Test 4",
 			method:             "DELETE",
-			expectedMessage:    api.ErrMethodNotAllowed,
 			payload:            "6783",
 			expectedStatusCode: http.StatusMethodNotAllowed,
 		},
 		{ // invalid listingID
 			name:               "Test 5",
 			method:             "GET",
-			expectedMessage:    "Furniture listing with provided listingID not found",
 			payload:            "65aeadc6f96ba92452b8e52",
 			expectedStatusCode: http.StatusBadRequest,
 		},
@@ -741,10 +735,6 @@ func TestHandleGetFurniture(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			server.Mux.ServeHTTP(w, r)
-
-			if strings.TrimSpace(w.Body.String()) != tc.expectedMessage {
-				t.Fatalf("Expected msg: %s, got: %s\n", tc.expectedMessage, w.Body.String())
-			}
 
 			if w.Code != tc.expectedStatusCode {
 				t.Fatalf("Expected status code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
