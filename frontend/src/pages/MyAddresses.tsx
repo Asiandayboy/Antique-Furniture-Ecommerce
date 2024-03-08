@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 
 
 
-type ShippingAddress = {
+export type ShippingAddress = {
   addressId?: string,
   userId?: string,
   state: string,

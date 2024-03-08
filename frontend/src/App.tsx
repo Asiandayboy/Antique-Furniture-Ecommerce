@@ -13,6 +13,7 @@ import PurchaseHistory from './pages/PurchaseHistory';
 import FurnitureListings from './pages/FurnitureListings';
 import MyAddresses from './pages/MyAddresses';
 import ListFurniture from './pages/ListFurniture';
+import PurchaseHistoryDetails from './pages/PurchaseHistoryDetails';
 
 
 
@@ -56,6 +57,7 @@ function App() {
           <Route element={<ProtectedRoutes auth={isLoggedIn} redirect='/login' />}>
             <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/dashboard/purchase-history' element={<PurchaseHistory />} />
+            <Route path='/dashboard/purchase-history/:id' element={<PurchaseHistoryDetails />} />
             <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
             <Route path='/dashboard/addresses' element={<MyAddresses />} />
           </Route>
