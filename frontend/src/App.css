@@ -41,6 +41,22 @@ nav {
       gap: 3em;
     }
   }
+
+  .cart-link a {
+    display: flex;
+    align-items: center;
+    gap: .25em;
+    color: black;
+
+    &:hover {
+      color: rgb(221, 61, 33);
+    }
+
+    svg {
+      stroke-width: 1.5;
+      height: 20px;
+    }
+  }
 }
 
 

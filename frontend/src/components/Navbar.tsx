@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuthContext } from "../contexts/authContext"
-
+import { useShoppingCartContext } from "../contexts/shoppingCartContext"
+import CartIcon from "../assets/CartIcon"
 
 type Props = {
   // isLoggedIn: boolean
@@ -15,6 +16,7 @@ export default function Navbar({  }: Props) {
   const navigate = useNavigate()
 
   const authState = useAuthContext()
+  const shoppingCart = useShoppingCartContext()
 
   async function onLogoutClick(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     try {
@@ -88,7 +90,12 @@ export default function Navbar({  }: Props) {
               </li>
             </>
           }
-          <li>Cart (0)</li>
+          <li className="cart-link">
+            <Link to="/checkout">
+              <CartIcon />
+              <div>Cart ({Object.keys(shoppingCart.cart).length})</div>
+            </Link>
+          </li>
         </div>
       </ol>
     </nav>

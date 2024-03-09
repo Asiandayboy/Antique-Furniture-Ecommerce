@@ -32,7 +32,7 @@ export default function FurnitureListing(data: Props) {
       <div>Style: {data.style}</div>
       <div>Material: {data.material}</div>
       <div>Condition: {data.condition}</div>
-      <div>Bought: {data.bought}</div>
+      <div>Bought: {String(data.bought)}</div>
       <div>SellerID: {data.userID}</div>
     </div>
   )

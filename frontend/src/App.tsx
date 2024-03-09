@@ -15,11 +15,14 @@ import MyAddresses from './pages/MyAddresses';
 import ListFurniture from './pages/ListFurniture';
 import PurchaseHistoryDetails from './pages/PurchaseHistoryDetails';
 import DetailedListing from './pages/DetailedListing';
+import { Cart, ShoppingCartContext } from './contexts/shoppingCartContext';
+import Checkout from './pages/Checkout';
 
 
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
+  const [cart, setCart] = useState<Cart>({})
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn")
@@ -39,32 +42,37 @@ function App() {
       auth: isLoggedIn,
       setAuth: setIsLoggedIn
     }}>
-      <BrowserRouter>
-        <Routes>
-          {/* public routes */}
-          <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
-          <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
-          <Route path='/market/listing/:listingId' element={<DetailedListing />}/>
-          <Route path='/list' element={<ListFurniture />}/>
-          <Route path="/checkout" />
+      <ShoppingCartContext.Provider value={{
+        cart: cart,
+        setCart: setCart,
+      }}>
+        <BrowserRouter>
+          <Routes>
+            {/* public routes */}
+            <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
+            <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
+            <Route path='/market/listing/:listingId' element={<DetailedListing />}/>
+            <Route path='/list' element={<ListFurniture />}/>
+            <Route path="/checkout" element={<Checkout />}/>
 
-          {/* Routes only accessible when logged out */}
-          <Route element={<ProtectedRoutes auth={!isLoggedIn} redirect='/dashboard' />}>
-            <Route path='/signup' element={<Signup />} />
-            <Route path='/signup-success' element={<SignupSuccess />} />
-            <Route path='/login' element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          </Route>
+            {/* Routes only accessible when logged out */}
+            <Route element={<ProtectedRoutes auth={!isLoggedIn} redirect='/dashboard' />}>
+              <Route path='/signup' element={<Signup />} />
+              <Route path='/signup-success' element={<SignupSuccess />} />
+              <Route path='/login' element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+            </Route>
 
-          {/* Routes only accessible when logged in */}
-          <Route element={<ProtectedRoutes auth={isLoggedIn} redirect='/login' />}>
-            <Route path='/dashboard' element={<Dashboard />} />
-            <Route path='/dashboard/purchase-history' element={<PurchaseHistory />} />
-            <Route path='/dashboard/purchase-history/:id' element={<PurchaseHistoryDetails />} />
-            <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
-            <Route path='/dashboard/addresses' element={<MyAddresses />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+            {/* Routes only accessible when logged in */}
+            <Route element={<ProtectedRoutes auth={isLoggedIn} redirect='/login' />}>
+              <Route path='/dashboard' element={<Dashboard />} />
+              <Route path='/dashboard/purchase-history' element={<PurchaseHistory />} />
+              <Route path='/dashboard/purchase-history/:id' element={<PurchaseHistoryDetails />} />
+              <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
+              <Route path='/dashboard/addresses' element={<MyAddresses />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ShoppingCartContext.Provider>
     </AuthContext.Provider>
   )
 }

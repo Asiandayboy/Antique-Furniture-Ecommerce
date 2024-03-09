@@ -38,7 +38,7 @@ export default function Market({ isLoggedIn }: Props) {
     })
       .then(res => res.json())
       .then((data: FurnitureListing[]) => {
-        console.log(data);
+        // console.log(data);
         setData(data)
         setFilteredData(data)
       })

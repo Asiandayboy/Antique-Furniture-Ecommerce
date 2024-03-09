@@ -148,10 +148,13 @@ FRONTEND
 - email subscription notification for new listings
   - backend: write logic
   - frontend: create button with CSS styles on market page
+- STYLESSSSSSSSSSSSSSSSSSSSSS
 
 
 plans established on 3/5
 - create form for listing furniture
 - refine rendering for market listings
   - render images for each listing, etc
-- add styles to MyAddresses
+- add styles to MyAddresses [LATER]
+
+
