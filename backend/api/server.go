@@ -64,10 +64,10 @@ func (s *Server) Start() {
 	s.Use("DELETE /account/address/{addressID}", s.HandleAddressDELETE, AuthMiddleware, logEndpointHit)
 	s.Use("GET /account/purchase_history", s.HandlePurchaseHistory, AuthMiddleware, logEndpointHit)
 
-	s.Use("POST /checkout", s.HandleCheckout, AuthMiddleware)
+	s.Use("POST /checkout", s.HandleCheckout, AuthMiddleware, logEndpointHit)
 
 	// handle auth in the handler bc cookies aren't sent when Stripe sends the webhook
-	s.Use("POST /checkout_webhook", s.HandleStripeWebhook)
+	s.Use("POST /checkout_webhook", s.HandleStripeWebhook, logEndpointHit)
 
 	/*----------STRIPE-----------*/
 
