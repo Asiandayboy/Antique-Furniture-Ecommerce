@@ -28,8 +28,6 @@ import (
 - Server saves appropriate data
 */
 
-const domain string = "http://localhost:5173"
-
 // User gets 95% of their profits; platform gets the other 5%
 const REVENUE_SPLIT float64 = 0.95
 
@@ -194,8 +192,8 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 	params := &stripe.CheckoutSessionParams{
 		LineItems:  lineItems,
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String(domain + "/checkout_success"), // frontend page
-		CancelURL:  stripe.String(domain + "/checkout_cancel"),  // frontend page
+		SuccessURL: stripe.String("http://127.0.0.1:5173/checkout_success"), // frontend page
+		CancelURL:  stripe.String("http://127.0.0.1:5173/checkout_cancel"),  // frontend page
 
 		/*
 			This is how we're passing the sessionID; we will access this in the webhook
@@ -219,7 +217,9 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Checkout session link:", checkoutSession.URL) // printing for testing purposes
 
-	http.Redirect(w, r, checkoutSession.SuccessURL, http.StatusSeeOther)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(checkoutSession.URL))
+	// http.Redirect(w, r, checkoutSession.URL, http.StatusSeeOther)
 }
 
 /*
