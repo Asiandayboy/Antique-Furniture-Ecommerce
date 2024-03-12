@@ -16,7 +16,10 @@ import ListFurniture from './pages/ListFurniture';
 import PurchaseHistoryDetails from './pages/PurchaseHistoryDetails';
 import DetailedListing from './pages/DetailedListing';
 import { Cart, ShoppingCartContext } from './contexts/shoppingCartContext';
+import ShoppingCart from './pages/ShoppingCart';
 import Checkout from './pages/Checkout';
+import CheckoutSuccess from './pages/checkout/CheckoutSuccess';
+import CheckoutCanceled from './pages/checkout/CheckoutCanceled';
 
 
 
@@ -33,6 +36,7 @@ function App() {
       setIsLoggedIn(true)
     } else {
       localStorage.setItem("isLoggedIn", "false")
+      setCart({})
     }
   }, [isLoggedIn])
 
@@ -53,7 +57,9 @@ function App() {
             <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
             <Route path='/market/listing/:listingId' element={<DetailedListing />}/>
             <Route path='/list' element={<ListFurniture />}/>
-            <Route path="/checkout" element={<Checkout />}/>
+            <Route path="/shopping-cart" element={<ShoppingCart />}/>
+            <Route path="/checkout_success" element={<CheckoutSuccess />}/>
+            <Route path="/checkout_cancel" element={<CheckoutCanceled />}/>
 
             {/* Routes only accessible when logged out */}
             <Route element={<ProtectedRoutes auth={!isLoggedIn} redirect='/dashboard' />}>
@@ -69,6 +75,7 @@ function App() {
               <Route path='/dashboard/purchase-history/:id' element={<PurchaseHistoryDetails />} />
               <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
               <Route path='/dashboard/addresses' element={<MyAddresses />} />
+              <Route path="/checkout" element={<Checkout />}/>
             </Route>
           </Routes>
         </BrowserRouter>
