@@ -77,7 +77,7 @@ export default function Navbar({  }: Props) {
                 <div className="acc-dropdown">
                   <Link className="acc-dropdown_btn" to="/dashboard">Account</Link>
                   <div className="acc-dropdown-content">
-                    <div className="acc-balance">Balance: $100.000</div>
+                    <div className="acc-balance">Balance: $666.000</div>
                     <Link to="/dashboard">Account</Link>
                     <Link to="/dashboard/purchase-history">Purchase History</Link>
                     <Link to="/dashboard/furniture-listings">Furniture Listings</Link>
@@ -91,7 +91,7 @@ export default function Navbar({  }: Props) {
             </>
           }
           <li className="cart-link">
-            <Link to="/checkout">
+            <Link to="/shopping-cart">
               <CartIcon />
               <div>Cart ({Object.keys(shoppingCart.cart).length})</div>
             </Link>
