@@ -7,9 +7,9 @@ export default function CartIcon() {
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
-      stroke-width="1" 
-      stroke-linecap="round" 
-      stroke-linejoin="round" 
+      strokeWidth="1" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
       className="feather feather-shopping-cart"
     >
       <circle cx="9" cy="21" r="1"/>
