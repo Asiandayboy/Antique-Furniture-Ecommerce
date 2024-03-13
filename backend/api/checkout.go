@@ -10,12 +10,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/stripe/stripe-go/v76"
 	stripeSession "github.com/stripe/stripe-go/v76/checkout/session"
-	"github.com/stripe/stripe-go/v76/file"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -128,29 +126,6 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 	// create Stripe checkout session
 	var lineItems []*stripe.CheckoutSessionLineItemParams
 	for _, furniture := range furnitures {
-		// upload furniture images to stripe to get URLs
-		var imageURLs []*string
-		for i, imgData := range furniture.Images {
-			imageParams := &stripe.FileParams{
-				Purpose:    stripe.String(string(stripe.FilePurposeDisputeEvidence)),
-				FileReader: strings.NewReader(string(imgData)),
-				Filename:   stripe.String(fmt.Sprintf("image%d", i+1)),
-			}
-
-			upload, err := file.New(imageParams)
-			if err != nil {
-				http.Error(
-					w,
-					fmt.Sprintf("Failed to upload image file %d to Stripe: %s\n", i+1, err),
-					http.StatusInternalServerError,
-				)
-				return
-			}
-			imageURLs = append(imageURLs, stripe.String(upload.URL)) // APPARENTLY, THE LINKS ARE BROKEN?
-
-			// fmt.Printf("Links?: %v\n", upload.Links)
-		}
-
 		productData := &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
 			Name:        &furniture.Title,
 			Description: &furniture.Description,
@@ -160,7 +135,6 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 				"Style":     string(furniture.Style),
 				"ListingID": furniture.ListingID.Hex(),
 			},
-			Images: imageURLs,
 		}
 
 		lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
