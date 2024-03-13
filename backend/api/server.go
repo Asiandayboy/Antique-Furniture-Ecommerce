@@ -54,7 +54,7 @@ func (s *Server) Start() {
 
 	s.Use("POST /list_furniture", s.HandleListFurniture, AuthMiddleware, logEndpointHit)
 	s.Use("GET /get_furnitures", s.HandleGetFurnitures, logEndpointHit)
-	s.Use("GET /get_furniture", s.HandleGetFurniture, logEndpointHit)
+	s.Use("GET /get_furniture/{listingID}", s.HandleGetFurniture, logEndpointHit)
 
 	s.Use("GET /account", s.HandleAccountGET, AuthMiddleware, logEndpointHit)
 	s.Use("PUT /account", s.HandleAccountPUT, AuthMiddleware, logEndpointHit)
@@ -63,6 +63,7 @@ func (s *Server) Start() {
 	s.Use("PUT /account/address", s.HandleAddressPUT, AuthMiddleware, logEndpointHit)
 	s.Use("DELETE /account/address/{addressID}", s.HandleAddressDELETE, AuthMiddleware, logEndpointHit)
 	s.Use("GET /account/purchase_history", s.HandlePurchaseHistory, AuthMiddleware, logEndpointHit)
+	s.Use("GET /account/purchase_history/{orderID}", s.HandlePurchaseHistoryItem, AuthMiddleware, logEndpointHit)
 
 	s.Use("POST /checkout", s.HandleCheckout, AuthMiddleware, logEndpointHit)
 
