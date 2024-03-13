@@ -49,9 +49,9 @@ type ShippingAddress struct {
 }
 
 type CheckoutInfo struct {
-	ShoppingCart    []string        `json:"shoppingCart"`
-	Payment         PaymentInfo     `json:"paymentInfo"`
-	ShippingAddress ShippingAddress `json:"shippingAddress"`
+	ShoppingCart []string    `json:"shoppingCart"`
+	Payment      PaymentInfo `json:"paymentInfo"`
+	// ShippingAddress ShippingAddress `json:"shippingAddress"`
 }
 
 type ProductItem struct {
@@ -116,8 +116,6 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 		furnitures = append(furnitures, furnitureListing)
 	}
 
-	// fmt.Println("Description:", furnitures[0])
-
 	if err := cursor.Err(); err != nil {
 		http.Error(w, "Error fetching furnitures", http.StatusBadRequest)
 		return
@@ -177,15 +175,9 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 
 	session := r.Context().Value(SessionKey).(*Session)
 
-	shoppingCardJSONData, err := json.Marshal(input.ShoppingCart)
+	shoppingCartJSONData, err := json.Marshal(input.ShoppingCart)
 	if err != nil {
 		http.Error(w, "Failed to encode listingIDs into JSON", http.StatusBadRequest)
-		return
-	}
-
-	shippingAddressJSONData, err := json.Marshal(input.ShippingAddress)
-	if err != nil {
-		http.Error(w, "Failed to encode shipping address into JSON", http.StatusBadRequest)
 		return
 	}
 
@@ -201,11 +193,14 @@ func (s *Server) HandleCheckout(w http.ResponseWriter, r *http.Request) {
 			necessary information associated with the client, like receipts and stuff
 		*/
 		Metadata: map[string]string{
-			"sessionID":       session.SessionID,
-			"userID":          session.Store["userid"].(primitive.ObjectID).Hex(),
-			"listingIDs":      string(shoppingCardJSONData),
-			"paymentMethod":   input.Payment.PaymentMethod,
-			"shippingAddress": string(shippingAddressJSONData),
+			"sessionID":     session.SessionID,
+			"userID":        session.Store["userid"].(primitive.ObjectID).Hex(),
+			"listingIDs":    string(shoppingCartJSONData),
+			"paymentMethod": input.Payment.PaymentMethod,
+			// "shippingAddress": string(shippingAddressJSONData),
+		},
+		ShippingAddressCollection: &stripe.CheckoutSessionShippingAddressCollectionParams{
+			AllowedCountries: stripe.StringSlice([]string{"US"}),
 		},
 	}
 
@@ -260,6 +255,7 @@ func (s *Server) HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
 		}
 
 		metadata := checkoutSession.Metadata
+		var shippingAddrInfo *stripe.Address = checkoutSession.ShippingDetails.Address
 
 		sessionManager := GetSessionManager()
 		session, sessionExists := sessionManager.GetSession(metadata["sessionID"])
@@ -273,12 +269,13 @@ func (s *Server) HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
 
 		/*----------------------Receipts, update balances, etc------------------------*/
 
-		var shippingAddress ShippingAddress
-		err = json.Unmarshal([]byte(metadata["shippingAddress"]), &shippingAddress)
-		if err != nil {
-			log.Println("Failed to decode shipping address")
-			return
+		var shippingAddress ShippingAddress = ShippingAddress{
+			State:   shippingAddrInfo.State,
+			City:    shippingAddrInfo.City,
+			Street:  shippingAddrInfo.Line1,
+			ZipCode: shippingAddrInfo.PostalCode,
 		}
+
 		userID, _ := primitive.ObjectIDFromHex(metadata["userID"])
 
 		orderReceipt := Receipt{
@@ -314,6 +311,11 @@ func (s *Server) HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
 
 			/*-----------TODO: Don't forget to mark listing as "bought": true-------------*/
 			/*---------------------Leave it as false for testing, though------------------*/
+			listingsCollection.UpdateByID(
+				context.Background(),
+				listingID,
+				bson.M{"$set": bson.M{"bought": true}},
+			)
 			/*-------------------------------2/4/2024-------------------------------------*/
 
 			amountReceivedByPlatform := afterStripeFee(float64(checkoutSession.AmountTotal / 100))
