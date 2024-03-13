@@ -263,7 +263,7 @@ func (s *Server) HandleAddressDELETE(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Fetches the user's purchase history
+// Fetches the user's entire purchase history
 func (s *Server) HandlePurchaseHistory(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value(SessionKey).(*Session)
 
@@ -292,4 +292,40 @@ func (s *Server) HandlePurchaseHistory(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(json)
+}
+
+/*
+Returns a specified purchase history item to the client
+*/
+func (s *Server) HandlePurchaseHistoryItem(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(SessionKey).(*Session)
+
+	var id string = r.PathValue("orderID")
+	orderID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, primitive.ErrInvalidHex.Error(), http.StatusBadRequest)
+		return
+	}
+
+	receipsCollection := db.GetCollection("receipts")
+
+	// find specified order
+	var order Receipt
+	res := receipsCollection.FindOne(
+		context.Background(),
+		bson.M{"_id": orderID, "userid": session.Store["userid"]},
+	).Decode(&order)
+	if res != nil {
+		http.Error(w, res.Error(), http.StatusBadRequest)
+		return
+	}
+
+	jsonData, err := json.Marshal(order)
+	if err != nil {
+		http.Error(w, "Failed to encode into JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(jsonData))
 }
