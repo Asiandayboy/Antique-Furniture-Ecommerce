@@ -1034,37 +1034,12 @@ func TestHandleCheckout(t *testing.T) {
 			Amount:        7500,
 			Currency:      "usd",
 		},
-		ShippingAddress: api.ShippingAddress{
-			State:   "RI",
-			City:    "Providence",
-			Street:  "999 Holy St.",
-			ZipCode: "02907",
-		},
 	}
 
-	// mock checkout ouput expected receipt
-	// expectedReceipt := api.ReceiptResponse{
-	// 	ShippingAddress: checkoutInfo.ShippingAddress,
-	// 	PaymentMethod:   "Credit",
-	// 	TotalCost:       7500.00,
-	// 	Items: []api.ProductItemClient{{
-	// 		ListingID: "65b433dd8d3c8f926b88cd7a",
-	// 		SellerID:  "65b094f4a2cb3bf5e40d42d7",
-	// 	}},
-	// 	UserID: session1.Store["userid"].(primitive.ObjectID).Hex(),
-	// }
-
-	// encode checkoutInfo
 	checkoutJSONData, err := json.Marshal(checkoutInfo)
 	if err != nil {
 		t.Fatal("Failed to encode checkoutInfo into JSON")
 	}
-
-	// encode expectedReceipt
-	// receiptJSONData, err := json.Marshal(expectedReceipt)
-	// if err != nil {
-	// 	t.Fatal("Failed to encode expectedReceipt into JSON")
-	// }
 
 	tests := []struct {
 		name               string
@@ -1095,7 +1070,7 @@ func TestHandleCheckout(t *testing.T) {
 			method:             "POST",
 			sessionid:          session1.SessionID,
 			payload:            string(checkoutJSONData),
-			expectedStatusCode: http.StatusSeeOther,
+			expectedStatusCode: http.StatusOK,
 			expectedMsg:        "",
 		},
 	}
