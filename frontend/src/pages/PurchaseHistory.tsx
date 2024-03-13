@@ -5,12 +5,17 @@ import { ShippingAddress } from "./MyAddresses";
 
 
 
-type OrderItem = {
+export type ProductItem = {
+  listingId: string,
+  sellerId: string
+}
+
+export type OrderItem = {
   orderId: string,
   shippingAddress: ShippingAddress[],
   paymentMethod: string,
   totalCost: number,
-  items: string[],
+  items: ProductItem[],
   userId: string,
   datePurchased: string,
   estimatedDelivery: string,
@@ -68,19 +73,19 @@ export default function PurchaseHistory() {
         <div className="purchase-history">
           <div className="purchase-history-labels">
             <div>Date</div>
-            <div>Title</div>
+            <div>OrderID</div>
             <div>Amount</div>
           </div>
           <div className="purchase-history_wrapper">
             {
               orders.length > 0 &&
               orders.map((order) => (
-                <div onClick={(e) => {
+                <div key={order.orderId} onClick={(e) => {
                   navigate(`/dashboard/purchase-history/${order.orderId}`)
                 }} className="purchase-history_item">
                   <div className="date">{order.datePurchased}</div>
-                  <div className="title">{order.orderId}</div>
-                  <div className="amount">{order.totalCost}</div>
+                  <div className="orderId">{order.orderId}</div>
+                  <div className="amount">${order.totalCost}</div>
                 </div>
               )) ||
               <div className="purchase-history_item-null">
