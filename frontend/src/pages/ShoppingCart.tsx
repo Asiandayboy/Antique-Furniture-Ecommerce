@@ -6,6 +6,49 @@ export default function ShoppingCart() {
 
   const { cart } = useShoppingCartContext()
 
+  function sendCheckoutRequest() {
+    // reducing the cart items into an array of the listingIDs 
+    const cartItems = []
+    let total = 0
+    for (const [key, listing] of Object.entries(cart)) {
+      cartItems.push(key)
+      total += +listing.cost
+    }
+
+    const body = {
+      shoppingCart: cartItems,
+      paymentInfo: {
+        paymentMethod: "credit",
+        amount: total,
+        currency: "usd"
+      },
+    }
+
+
+    fetch("http://localhost:3000/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/html",
+      },
+      body: JSON.stringify(body),
+      credentials: "include"
+    })
+    .then(async (res: Response) => {
+      if (res.ok) {
+        const redirectURL = await res.text()
+        console.log("Redirect URL:", redirectURL)
+        window.location.href = redirectURL
+      } else {
+        const msg = await res.text()
+        throw new Error(msg)
+      }
+    })
+    .catch((err: Error) => {
+      console.error(err)
+    })
+
+  }
+
 
   return (
     <>
@@ -31,7 +74,13 @@ export default function ShoppingCart() {
               </div>
             ))
           }
-          <Link to="/checkout"><button>Checkout</button></Link>
+
+          {
+            Object.entries(cart).length > 0 &&
+            <button onClick={sendCheckoutRequest}>Checkout</button>
+            ||
+            <div>There are no items in your cart</div>
+          }
         </div>
       </div>
     </>

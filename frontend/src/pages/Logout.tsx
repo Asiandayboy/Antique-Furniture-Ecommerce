@@ -24,7 +24,6 @@ export default function Logout({ setIsLoggedIn }: Props) {
         throw new Error(msg)
       } else {
         setIsLoggedIn(false)
-
       }
     } catch (error) {
       console.log(error)

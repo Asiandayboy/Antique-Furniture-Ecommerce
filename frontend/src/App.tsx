@@ -17,7 +17,6 @@ import PurchaseHistoryDetails from './pages/PurchaseHistoryDetails';
 import DetailedListing from './pages/DetailedListing';
 import { Cart, ShoppingCartContext } from './contexts/shoppingCartContext';
 import ShoppingCart from './pages/ShoppingCart';
-import Checkout from './pages/Checkout';
 import CheckoutSuccess from './pages/checkout/CheckoutSuccess';
 import CheckoutCanceled from './pages/checkout/CheckoutCanceled';
 
@@ -72,10 +71,9 @@ function App() {
             <Route element={<ProtectedRoutes auth={isLoggedIn} redirect='/login' />}>
               <Route path='/dashboard' element={<Dashboard />} />
               <Route path='/dashboard/purchase-history' element={<PurchaseHistory />} />
-              <Route path='/dashboard/purchase-history/:id' element={<PurchaseHistoryDetails />} />
+              <Route path='/dashboard/purchase-history/:orderId' element={<PurchaseHistoryDetails />} />
               <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
               <Route path='/dashboard/addresses' element={<MyAddresses />} />
-              <Route path="/checkout" element={<Checkout />}/>
             </Route>
           </Routes>
         </BrowserRouter>
