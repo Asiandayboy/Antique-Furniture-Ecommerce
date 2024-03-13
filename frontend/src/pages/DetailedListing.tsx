@@ -14,7 +14,7 @@ export default function DetailedListing() {
 
   // fetch individual furniture listing data from API
   useEffect(() => {
-    fetch(`http://localhost:3000/get_furniture?listingid=${listingId}`, {
+    fetch(`http://localhost:3000/get_furniture/${listingId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
