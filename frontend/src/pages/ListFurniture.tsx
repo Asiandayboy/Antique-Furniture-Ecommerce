@@ -2,9 +2,6 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 
 
-const NONE: string = "None"
-
-
 type FurnitureListing = {
   title: string,
   description: string,
@@ -13,6 +10,17 @@ type FurnitureListing = {
   style: string,
   condition: string,
   material: string,
+}
+
+const NONE: string = "None"
+const EMPTY_LISTING: FurnitureListing = {
+  title: "",
+  description: "",
+  cost: 0,
+  type: NONE,
+  material: NONE,
+  style: NONE,
+  condition: NONE
 }
 
 
@@ -31,7 +39,7 @@ function validateForm(
         }
         break
       case "number":
-        if (value == 0) {
+        if (value <= 0) {
           return [true, key]
         }
         break
@@ -47,17 +55,32 @@ function validateForm(
 }
 
 
-export default function ListFurniture() {
-  const [listing, setListing] = useState<FurnitureListing>({
-    title: "",
-    description: "",
-    cost: 0,
-    type: NONE,
-    material: NONE,
-    style: NONE,
-    condition: NONE
-  })
+async function sendRequest(formData: FormData) {
+  try {
+    const res = await fetch("http://localhost:3000/list_furniture", {
+      method: "POST",
+      body: formData, // browser will automatically set the appropriate headers for the content
+      credentials: "include"
+    })
 
+    if (!res.ok) {
+      const msg = await res.text()
+      throw new Error(msg)
+    }
+
+    const listingID = await res.text();
+    console.log("The ID of your new listing is:", listingID)
+
+  } catch(err) {
+    console.error(err)
+  }
+}
+
+
+
+
+export default function ListFurniture() {
+  const [listing, setListing] = useState<FurnitureListing>(EMPTY_LISTING)
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [currentFormErr, setCurrentFormErr] = useState<string | null>()
 
@@ -80,8 +103,7 @@ export default function ListFurniture() {
         formData.append("furniture_images", file)
       })
 
-
-
+      sendRequest(formData)
     }
 
   }
