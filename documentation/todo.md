@@ -152,9 +152,18 @@ FRONTEND
 
 
 plans established on 3/5
-- create form for listing furniture
+- create form for listing furniture [CIP]
 - refine rendering for market listings
   - render images for each listing, etc
 - add styles to MyAddresses [LATER]
+
+
+3/12 - 3/13
+- add checkout page [DONE]
+  - could use some sort of loading????
+- render listings conditionally based on bought or not (SOLD tag)
+- if address is default, send it in request to checkout and substitute it
+over using stripe address collection
+
 
 
