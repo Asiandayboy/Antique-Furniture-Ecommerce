@@ -55,19 +55,21 @@ export default function FurnitureListing(data: Props) {
 
   return (
     <div onClick={onClick} className="furniture-listing">
-      {data.title}
+      <div className="listing-title">
+        {data.title}
+      </div>
+      <div className="listing-desc">{data.description}</div>
       <div className="img_wrapper">
         <img src={imageURLs[0]} alt="furniture listing image 1" />
       </div>
-      <div>ListingID: {data.listingID}</div>
-      <div>Desc: {data.description}</div>
       <div>Cost: {data.cost}</div>
-      <div>Type: {data.type}</div>
-      <div>Style: {data.style}</div>
-      <div>Material: {data.material}</div>
-      <div>Condition: {data.condition}</div>
-      <div>Bought: {String(data.bought)}</div>
-      <div>SellerID: {data.userID}</div>
+      <div className="listing-metadata">
+        <div className="listing-type">Type: {data.type}</div>
+        <div className="listing-material">Material: {data.material}</div>
+        <div className="listing-condition">Condition: {data.condition}</div>
+        <div className="listing-style">Style: {data.style}</div>
+      </div>
+      <span className="overlay-hover"></span>
     </div>
   )
 }
