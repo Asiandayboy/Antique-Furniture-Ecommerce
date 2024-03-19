@@ -23,7 +23,6 @@ export default function Home({ isLoggedIn }: Props) {
           <div className="hero-latest">
             <div className="hero-latest_header">Latest Furniture Listed</div>
             <div className="hero-img">
-
             </div>
           </div>
         </section>

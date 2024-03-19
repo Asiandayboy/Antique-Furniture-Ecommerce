@@ -152,22 +152,17 @@ nav {
 
 .hero-wrapper {
   display: flex;
-  max-width: min(60%, 1250px);
+  max-width: min(80%, 1250px);
   height: 500px;
   margin: 0 auto;
   margin-top: 5em;
-  /* background-color: rgb(238, 238, 238); */
-
-  /* justify-content: space-between; */
 
   border: 1px solid black;
 
   .hero-info {
     width: 50%;
-    /* background-color: tomato; */
 
     div {
-      /* border: 1px solid black; */
       width: 80%;
       margin: 8em auto;
 
@@ -188,7 +183,6 @@ nav {
   }
 
   .hero-latest {
-    /* background-color: orange; */
     padding: 2em;
     width: 50%;
 
@@ -208,6 +202,34 @@ nav {
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+    }
+  }
+
+
+  @media (max-width: 1000px) {
+    flex-direction: column;
+    height: 100%;
+    gap: 1em;
+    margin-bottom: 5em;
+
+    .hero-info {
+      width: 100%;
+      text-align: center;
+
+      
+      div {
+        margin: 1em auto;
+      }
+    }
+
+    .hero-latest {
+      padding: 1em;
+      width: 100%;
+
+      .hero-img {
+        height: 300px;
+        background-size: contain;
+      }
     }
   }
 
