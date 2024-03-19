@@ -68,17 +68,3 @@ export default function Market({ isLoggedIn }: Props) {
   )
 }
 
-
-// {
-//   listingID: "4444",
-//   title: "bruh",
-//   description: "hello world",
-//   cost: "44..44",
-//   type: "bed",
-//   style: "sheraton",
-//   condition: "mint",
-//   material: "walnut",
-//   images: ["iamge1", "image2"],
-//   userID: "41231231",
-//   bought: "false",
-// }

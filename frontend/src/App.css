@@ -130,12 +130,14 @@ nav {
 
 
   .market-filter_wrapper {
-    border: 2px solid black;
+    /* border: 2px solid black; */
     max-width: 1250px;
     margin: 0 auto;
+    margin-bottom: .5em;
     padding: 2em;
-    background-color: wheat;
-    border-radius: 10px;
+    box-shadow: 0 5px 10px rgb(225, 225, 225);
+    outline: 1px solid rgb(193, 193, 193);
+
 
     display: flex;
     flex-direction: column;
@@ -176,27 +178,33 @@ nav {
 
     .search-bar {
       display: flex;
-
-      border: 1px solid black;
-
-      label {
-        width: 15%;
-      }
+      /* border: 1px solid black; */
 
       form {
-        background-color: tomato;
         width: 100%;
         display: flex;
+        gap: .5em;
         justify-content: space-between;
-
+        
         .input_bar {
           width: 100%;
-          outline: none;
+          border: none;
+          outline: 1px solid rgb(193, 193, 193);
+          /* box-shadow: 0 5px 5px rgb(225, 225, 225); */
+          padding: .5em;
         }
         
         .input_btn {
-          width: 10%;
+          width: fit-content;
+          padding: 0 1.5em;
+          border: none;
           cursor: pointer;
+          outline: 1px solid rgb(193, 193, 193);
+          /* box-shadow: 0 5px 5px rgb(225, 225, 225); */
+
+          &:hover {
+            background-color: rgb(196, 196, 196);
+          }
         }
       }
 
@@ -216,16 +224,41 @@ nav {
       box-shadow: 0 10px 10px rgb(225, 225, 225);
       position: relative;
       
-      
       padding: 1em;
-      
-      .listing-title {
-        font-size: 1.25rem;
+
+      .listing-header {
+        /* background-color: tomato; */
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .listing-title {
+          font-size: 1.25rem;
+        }
+
+        .listing-cost {
+          font-size: 1.1rem;
+          box-shadow: 0 0px 5px rgb(225, 225, 225);
+          padding: .25em .5em;
+          outline: 1px solid rgb(193, 193, 193);
+          margin-left: .5em;
+        }
+
+        .listing-bought {
+          font-size: 1.1rem;
+          padding: .25em .5em;
+          outline: 2px solid rgb(255, 38, 0);
+          margin-left: .5em;
+          color: rgb(255, 38, 0);
+          font-weight: bold;
+        }
       }
+      
       
       .listing-metadata {
         display: flex;
-        font-size: .75rem;
+        font-size: .8rem;
         align-items: center;
         gap: .5em;
         margin-top: .5em;
@@ -233,16 +266,12 @@ nav {
 
         >* {
           outline: 1px solid rgb(193, 193, 193);
-          /* border-radius: 3px; */
           padding: .5em;
           background-color: #f9f9f9;
           box-shadow: 0 3px 3px rgb(225, 225, 225);
 
         }
       }
-
-      
-      
       
       .img_wrapper {
         height: 300px;
@@ -260,8 +289,12 @@ nav {
         inset: 0;
         width: 100%;
         height: 100%;
-        background-color: var(--hover-color);
+        /* background-color: var(--hover-color); */
+        background-color: rgba(255, 255, 255, 0.944);
         opacity: 0;
+        display: grid;
+        place-items: center;
+        transition: 150ms ease-in-out;
       }
 
       &:hover .overlay-hover {

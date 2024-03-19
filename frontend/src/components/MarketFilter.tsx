@@ -281,9 +281,8 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
       </div>
 
       <div className="search-bar">
-        <label htmlFor="">Search for furniture:</label>
         <form onSubmit={(e) => onSearch(e)}>
-          <input className="input_bar" onChange={
+          <input className="input_bar" placeholder="Search for furniture" onChange={
             (e) => setSearchQuery({...searchQuery, searchString: e.currentTarget.value})
           } type="text" />
           <input className="input_btn" type="submit" value="Search" />

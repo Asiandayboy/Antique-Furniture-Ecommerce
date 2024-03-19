@@ -152,8 +152,8 @@ FRONTEND
 
 
 plans established on 3/5
-- create form for listing furniture [CIP]
-- refine rendering for market listings
+- create form for listing furniture [DONE]
+- refine rendering for market listings [TODO]
   - render images for each listing, etc
 - add styles to MyAddresses [LATER]
 
