@@ -245,7 +245,7 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
 
         <div className="price-range_filter">
           <div>
-            <label htmlFor="">Price Range </label>
+            <label htmlFor="">Price Range: </label>
             <div className="price-ranges">
               <div>
                 <label htmlFor="">min</label>

@@ -265,22 +265,35 @@ nav {
 
       .select_filters {
         display: flex;
+        align-items: center;
+        flex-wrap: wrap;
         gap: 1em;
       }
 
       .price-range_filter {
         width: 100%;
-
+        margin-top: 1em;
         
         > div {
           display: flex;
           gap: 1em;
-          /* justify-content: center; */
 
           .price-ranges >* {
             display: flex;
+            width: 100%;
+          }
+
+          @media (max-width: 500px) {
+            flex-direction: column;
+            gap: .5em;
+
+            .price-ranges >* {
+              flex-direction: column;
+              margin-bottom: 1em;
+            }
           }
         }
+
       }
 
       .clear-filter_btn {
