@@ -1,3 +1,7 @@
+:root {
+  --primary-color: teal;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -17,6 +21,7 @@ ol {
 
 a {
   text-decoration: none;
+  color: black;
 }
 
 button {
@@ -25,16 +30,27 @@ button {
 
 nav {
   padding: 1em 2em;
-  /* background-color: tomato; */
   box-shadow: 0 0 10px grey;
+
+  li {
+    position: relative;
+  }
+  
+  a:hover {
+    color: var(--primary-color);
+  }
+
+
 
   ol {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 
 
     .nav-1, .nav-2 {
       display: flex;
+      align-items: center;
     }
     
     .nav-2 {
@@ -42,19 +58,93 @@ nav {
     }
   }
 
+  .signup_btn {
+    --transition-time: 150ms;
+
+    border: none;
+    padding: .5em 1em;
+    background-color: white;
+    outline: 1px solid rgb(193, 193, 193);
+    box-shadow: 0 3px 5px rgb(199, 199, 199);
+    transition: var(--transition-time) ease-in-out all;
+    
+    a {
+      transition: var(--transition-time) ease-in-out all;
+    }
+
+    &:hover {
+      background-color: teal;
+
+      a {
+        color: white;
+      }
+    }
+
+  }
+  
   .cart-link a {
     display: flex;
     align-items: center;
     gap: .25em;
     color: black;
-
+    
     &:hover {
-      color: rgb(221, 61, 33);
+      color: var(--primary-color);
     }
 
-    svg {
+    
+    .cart-icon {
       stroke-width: 1.5;
-      height: 20px;
+      height: 100%;
+    }
+  }
+
+  @media (min-width: 650px) {
+    .hamburger-icon {
+      display: none;
+    }
+  }
+
+  @media (max-width: 650px) {
+    ol {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      
+      gap: 1em;
+
+      .nav-1 {
+        display: none;
+        align-self: start;
+      }
+
+      .nav-2 {
+        display: none;
+        gap: 1em;
+        align-self: start;
+        align-items: start;
+      }
+
+      .hamburger-icon {
+        align-self: start;
+        cursor: pointer;
+        height: 100%;
+        display: block;
+        stroke-linecap: square;
+  
+        &:hover ~ .nav-1,
+        &:hover ~ .nav-2 {
+          display: flex;
+          flex-direction: column;
+        }
+      }
+
+      .cart-link {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
     }
   }
 }
@@ -216,6 +306,7 @@ nav {
     padding: 1em 0;
 
     .furniture-listing {
+      --sold-color: teal;
       --background-color: #ffffff;
       --hover-color: rgba(43, 43, 43, 0.233);
 
@@ -248,9 +339,9 @@ nav {
         .listing-bought {
           font-size: 1.1rem;
           padding: .25em .5em;
-          outline: 2px solid rgb(255, 38, 0);
+          outline: 2px solid var(--sold-color);
           margin-left: .5em;
-          color: rgb(255, 38, 0);
+          color: var(--sold-color);
           font-weight: bold;
         }
       }

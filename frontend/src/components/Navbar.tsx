@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useAuthContext } from "../contexts/authContext"
 import { useShoppingCartContext } from "../contexts/shoppingCartContext"
 import CartIcon from "../assets/CartIcon"
+import HamburgerIcon from "../assets/HamburgerIcon"
 
 type Props = {
   // isLoggedIn: boolean
@@ -54,49 +55,46 @@ export default function Navbar({  }: Props) {
   return (
     <nav>
       <ol>
+        <HamburgerIcon />
         <li className="nav-1">
           <Link to="/">Home</Link>
         </li>
         <div className="nav-2">
           <li><Link to="/list">List a furniture</Link></li>
-          <li>
-            <Link to="/market">Market</Link>
-          </li>
+          <li><Link to="/market">Market</Link></li>
           {!authState.auth &&
             <>
               <li>
                 <Link to="/login">Login</Link>
               </li>
               <li className="signup-link">
-                <button><Link to="/signup">Signup</Link></button>
+                <button className="signup_btn"><Link to="/signup">Signup</Link></button>
               </li>
             </>
             ||
-            <>
-              <li>
-                <div className="acc-dropdown">
-                  <Link className="acc-dropdown_btn" to="/dashboard">Account</Link>
-                  <div className="acc-dropdown-content">
-                    <div className="acc-balance">Balance: $666.000</div>
-                    <Link to="/dashboard">Account</Link>
-                    <Link to="/dashboard/purchase-history">Purchase History</Link>
-                    <Link to="/dashboard/furniture-listings">Furniture Listings</Link>
-                    <Link to="/dashboard/addresses">My Addresses</Link>
-                    <Link to="" onClick={
-                      (e) => onLogoutClick(e)
-                    } className="logout-link">Logout</Link>
-                  </div>
+            <li>
+              <div className="acc-dropdown">
+                <Link className="acc-dropdown_btn" to="/dashboard">Account</Link>
+                <div className="acc-dropdown-content">
+                  <div className="acc-balance">Balance: $666.000</div>
+                  <Link to="/dashboard">Account</Link>
+                  <Link to="/dashboard/purchase-history">Purchase History</Link>
+                  <Link to="/dashboard/furniture-listings">Furniture Listings</Link>
+                  <Link to="/dashboard/addresses">My Addresses</Link>
+                  <Link to="" onClick={
+                    (e) => onLogoutClick(e)
+                  } className="logout-link">Logout</Link>
                 </div>
-              </li>
-            </>
+              </div>
+            </li>
           }
-          <li className="cart-link">
-            <Link to="/shopping-cart">
-              <CartIcon />
-              <div>Cart ({Object.keys(shoppingCart.cart).length})</div>
-            </Link>
-          </li>
         </div>
+        <li className="cart-link">
+          <Link to="/shopping-cart">
+            <CartIcon />
+            <div>Cart ({Object.keys(shoppingCart.cart).length})</div>
+          </Link>
+        </li>
       </ol>
     </nav>
   )
