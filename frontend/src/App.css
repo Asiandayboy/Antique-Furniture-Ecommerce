@@ -165,6 +165,10 @@ nav {
       text-decoration: underline;
     }
   }
+
+  .home-foot-link {
+    color: rgb(175, 175, 175);
+  }
   
   .login-form, .signup-form {
     display: flex;

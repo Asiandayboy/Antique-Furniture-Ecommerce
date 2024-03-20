@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import Navbar from "../components/Navbar"
 
 type SignupInfo = {
   username: string,
@@ -117,6 +118,8 @@ export default function Signup() {
         <div>
           Have an account? <Link to="/login">Log in</Link>
         </div>
+        <br />
+        <Link className="home-foot-link" to="/">Return Home</Link>
       </div>
     </main>
   )

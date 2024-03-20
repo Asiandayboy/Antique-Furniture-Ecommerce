@@ -165,5 +165,11 @@ plans established on 3/5
 - if address is default, send it in request to checkout and substitute it
 over using stripe address collection
 
+3/19
+- styles for List a Furniture
+- styles for dashboard
+- styles for login and signup
+- styles for shopping cart page
+
 
 

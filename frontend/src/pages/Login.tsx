@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
+import Navbar from "../components/Navbar"
 
 type LoginInfo = {
   username: string,
@@ -74,6 +75,8 @@ export default function Login({ setIsLoggedIn }: Props) {
         <div>
           Don't have an account? <Link to="/signup">Sign up</Link>
         </div>
+        <br />
+        <Link className="home-foot-link" to="/">Return Home</Link>
       </div>
     </main>
   )
