@@ -81,39 +81,42 @@ export default function Signup() {
 
   return (
     <main>
-      <form onSubmit={onSubmit}>
+      <div className="signup_wrapper">
+        <form className="signup-form" onSubmit={onSubmit}>
+          <h1>Sign Up</h1>
+          <div className="signup-user">
+            <label htmlFor="username">Username</label>
+            <input placeholder="Username" onChange={
+              (e) => setSignupInfo({...signupInfo, username: e.target.value})  
+            } type="text" name="username" id="username" />
+          </div>
+          <div className="signup-email">
+            <label htmlFor="email">Email</label>
+            <input placeholder="Email" onChange={
+              (e) => setSignupInfo({...signupInfo, email: e.target.value})
+            } type="email" name="email" id="email" />
+          </div>
+          <div className="signup-pass">
+            <label htmlFor="password">Password</label>
+            <input placeholder="Password" onChange={
+              (e) => setSignupInfo({...signupInfo, password: e.target.value})
+            }  type="password" name="password" id="password" />
+          </div>
+          <div className="signup-confirm">
+            <label htmlFor="confirm">Confirm Password</label>
+            <input placeholder="Confirm password" onChange={
+              (e) => setSignupInfo({...signupInfo, confirm: e.target.value})
+            }  type="password" name="confirm" id="confirm" />
+          </div>
+          
+          <button type="submit" name="submit">Signup</button>
+        </form>
         <div>
-          <label htmlFor="username">Username</label>
-          <input onChange={
-            (e) => setSignupInfo({...signupInfo, username: e.target.value})  
-          } type="text" name="username" id="username" />
+          {success && "Successfully signed up!" || resMsg}
         </div>
         <div>
-          <label htmlFor="email">Email</label>
-          <input onChange={
-            (e) => setSignupInfo({...signupInfo, email: e.target.value})
-          } type="email" name="email" id="email" />
+          Have an account? <Link to="/login">Log in</Link>
         </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input onChange={
-            (e) => setSignupInfo({...signupInfo, password: e.target.value})
-          }  type="password" name="password" id="password" />
-        </div>
-        <div>
-          <label htmlFor="confirm">Confirm Password</label>
-          <input onChange={
-            (e) => setSignupInfo({...signupInfo, confirm: e.target.value})
-          }  type="password" name="confirm" id="confirm" />
-        </div>
-        
-        <button type="submit" name="submit">Signup</button>
-      </form>
-      <div>
-        {success && "Successfully signed up!" || resMsg}
-      </div>
-      <div>
-        Have an account? <Link to="/login">Log in</Link>
       </div>
     </main>
   )

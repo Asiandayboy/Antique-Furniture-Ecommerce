@@ -53,24 +53,27 @@ export default function Login({ setIsLoggedIn }: Props) {
 
   return (
     <main>
-      <form onSubmit={onSubmit}>
+      <div className="login_wrapper">
+        <form className="login-form" onSubmit={onSubmit}>
+          <h1>Login</h1>
+          <div className="login-user">
+            <label htmlFor="username">Username</label>
+            <input placeholder="Username" onChange={
+              (e) => setLoginInfo({...loginInfo, username: e.target.value})
+            } type="text" name="username" id="username" />
+          </div>
+          <div className="login-pass">
+            <label htmlFor="password">Password</label>
+            <input placeholder="Password" onChange={
+              (e) => setLoginInfo({...loginInfo, password: e.target.value})
+            } type="password" name="password" id="password" />
+          </div>
+          <button type="submit" name="submit">Login</button>
+        </form>
+        <div>{resMsg}</div>
         <div>
-          <label htmlFor="username">Username</label>
-          <input onChange={
-            (e) => setLoginInfo({...loginInfo, username: e.target.value})
-          } type="text" name="username" id="username" />
+          Don't have an account? <Link to="/signup">Sign up</Link>
         </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input onChange={
-            (e) => setLoginInfo({...loginInfo, password: e.target.value})
-          } type="password" name="password" id="password" />
-        </div>
-        <button type="submit" name="submit">Login</button>
-      </form>
-      <div>{resMsg}</div>
-      <div>
-        Don't have an account? <Link to="/signup">Sign up</Link>
       </div>
     </main>
   )
