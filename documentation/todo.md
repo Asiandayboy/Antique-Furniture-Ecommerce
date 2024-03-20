@@ -166,9 +166,9 @@ plans established on 3/5
 over using stripe address collection
 
 3/19
-- styles for List a Furniture
+- styles for List a Furniture [DONE]
 - styles for dashboard
-- styles for login and signup
+- styles for login and signup [DONE]
 - styles for shopping cart page
 
 
