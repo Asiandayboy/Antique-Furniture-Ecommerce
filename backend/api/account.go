@@ -329,3 +329,37 @@ func (s *Server) HandlePurchaseHistoryItem(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(jsonData))
 }
+
+/*
+Returns all of the user's furniture listings they've listed for sale
+*/
+func (s *Server) HandleGETUserFurnitureListings(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(SessionKey).(*Session)
+
+	listingsCollection := db.GetCollection("listings")
+	cursor, err := listingsCollection.Find(
+		context.Background(),
+		bson.M{"userid": session.Store["userid"]},
+	)
+	if err != nil {
+		http.Error(w, "Failed to fetch user's furniture listings", http.StatusInternalServerError)
+		return
+	}
+
+	var listings []types.FurnitureListing
+	err = cursor.All(context.Background(), &listings)
+	if err != nil {
+		http.Error(w, "Failed to cursor.All listings cursor", http.StatusInternalServerError)
+		return
+	}
+
+	json, err := json.Marshal(listings)
+	if err != nil {
+		http.Error(w, "Failed to encode into JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+
+}

@@ -1613,3 +1613,71 @@ func TestHandlePurchaseHistory(t *testing.T) {
 		})
 	}
 }
+
+func TestHandleGETUserFurnitureListings(t *testing.T) {
+	db.Init()
+	defer db.Close()
+	sessionManager := api.GetSessionManager()
+
+	/*-----------Fake logged in user 1-------------*/
+
+	session1, err := sessionManager.CreateSession(api.SessionTemplate{
+		SessionID: "testtest-test-test-test-testtesttest",
+	})
+	if err != nil {
+		t.Fatal("Failed to create session for testuser1")
+	}
+	userID1, _ := primitive.ObjectIDFromHex("65b094f4a2cb3bf5e40d42d7")
+	session1.Store["userid"] = userID1
+
+	/*----------------------tests--------------------*/
+
+	tests := []struct {
+		name               string
+		sessionID          string
+		userID             primitive.ObjectID
+		expectedStatusCode int
+	}{
+		{
+			name:               "Test 1",
+			sessionID:          session1.SessionID,
+			userID:             userID1,
+			expectedStatusCode: http.StatusOK,
+		},
+	}
+
+	server := api.NewServer(":3000")
+	server.Use("GET /account/furniture_listings", server.HandleGETUserFurnitureListings, api.AuthMiddleware)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := httptest.NewRequest("GET", "/account/furniture_listings", nil)
+			r.AddCookie(&http.Cookie{
+				Name:  api.SESSIONID_COOKIE_NAME,
+				Value: tc.sessionID,
+			})
+
+			w := httptest.NewRecorder()
+
+			server.Mux.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatusCode {
+				t.Fatalf("Expected code: %d, got: %d\n", tc.expectedStatusCode, w.Code)
+			}
+
+			var userFurnitureListings []types.FurnitureListing
+			err := json.Unmarshal(w.Body.Bytes(), &userFurnitureListings)
+			if err != nil {
+				t.Fatalf("Error decoding resulting string: %s\n", err.Error())
+			}
+
+			// check to make sure each returned listing belongs to the user
+			for _, listing := range userFurnitureListings {
+				if listing.UserID != tc.userID {
+					t.Fatalf("Expected listing of UserID: %s, got: %s\n",
+						tc.userID.Hex(), listing.UserID.Hex())
+				}
+			}
+		})
+	}
+
+}
