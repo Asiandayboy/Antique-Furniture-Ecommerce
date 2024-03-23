@@ -138,22 +138,18 @@ FRONTEND
 
 # Planned
 =========
-- CSS styles for login and signup 
-- CSS styles for navbar
-- CSS styles for dashboard
-- populate dashboard with user data 
+- CSS styles for login and signup [DONE]
+- CSS styles for navbar [DONE]
+- CSS styles for dashboard [DONE]
+- populate dashboard with user data [DONE]
 - populate market with user data [DONE]
 - populate MyAddresses with user data [DONE]
-- create component for listing furniture
-- email subscription notification for new listings
-  - backend: write logic
-  - frontend: create button with CSS styles on market page
-- STYLESSSSSSSSSSSSSSSSSSSSSS
+- create component for listing furniture [DONE]
 
 
 plans established on 3/5
 - create form for listing furniture [DONE]
-- refine rendering for market listings [TODO]
+- refine rendering for market listings [DONE]
   - render images for each listing, etc
 - add styles to MyAddresses [LATER]
 
@@ -161,15 +157,22 @@ plans established on 3/5
 3/12 - 3/13
 - add checkout page [DONE]
   - could use some sort of loading????
-- render listings conditionally based on bought or not (SOLD tag)
-- if address is default, send it in request to checkout and substitute it
-over using stripe address collection
+- render listings conditionally based on bought or not (SOLD tag) [DONE]
+
 
 3/19
 - styles for List a Furniture [DONE]
-- styles for dashboard
+- styles for dashboard [DONE]
 - styles for login and signup [DONE]
-- styles for shopping cart page
+- styles for shopping cart page [TODO]
 
 
+3/22
+- SUBSCRIBE!!!!!!!!!!
+  - email subscription notification for new listings
+    - backend: write logic
+    - frontend: create button with CSS styles on market page
+
+- if address is default, send it in request to checkout and substitute it
+over using stripe address collection
 
