@@ -1,5 +1,7 @@
 :root {
   --primary-color: teal;
+  --primary-darker-color: rgb(89, 140, 140);
+  
 }
 
 *, *::before, *::after {
@@ -957,7 +959,61 @@ nav {
   }
 }
 
+.dashboard_wrapper {
+  /* border: 1px solid black; */
+  width: min(95%, 1000px);
+  margin: 0 auto;
+  padding: 1em;
 
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
+
+    > .dashboard-grid-item {
+      outline: 1px dashed rgb(140, 140, 140);
+      padding: 1.5em;
+      cursor: pointer;
+      border-radius: 4px;
+
+      height: 125px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1em;
+
+
+      &:hover {
+        outline: 2px solid var(--primary-color);
+        
+        div {
+          color: var(--primary-color);
+        }
+        .subtext {
+          color: var(--primary-darker-color);
+        }
+        svg {
+          color: var(--primary-color);
+        }
+      }
+
+      > svg {
+      }
+
+      > div {
+        width: 80%;
+        /* border: 1px solid black; */
+      }
+
+      .subtext {
+        color: rgb(94, 94, 94);
+        font-size: .95rem;
+      }
+    }
+
+  }
+}
 
 
 
