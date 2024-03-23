@@ -19,12 +19,15 @@ import { Cart, ShoppingCartContext } from './contexts/shoppingCartContext';
 import ShoppingCart from './pages/ShoppingCart';
 import CheckoutSuccess from './pages/checkout/CheckoutSuccess';
 import CheckoutCanceled from './pages/checkout/CheckoutCanceled';
+import LoginSecurity from './pages/LoginSecurity';
+import { AccountInfo, AccountDataContext } from './contexts/accountDataContext';
 
 
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
   const [cart, setCart] = useState<Cart>({})
+  const [userData, setUserData] = useState<AccountInfo | null>(null)
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn")
@@ -45,39 +48,45 @@ function App() {
       auth: isLoggedIn,
       setAuth: setIsLoggedIn
     }}>
-      <ShoppingCartContext.Provider value={{
-        cart: cart,
-        setCart: setCart,
+      <AccountDataContext.Provider value={{
+        userData: userData,
+        setUserData: setUserData
       }}>
-        <BrowserRouter>
-          <Routes>
-            {/* public routes */}
-            <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
-            <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
-            <Route path='/market/listing/:listingId' element={<DetailedListing />}/>
-            <Route path='/list' element={<ListFurniture />}/>
-            <Route path="/shopping-cart" element={<ShoppingCart />}/>
-            <Route path="/checkout_success" element={<CheckoutSuccess />}/>
-            <Route path="/checkout_cancel" element={<CheckoutCanceled />}/>
+        <ShoppingCartContext.Provider value={{
+          cart: cart,
+          setCart: setCart,
+        }}>
+          <BrowserRouter>
+            <Routes>
+              {/* public routes */}
+              <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
+              <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
+              <Route path='/market/listing/:listingId' element={<DetailedListing />}/>
+              <Route path='/list' element={<ListFurniture />}/>
+              <Route path="/shopping-cart" element={<ShoppingCart />}/>
+              <Route path="/checkout_success" element={<CheckoutSuccess />}/>
+              <Route path="/checkout_cancel" element={<CheckoutCanceled />}/>
 
-            {/* Routes only accessible when logged out */}
-            <Route element={<ProtectedRoutes auth={!isLoggedIn} redirect='/dashboard' />}>
-              <Route path='/signup' element={<Signup />} />
-              <Route path='/signup-success' element={<SignupSuccess />} />
-              <Route path='/login' element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-            </Route>
+              {/* Routes only accessible when logged out */}
+              <Route element={<ProtectedRoutes auth={!isLoggedIn} redirect='/dashboard' />}>
+                <Route path='/signup' element={<Signup />} />
+                <Route path='/signup-success' element={<SignupSuccess />} />
+                <Route path='/login' element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+              </Route>
 
-            {/* Routes only accessible when logged in */}
-            <Route element={<ProtectedRoutes auth={isLoggedIn} redirect='/login' />}>
-              <Route path='/dashboard' element={<Dashboard />} />
-              <Route path='/dashboard/purchase-history' element={<PurchaseHistory />} />
-              <Route path='/dashboard/purchase-history/:orderId' element={<PurchaseHistoryDetails />} />
-              <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
-              <Route path='/dashboard/addresses' element={<MyAddresses />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </ShoppingCartContext.Provider>
+              {/* Routes only accessible when logged in */}
+              <Route element={<ProtectedRoutes auth={isLoggedIn} redirect='/login' />}>
+                <Route path='/dashboard' element={<Dashboard />} />
+                <Route path='/dashboard/purchase-history' element={<PurchaseHistory />} />
+                <Route path='/dashboard/purchase-history/:orderId' element={<PurchaseHistoryDetails />} />
+                <Route path='/dashboard/furniture-listings' element={<FurnitureListings />} />
+                <Route path='/dashboard/addresses' element={<MyAddresses />} />
+                <Route path='dashboard/login-security' element={<LoginSecurity />}/>
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ShoppingCartContext.Provider>
+      </AccountDataContext.Provider>
     </AuthContext.Provider>
   )
 }
