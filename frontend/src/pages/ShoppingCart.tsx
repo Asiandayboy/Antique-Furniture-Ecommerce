@@ -68,41 +68,38 @@ export default function ShoppingCart() {
       <Navbar />
       <div className="shopping-cart_wrapper">
         <h1>Shopping Cart</h1>
-        <div className="cart_wrapper">
-          <div className="cart-items_wrapper">
-            {
-              Object.entries(cart).map(([key, item]) => (
-                <CartItem {...item} key={key}/>
-              ))
-            }
-          </div>
-          <div className="cart-info_wrapper">
-            <div>
-              <div className="cart-totals">
-                {
-                  Object.values(cart).map((item) => (
-                    <div>
-                      <div>{item.title}</div>
-                      <div>${item.cost}</div>
-                    </div>
-                  ))
-                }
-              </div>
-              <div className="cart-subtotal">Subtotal: ${getSubtotal()}</div>
+        {
+          Object.entries(cart).length > 0 &&
+          <div className="cart_wrapper">
+            <div className="cart-items_wrapper">
+              {
+                Object.entries(cart).map(([key, item]) => (
+                  <CartItem {...item} key={key}/>
+                ))
+              }
             </div>
-            {
-              Object.entries(cart).length > 0 &&
-              <button 
-                className="checkout_btn"
-                onClick={sendCheckoutRequest}
-              >Checkout</button>
-              ||
-              <div className="no-checkout_btn">
-                There are no items in your cart
+            <div className="cart-info_wrapper">
+              <div>
+                <div className="cart-totals">
+                  {
+                    Object.values(cart).map((item) => (
+                      <div>
+                        <div>{item.title}</div>
+                        <div>${item.cost}</div>
+                      </div>
+                    ))
+                  }
+                </div>
+                <div className="cart-subtotal">Subtotal: ${getSubtotal()}</div>
               </div>
-            }
+              <button className="checkout_btn" onClick={sendCheckoutRequest}>Checkout</button>
+            </div>
+          </div> 
+          ||
+          <div className="no-checkout_btn">
+            There are no items in your cart
           </div>
-        </div>
+        }
       </div>
     </>
   )

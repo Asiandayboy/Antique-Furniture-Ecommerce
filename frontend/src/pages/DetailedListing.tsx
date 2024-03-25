@@ -3,13 +3,15 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { FurnitureListing } from "./Market";
 import { useShoppingCartContext } from "../contexts/shoppingCartContext";
+import { convertBase64ToImage } from "../util/image";
+import ImageSlider from "../components/ImageSlider";
 
 export default function DetailedListing() {
   const [listingData, setListingData] = useState<FurnitureListing>()
   const [addedToCart, setAddedToCart] = useState<boolean>(false)
+  const [imageURLs, setImageURLs] = useState<string[]>([])
 
   const { listingId } = useParams()
-
   const { cart, setCart } = useShoppingCartContext()
 
   // fetch individual furniture listing data from API
@@ -31,19 +33,15 @@ export default function DetailedListing() {
     })
     .then((data: FurnitureListing) => {
       setListingData(data)
+      const urls = data.images.map(imageBase64 => convertBase64ToImage(imageBase64));
+      setImageURLs(urls)
       console.log("detailed listing:", data)
     })
     .catch((err: Error) => {
       console.error(err)
     })
-
-
   }, [])
 
-
-  useEffect(() => {
-    console.log("SHopping cart:", cart)
-  }, [cart])
 
 
   function onAddToCart(e: React.MouseEvent<HTMLButtonElement>) {
@@ -65,25 +63,34 @@ export default function DetailedListing() {
   return (
     <>
       <Navbar />
-      <div>
-        <div>
-          <div>Title: {listingData?.title}</div>
-          <div>Description: {listingData?.description}</div>
-          <div>Cost: {listingData?.cost}</div>
-          <div>Material: {listingData?.material}</div>
-          <div>Style: {listingData?.style}</div>
-          <div>Type: {listingData?.type}</div>
-          <div>Condition: {listingData?.condition}</div>
-          <div>Bought: {String(listingData?.bought)}</div>
-          <div>ListingID: {listingData?.listingID}</div>
-          <div>SellerID: {listingData?.userID}</div>
+      <div className="detailed-listing_wrapper">
+        {imageURLs.length > 0 && <ImageSlider imageURLs={imageURLs}/>}
+        <div className="detailed-listing-info">
+          <div className="detailed-listing-main">
+            <h1>{listingData?.title}</h1>
+            <div>{listingData?.description}</div>
+            {
+              listingData?.bought && <div className="detailed-bought">SOLD</div> 
+              ||
+              <div className="detailed-cost">${listingData?.cost}</div>
+            }
+          </div>
+          <div className="listing-metadata">
+            <div className="listing-type">Type: <div>{listingData?.type}</div></div>
+            <div className="listing-material">Material: <div>{listingData?.material}</div></div>
+            <div className="listing-condition">Condition: <div>{listingData?.condition}</div></div>
+            <div className="listing-style">Style: <div>{listingData?.style}</div></div>
+          </div>
+          {
+            !listingData?.bought &&
+            (
+              !addedToCart &&
+              <button className="add-to-cart_btn" onClick={onAddToCart}>Add to cart</button>
+              ||
+              <div className="post-cart-add_btn">Listing has been added to cart</div>
+            )
+          }
         </div>
-        {
-          !addedToCart &&
-          <button className="add-to-cart_btn" onClick={onAddToCart}>Add to cart</button>
-          ||
-          <div className="post-cart-add_btn">Listing has been added to cart</div>
-        }
       </div>
     </>
   )
