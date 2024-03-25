@@ -93,7 +93,7 @@ function App() {
               {/* public routes */}
               <Route path="/" element={<Home isLoggedIn={isLoggedIn} />}/>
               <Route path='/market' element={<Market isLoggedIn={isLoggedIn} />} />
-              <Route path='/market/listing/:listingId' element={<DetailedListing />}/>
+              <Route path='/market/:listingId' element={<DetailedListing />}/>
               <Route path='/list' element={<ListFurniture />}/>
               <Route path="/shopping-cart" element={<ShoppingCart />}/>
               <Route path="/checkout_success" element={<CheckoutSuccess />}/>

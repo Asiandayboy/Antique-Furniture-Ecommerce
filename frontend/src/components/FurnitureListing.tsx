@@ -25,7 +25,7 @@ export default function FurnitureListing(data: Props) {
   const navigate = useNavigate()
 
   function onClick(e: React.MouseEvent<HTMLDivElement>) {
-    navigate(`/market/listing/${data.listingID}`)
+    navigate(`/market/${data.listingID}`)
   }
 
   useEffect(() => {
