@@ -1157,7 +1157,118 @@ nav {
 
 }
 
+.your-furniture-listings_wrapper {
+  width: min(90%, 1000px);
+  margin: 0 auto;
+
+  .listings_wrapper {
+
+    .your-listing_wrapper {
+      --sold-color: teal;
+      --background-color: #ffffff;
+
+      outline: 1px solid rgb(193, 193, 193);
+      background-color: var(--background-color);
+      /* box-shadow: 0 0px 10px rgb(225, 225, 225); */
+      padding: 1em;
+
+      .your-listing-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1em;
+        margin-bottom: 1em;
+
+        > div {
+          display: flex;
+          gap: 1em;
+        }
+
+        .img_wrapper {
+          height: 150px;
+          width: 150px;
+          aspect-ratio: 1;
+          
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
 
 
+        .listing-title {
+          margin: 0;
+          margin-bottom: .5em;
+          font-size: 1.25rem;
+        }
+
+        .listing-cost {
+          align-self: flex-start;
+          font-size: 1.1rem;
+          box-shadow: 0 0px 5px rgb(225, 225, 225);
+          padding: .25em .5em;
+          outline: 1px solid rgb(193, 193, 193);
+          margin-left: .5em;
+        }
+
+        .listing-bought {
+          align-self: flex-start;
+          font-size: 1.1rem;
+          padding: .25em .5em;
+          outline: 2px solid var(--sold-color);
+          margin-left: .5em;
+          color: var(--sold-color);
+          font-weight: bold;
+        }
+
+      }
+      
+      
+      .listing-metadata {
+        display: flex;
+        font-size: .8rem;
+        align-items: center;
+        gap: .5em;
+        margin-top: .5em;
+        flex-wrap: wrap;
+
+        >* {
+          outline: 1px solid rgb(193, 193, 193);
+          padding: .5em;
+          background-color: #f9f9f9;
+          box-shadow: 0 3px 3px rgb(225, 225, 225);
+
+        }
+      }
+      
+      @media (max-width: 500px) {
+        .your-listing-main {
+          flex-direction: column;
+
+          > div {
+            flex-direction: column;
+            align-items: center;
+          }
+
+          text-align: center;
+
+          .listing-cost {
+            align-self: center;
+          }
+
+          .img_wrapper {
+            width: 100%;
+          }
+
+        }
+
+        .listing-metadata {
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
 
 

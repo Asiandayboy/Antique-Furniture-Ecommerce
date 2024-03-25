@@ -9,52 +9,10 @@ type Props = {
 }
 
 
-type Info = {
-  UserID: string,
-  username: string,
-  email: string,
-  password: string,
-  phone: string,
-  sessionId: string,
-  balance: string
-}
-
 
 export default function Dashboard({  }: Props) {
-  const { userData, setUserData } = useAccountDataContext()
 
   const navigate = useNavigate()
-
-  async function getAccountData() {
-    try {
-      const res = await fetch("http://localhost:3000/account", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        mode: "cors",
-        credentials: "include",
-      })
-
-      if (!res.ok) {
-        const msg = await res.text()
-        throw new Error(msg)
-      } else {
-        const data = await res.json()
-        console.log("account data:", data)
-        setUserData({...data})
-      }
-
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  useEffect(() => {
-    getAccountData()
-  }, [])
-
-
 
   return (
     <>
@@ -107,13 +65,6 @@ export default function Dashboard({  }: Props) {
                 </div>
               </div>
             </div>
-            {/* <div>UserID: {userInfo?.UserID}</div>
-            <div>Username: {userInfo?.username}</div>
-            <div>Email: {userInfo?.email}</div>
-            <div>Password: {userInfo?.password}</div>
-            <div>Phone: {userInfo?.phone}</div>
-            <div>SessionID: {userInfo?.sessionId}</div>
-            <div>Balance: {userInfo?.balance}</div> */}
           </div>
         </div>
       </main>

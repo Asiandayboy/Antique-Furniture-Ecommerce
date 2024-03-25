@@ -79,7 +79,7 @@ export default function Navbar({  }: Props) {
                   <div className="acc-balance">Balance: $666.000</div>
                   <Link to="/dashboard">Account</Link>
                   <Link to="/dashboard/purchase-history">Purchase History</Link>
-                  <Link to="/dashboard/furniture-listings">Furniture Listings</Link>
+                  <Link to="/dashboard/furniture-listings">My Furniture Listings</Link>
                   <Link to="/dashboard/addresses">My Addresses</Link>
                   <Link to="" onClick={
                     (e) => onLogoutClick(e)

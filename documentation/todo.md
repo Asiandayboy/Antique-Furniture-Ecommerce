@@ -164,15 +164,22 @@ plans established on 3/5
 - styles for List a Furniture [DONE]
 - styles for dashboard [DONE]
 - styles for login and signup [DONE]
-- styles for shopping cart page [TODO]
+- styles for shopping cart page [DONE] - *3/25*
 
 
 3/22
-- SUBSCRIBE!!!!!!!!!!
+- SUBSCRIBE!!!!!!!!!! [TODO]
   - email subscription notification for new listings
     - backend: write logic
     - frontend: create button with CSS styles on market page
 
 - if address is default, send it in request to checkout and substitute it
-over using stripe address collection
+over using stripe address collection [TDOD]
+
+3/25
+- styles for Your Furniture Listings [DONE] - *3/25*
+- styles for detailed view of Furniture listing in Market [TDOD]
+- edit and delete functionality for shipping addresses and styles [TDOD]
+- add a check in backend checkout to check if item is not bought
+before processing. Or just don't cuz why be extra
 
