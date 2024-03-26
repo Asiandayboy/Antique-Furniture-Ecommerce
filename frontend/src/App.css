@@ -576,34 +576,109 @@ nav {
 }
 
 
-.address_wrapper {
-  border: 2px solid rgb(156, 37, 37);
-
+.my-address_wrapper {
   max-width: min(80%, 800px);
-  margin: 0 auto;
+  margin: 3em auto;
+  /* border: 2px solid rgb(156, 37, 37); */
   padding: 1em;
 
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1em;
-
-  >* {
-    border-radius: 10px;
-    padding: 1em;
-    aspect-ratio: 1;
+  h1 {
+    margin: 1em 0;
+    margin-top: 0;
   }
-
-  .add-addr_btn {
-    background-color: white;
-    border: 2px dashed rgb(185, 185, 185);
-
-    &:hover {
-      background-color: rgb(228, 228, 228);
+  
+  .addresses {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
+    
+  
+    >* {
+      border-radius: 10px;
+      padding: 1em;
+      aspect-ratio: 1;
     }
-  }
+  
+    .add-addr_btn {
+      background-color: white;
+      border: 2px dashed rgb(185, 185, 185);
+  
+      &:hover {
+        background-color: rgb(228, 228, 228);
+      }
+    }
+  
+    .address-item {
+      box-shadow: 0 5px 5px rgb(193, 193, 193);
+      outline: 1px solid rgb(147, 147, 147);
+  
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+  
+      .address-buttons > button {
+        margin-right: .5em;
+  
+        border: none;
+        padding: .5em 1em;
+        outline: 1px dashed grey;
+        border-radius: 5px;
+        background-color: f8f8f8;
+        
+  
+        &:hover {
+          background-color: teal;
+          color: white;
+          outline: none;
+        }
+      }
 
-  div {
-    background-color: orange;
+      .address-delete-dialog {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.267);
+        border: none;
+
+        display: grid;
+        place-items: center;
+
+
+        > div {
+          background-color: white;
+          display: flex;
+          flex-direction: column;
+          gap: 1em;
+          padding: 2em;
+          align-items: center;
+          border: 1px solid rgb(133, 133, 133);
+          font-size: 1.5rem;
+          border-radius: 5px;
+          background-color: white;
+
+          .dialog-buttons {
+            display: flex;
+            gap: .5em;
+
+            button {
+              width: 100px;
+              padding: .5rem 2rem;
+              border: none;
+              outline: 1px dashed rgb(168, 168, 168);
+              border-radius: 5px;
+              box-shadow: 0 0px 5px rgb(209, 209, 209);
+
+              &:hover {
+                background-color: teal;
+                color: white;
+                border: none;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 

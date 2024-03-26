@@ -179,7 +179,8 @@ over using stripe address collection [TDOD]
 3/25
 - styles for Your Furniture Listings [DONE] - *3/25*
 - styles for detailed view of Furniture listing in Market [DONE] - *3/25*
-- edit and delete functionality for shipping addresses and styles [TDOD]!!!!
+- edit and delete functionality for shipping addresses and styles [DONE] - *3/26*
+  - input validation for POST [EH]
 - add a check in backend checkout to check if item is not bought [TODO?]
 before processing. Or just don't cuz why be extra
 - edit functionality for LoginSecurity and styles [TODO]
