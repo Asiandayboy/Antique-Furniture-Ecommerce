@@ -100,6 +100,7 @@ func (s *Server) Start() {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://127.0.0.1:5173"},
 		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"GET", "HEAD", "POST", "PUT", "DELETE"},
 		AllowCredentials: true,
 	})
 
