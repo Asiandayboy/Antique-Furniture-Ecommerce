@@ -72,7 +72,7 @@ function App() {
     if (isLoggedIn) {
       getAccountData()
     }
-  }, [])
+  }, [isLoggedIn])
 
 
   return (

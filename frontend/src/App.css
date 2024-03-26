@@ -1304,11 +1304,44 @@ nav {
       background-color: rgb(183, 183, 183, .5);
       color: white;
       opacity: 0;
+      cursor: pointer;
     }
 
     &:hover .img-hover {
       opacity: 1;
     }
+
+  }
+  
+  .expanded-img-closer {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    inset: 0;
+    background-color: rgba(34, 34, 34, 0.6);
+    border: none;
+    cursor: pointer;
+  }
+
+  .expanded-img {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    width: min(85%, 800px);
+    border: none;
+    padding: .5em;
+
+    img {
+      margin: 0 auto;
+      opacity: 1;
+      height: fit-content;
+      object-fit: contain;
+      object-position: center;
+      user-select: none;
+      cursor: default;
+      pointer-events: none;
+    }
+
   }
   
   .slider-mini {
