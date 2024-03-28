@@ -164,6 +164,18 @@ func (s *Server) HandleAddressGET(w http.ResponseWriter, r *http.Request) {
 	w.Write(json)
 }
 
+func removeDefaultAddress(userID primitive.ObjectID) error {
+	addressesCollection := db.GetCollection("shippingAddresses")
+
+	_, err := addressesCollection.UpdateOne(
+		context.Background(),
+		bson.M{"userid": userID, "default": true},
+		bson.M{"$set": bson.M{"default": false}},
+	)
+
+	return err
+}
+
 // Used to create a new address
 func (s *Server) HandleAddressPOST(w http.ResponseWriter, r *http.Request) {
 	var address types.ShippingAddress
@@ -179,6 +191,19 @@ func (s *Server) HandleAddressPOST(w http.ResponseWriter, r *http.Request) {
 	address.UserID = session.Store["userid"].(primitive.ObjectID)
 
 	addressesCollection := db.GetCollection("shippingAddresses")
+
+	/*
+		allow the newly added address to override old default address as the
+		new default address if default = true
+	*/
+	if address.Default {
+		err = removeDefaultAddress(address.UserID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	_, err = addressesCollection.InsertOne(context.Background(), address)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -211,6 +236,20 @@ func (s *Server) HandleAddressPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	addressesCollection := db.GetCollection("shippingAddresses")
+	session := r.Context().Value(SessionKey).(*Session)
+
+	/*
+		allow the newly added address to override old default address as the
+		new default address if default = true
+	*/
+	if changes.Changes.NewDefault {
+		err = removeDefaultAddress(session.Store["userid"].(primitive.ObjectID))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	res, err := addressesCollection.UpdateByID(
 		context.Background(),
 		addressID,
