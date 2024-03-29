@@ -174,17 +174,16 @@ plans established on 3/5
     - frontend: create button with CSS styles on market page
 
 - if address is default, send it in request to checkout and substitute it
-over using stripe address collection [TDOD]
+over using stripe address collection [CANT] [apparently, you cant prefill the stripe form]
 
 3/25
 - styles for Your Furniture Listings [DONE] - *3/25*
 - styles for detailed view of Furniture listing in Market [DONE] - *3/25*
 - edit and delete functionality for shipping addresses and styles [DONE] - *3/26*
   - input validation for POST [EH]
-- add a check in backend checkout to check if item is not bought [TODO?]
-before processing. Or just don't cuz why be extra
-- edit functionality for LoginSecurity and styles [TODO]
+- edit functionality for LoginSecurity and styles [DONE] *3/29/24*
 
 3/26
 - LATEST FURNITURE LISTED![TODO]
+- styles for detailed purchase history
 
