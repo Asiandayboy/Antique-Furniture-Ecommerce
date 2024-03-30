@@ -167,23 +167,22 @@ plans established on 3/5
 - styles for shopping cart page [DONE] - *3/25*
 
 
-3/22
-- SUBSCRIBE!!!!!!!!!! [TODO]
-  - email subscription notification for new listings
-    - backend: write logic
-    - frontend: create button with CSS styles on market page
-
-- if address is default, send it in request to checkout and substitute it
-over using stripe address collection [CANT] [apparently, you cant prefill the stripe form]
-
 3/25
 - styles for Your Furniture Listings [DONE] - *3/25*
 - styles for detailed view of Furniture listing in Market [DONE] - *3/25*
 - edit and delete functionality for shipping addresses and styles [DONE] - *3/26*
-  - input validation for POST [EH]
 - edit functionality for LoginSecurity and styles [DONE] *3/29/24*
 
 3/26
-- LATEST FURNITURE LISTED![TODO]
 - styles for detailed purchase history [DONE] *3/29/24*
+
+
+
+# Things left to do
+- LATEST FURNITURE LISTED [DONE] *3/30/24*
+- SUBSCRIBE!!!!!!!!!! [TODO]
+  - email subscription notification for new listings
+    - backend: write logic
+    - frontend: create button with CSS styles on market page
+- input validation for POST? [MAYBE]
 

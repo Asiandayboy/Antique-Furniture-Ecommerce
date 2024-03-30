@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react"
 import Navbar from "../components/Navbar"
 import { Link } from "react-router-dom"
+import { FurnitureListing } from "./Market"
+import LatestListing from "../components/LatestListing"
 
 type Props = {
   isLoggedIn: boolean
@@ -7,6 +10,40 @@ type Props = {
 
 
 export default function Home({ isLoggedIn }: Props) {
+  const [mostRecentListing, setMostRecentListing] = useState<FurnitureListing | null>(null)
+
+
+
+  useEffect(() => {
+
+    const fetchMostRecentListing = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/recent_listing", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+        })
+
+        if (!res.ok) {
+          const msg = await res.text()
+          throw new Error(msg)
+        }
+
+        const data = await res.json()
+        setMostRecentListing(data)
+        console.log("recent listing:", data)
+
+      } catch(err) {
+        console.error(err)
+      }
+    }
+
+    fetchMostRecentListing()
+
+
+  }, [])
+
   return (
     <>
       <Navbar />
@@ -20,11 +57,10 @@ export default function Home({ isLoggedIn }: Props) {
               </Link>
             </div>
           </div>
-          <div className="hero-latest">
-            <div className="hero-latest_header">Latest Furniture Listed</div>
-            <div className="hero-img">
-            </div>
-          </div>
+          {
+            mostRecentListing &&
+            <LatestListing listing={mostRecentListing}/>
+          }
         </section>
       </main>
     </>

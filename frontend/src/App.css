@@ -236,18 +236,20 @@ nav {
 .hero-wrapper {
   display: flex;
   max-width: min(80%, 1250px);
-  height: 500px;
   margin: 0 auto;
   margin-top: 5em;
+  margin-bottom: 5em;
 
-  border: 1px solid black;
+  box-shadow: 0 0px 10px rgb(209, 209, 209);
+  border-radius: 10px;
 
   .hero-info {
     width: 50%;
+    text-align: center;
 
     div {
       width: 80%;
-      margin: 8em auto;
+      margin: 13em auto;
 
       .begin-shopping_btn {
         padding: 1em 2em;
@@ -256,6 +258,11 @@ nav {
         cursor: pointer;
         font-size: 1.2rem;
         background-color: rgb(255, 184, 92);
+
+        &:hover {
+          background-color: var(--primary-color);
+          color: white;
+        }
       }
     }
 
@@ -265,28 +272,37 @@ nav {
 
   }
 
-  .hero-latest {
-    padding: 2em;
-    width: 50%;
+  .latest-listing_wrapper {
+    --padding: 1em;
+    --h2-margin-bot: .5em;
+    padding: var(--padding);
 
     display: flex;
     flex-direction: column;
-    gap: 1em;
-
-
-    .hero-latest_header {
-      font-size: 2rem;
-      text-align: center;
+    flex-grow: 1;
+    align-items: center;
+  
+    .image-slider_wrapper {
+      width: 450px;
     }
 
-    .hero-img {
-      height: 100%;
-      background-image: url("https://th.bing.com/th/id/OIP.72udFR8d05ufhLy_dsx1sAHaFg?rs=1&pid=ImgDetMain");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+    a {
+      margin: 1em 0;
+      text-decoration: underline;
+
+      &:hover {
+        color: var(--primary-color)
+      }
+    }
+    
+    h2 {
+      margin: 1em 0;
+      margin-bottom: 0;
+      text-align: center;
+      font-size: 2rem;
     }
   }
+
 
 
   @media (max-width: 1000px) {
@@ -305,15 +321,6 @@ nav {
       }
     }
 
-    .hero-latest {
-      padding: 1em;
-      width: 100%;
-
-      .hero-img {
-        height: 300px;
-        background-size: contain;
-      }
-    }
   }
 
 }
@@ -1729,3 +1736,4 @@ nav {
 
   }
 }
+
