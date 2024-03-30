@@ -185,5 +185,5 @@ over using stripe address collection [CANT] [apparently, you cant prefill the st
 
 3/26
 - LATEST FURNITURE LISTED![TODO]
-- styles for detailed purchase history
+- styles for detailed purchase history [DONE] *3/29/24*
 
