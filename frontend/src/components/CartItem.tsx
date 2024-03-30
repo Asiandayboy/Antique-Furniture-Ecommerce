@@ -1,10 +1,21 @@
+import { useShoppingCartContext } from "../contexts/shoppingCartContext"
 import { FurnitureListing } from "../pages/Market"
 import { convertBase64ToImage } from "../util/image"
 
 type Props = FurnitureListing
 
 export default function CartItem(item: Props) {
+
+  const { cart, setCart }  = useShoppingCartContext()
+
   const imgURL = convertBase64ToImage(item.images[0])
+
+  function removeFromCart() {
+    const updatedCart = { ...cart }
+    delete updatedCart[item.listingID]
+
+    setCart(updatedCart)
+  }
 
 
   return (
@@ -16,7 +27,10 @@ export default function CartItem(item: Props) {
           <div>{item.description}</div>
         </div>
       </div>
-      <div className="cart-cost">Cost: ${item.cost}</div>
+      <div className="cart-side">
+        <div>Cost: ${item.cost}</div>
+        <button onClick={removeFromCart}>Remove from cart</button>
+      </div>
     </div>
   )
 }

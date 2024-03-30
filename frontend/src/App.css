@@ -1115,12 +1115,13 @@ nav {
       .cart-item {
         padding: 1em;
         border: 1px solid var(--grey);
-  
+
         display: flex;
         justify-content: space-between;
         gap: 2em;
   
         .cart-main {
+          /* border: 1px solid tomato; */
           display: flex;
           gap: 1em;
 
@@ -1137,9 +1138,29 @@ nav {
           }
         }
   
-        .cart-cost {
+        .cart-side {
+          /* border: 1px solid tomato; */
           width: max-content;
           text-wrap: nowrap;
+
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+
+          button {
+            padding: .5em 1em;
+            background-color: white;
+            border: none;
+            outline: 1px dashed rgb(158, 158, 158);
+            box-shadow: 0 0 5px rgb(223, 223, 223);
+            border-radius: 4px;
+
+            &:hover {
+              outline: none;
+              color: white;
+              background-color: black;
+            }
+          }
         }
   
         
@@ -1228,8 +1249,10 @@ nav {
         text-align: center;
       }
 
-      .cart-cost {
+      .cart-side {
+        text-align: center;
         align-self: center;
+        gap: 1em;
       }
     }
   }

@@ -185,4 +185,5 @@ plans established on 3/5
     - backend: write logic
     - frontend: create button with CSS styles on market page
 - input validation for POST? [MAYBE]
+- delete button for shopping cart items [DONE] *3/30/24*
 
