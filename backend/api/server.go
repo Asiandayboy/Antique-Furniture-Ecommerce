@@ -55,6 +55,7 @@ func (s *Server) Start() {
 	s.Use("POST /list_furniture", s.HandleListFurniture, AuthMiddleware, logEndpointHit)
 	s.Use("GET /get_furnitures", s.HandleGetFurnitures, logEndpointHit)
 	s.Use("GET /get_furniture/{listingID}", s.HandleGetFurniture, logEndpointHit)
+	s.Use("GET /recent_listing", s.HandleGetMostRecentListing, logEndpointHit)
 
 	s.Use("GET /account", s.HandleAccountGET, AuthMiddleware, logEndpointHit)
 	s.Use("PUT /account", s.HandleAccountPUT, AuthMiddleware, logEndpointHit)

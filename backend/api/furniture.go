@@ -13,6 +13,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
@@ -255,5 +256,33 @@ func (s *Server) HandleGetFurnitures(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
+}
 
+/*
+Returns the JSON data of the most recently posted furniture listing
+*/
+func (s *Server) HandleGetMostRecentListing(w http.ResponseWriter, r *http.Request) {
+	var listing types.FurnitureListing
+	listingsCollection := db.GetCollection("listings")
+
+	options := options.FindOne().SetSort(map[string]int{"_id": -1})
+
+	err := listingsCollection.FindOne(
+		context.Background(),
+		bson.M{},
+		options,
+	).Decode(&listing)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(listing)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
