@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { OrderItem, ProductItem } from "./PurchaseHistory";
 import { FurnitureListing } from "./Market";
+import HistoryDetail from "../components/HistoryDetail";
 
 
 /*
@@ -18,6 +19,7 @@ which is the details of the listing itself
 
 
 export default function PurchaseHistoryDetails() {
+  const [order, setOrder] = useState<OrderItem>()
   const [orderItems, setOrderItems] = useState<FurnitureListing[]>([])
 
   const { orderId } = useParams()
@@ -69,6 +71,7 @@ export default function PurchaseHistoryDetails() {
 
         const order: OrderItem = await res.json()
         const orderItems: FurnitureListing[] = await fetchOrderItems(order.items)
+        setOrder(order)
         setOrderItems(orderItems)
 
       } catch (err) {
@@ -85,27 +88,20 @@ export default function PurchaseHistoryDetails() {
     <>
       <Navbar />
       <main>
-        <div>PurchaseHistoryDetails</div>
-        <div>
-          <br />
-          {orderItems.map((item, i) => (
-              <>
-                <div key={item.listingID + i}>
-                  <div>Title: {item?.title}</div>
-                  <div>Description: {item?.description}</div>
-                  <div>Cost: {item?.cost}</div>
-                  <div>Material: {item?.material}</div>
-                  <div>Style: {item?.style}</div>
-                  <div>Type: {item?.type}</div>
-                  <div>Condition: {item?.condition}</div>
-                  <div>Bought: {String(item?.bought)}</div>
-                  <div>ListingID: {item?.listingID}</div>
-                  <div>SellerID: {item?.userID}</div>
-                </div>
-                <br />
-              </>
-            ))
-          }
+        <div className="purchase-history-detailed_wrapper">
+          <h1>Purchase History Item Details</h1>
+          <div className="history-list_wrapper">
+            {
+              orderItems.map((item, i) => (
+                <HistoryDetail 
+                  data={item} 
+                  key={item.listingID}
+                  datePurchased={order?.datePurchased!}
+                  itemNumber={i+1}
+                />
+              ))
+            }
+          </div>
         </div>
       </main>
     </>

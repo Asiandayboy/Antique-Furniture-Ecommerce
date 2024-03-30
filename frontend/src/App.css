@@ -1603,3 +1603,129 @@ nav {
     }
   }
 }
+
+
+.purchase-history-detailed_wrapper {
+  width: min(90%, 1150px);
+  margin: 5em auto;
+
+  .history-list_wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4em;
+
+
+    .history-detail_wrapper {
+      border: 1px solid rgb(211, 211, 211);
+      padding: 2em;
+      box-shadow: 0 5px 10px rgb(214, 214, 214);
+      border-radius: 7px;
+
+      .detail-tag {
+        font-style: italic;
+      }
+
+      .detail-header {
+        margin-bottom: 1em;
+        h2 {
+          font-size: 1.7rem;
+          margin-top: .5em;
+          margin-bottom: .25em;
+        }
+
+        .desc-content {
+          border: 1px dashed rgb(165, 165, 165);
+          padding: .5em;
+          border-radius: 4px;
+
+          span {
+            font-style: italic;
+          }
+        }
+      }
+
+
+      .detail-item {
+
+        > div:nth-child(1) {
+          display: flex;
+          justify-content: space-between;
+          gap: 2em;
+        }
+
+
+        .image-slider_wrapper {
+          width: 50%;
+          
+        }
+  
+        .detail-main {
+          display: flex;
+          flex-direction: column;
+          gap: 1em;
+          width: 50%;
+          /* flex-grow: 1; */
+
+          .detail-orderid {
+            background-color: #f9f9f9;
+
+            padding: 1em;
+            outline: 1px solid rgb(193, 193, 193);
+            box-shadow: 0 3px 3px rgb(186, 186, 186);
+          }
+  
+          .detail-order-info {
+            background-color: #f9f9f9;
+
+            outline: 1px solid rgb(193, 193, 193);
+            box-shadow: 0 3px 3px rgb(186, 186, 186);
+            padding: 1em;
+  
+            display: flex;
+            flex-direction: column;
+            gap: .5em;
+  
+            > div div {
+              outline: 1px solid rgb(193, 193, 193);
+              padding: .25em;
+              border-radius: 4px;
+              box-shadow: 0 2px 3px rgb(207, 207, 207);
+            }
+
+            .info-label {
+              width: 25%;
+            }
+
+            .info-content {
+              width: 75%;
+            }
+  
+            > div {
+              display: flex;
+              gap: .25em;
+              justify-content: space-between;
+            }
+          }
+        }
+  
+        .detail-metadata {
+          display: flex;
+          flex-direction: column;
+
+          > div {
+            padding: .5em 0;
+
+            display: flex;
+            justify-content: space-between;
+
+            outline: 1px solid rgb(193, 193, 193);
+            padding: .5em;
+            background-color: #f9f9f9;
+            box-shadow: 0 3px 3px rgb(186, 186, 186);
+          }
+        }
+      }
+    }
+
+  }
+}
