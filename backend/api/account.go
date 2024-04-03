@@ -402,3 +402,55 @@ func (s *Server) HandleGETUserFurnitureListings(w http.ResponseWriter, r *http.R
 	w.Write(json)
 
 }
+
+/*
+Subscribes the user to receive email updates for every furniture listing posted
+*/
+func (s *Server) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(SessionKey).(*Session)
+
+	usersCollection := db.GetCollection("users")
+
+	res, err := usersCollection.UpdateByID(
+		context.Background(),
+		session.Store["userid"],
+		bson.M{"$set": bson.M{"subscribed": true}},
+	)
+	if res.MatchedCount == 0 {
+		http.Error(w, "No document was found with the userID", http.StatusInternalServerError)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
+}
+
+/*
+Unsubscribes the user to cease email updates
+*/
+func (s *Server) HandleUnsubscribe(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(SessionKey).(*Session)
+
+	usersCollection := db.GetCollection("users")
+
+	res, err := usersCollection.UpdateByID(
+		context.Background(),
+		session.Store["userid"],
+		bson.M{"$set": bson.M{"subscribed": false}},
+	)
+	if res.MatchedCount == 0 {
+		http.Error(w, "No document was found with the userID", http.StatusInternalServerError)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("success"))
+}

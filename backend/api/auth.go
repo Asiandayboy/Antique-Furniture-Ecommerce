@@ -73,6 +73,8 @@ func (s *Server) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	signupInfo.Subscribed = false
+
 	//set balance to 0
 	balance, err := primitive.ParseDecimal128("0")
 	if err != nil {

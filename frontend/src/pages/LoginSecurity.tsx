@@ -2,6 +2,7 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { AccountInfo, useAccountDataContext } from "../contexts/accountDataContext";
 import { getAccountData } from "../util/account";
+import SubscribeButton from "../components/SubscribeButton";
 
 
 
@@ -102,7 +103,7 @@ export default function LoginSecurity() {
     <>
       <Navbar />
       <div className="login-security_wrapper">
-        <h1>LoginSecurity</h1>
+        <h1>Login & Security</h1>
         <div className="loginsec-info">
           {
             editMode == "Email" &&
@@ -158,7 +159,9 @@ export default function LoginSecurity() {
             </div>
           }
         </div>
-
+        <div className="subscription-state">
+          Subscribed: {String(userData?.subscribed)} <SubscribeButton />
+        </div>
       </div>
     </>
   )

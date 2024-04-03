@@ -51,6 +51,8 @@ func (s *Server) Start() {
 	s.Use("POST /login", s.HandleLogin, logEndpointHit)
 	s.Use("POST /signup", s.HandleSignup, logEndpointHit)
 	s.Use("POST /logout", s.HandleLogout, AuthMiddleware, logEndpointHit)
+	s.Use("POST /subscribe", s.HandleSubscribe, AuthMiddleware, logEndpointHit)
+	s.Use("POST /unsubscribe", s.HandleUnsubscribe, AuthMiddleware, logEndpointHit)
 
 	s.Use("POST /list_furniture", s.HandleListFurniture, AuthMiddleware, logEndpointHit)
 	s.Use("GET /get_furnitures", s.HandleGetFurnitures, logEndpointHit)

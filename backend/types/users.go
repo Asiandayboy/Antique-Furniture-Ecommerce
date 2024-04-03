@@ -19,6 +19,7 @@ type User struct {
 	Phone       string               `bson:"phone" json:"phone"`
 	SessionID   string               `bson:"sessionid"`
 	Balance     primitive.Decimal128 `bson:"balance" json:"balance"` // The amount of money from sales in the user's account
+	Subscribed  bool                 `bson:"subscribed" json:"subscribed"`
 }
 
 /*

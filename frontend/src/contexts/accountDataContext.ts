@@ -8,7 +8,8 @@ export type AccountInfo = {
     password: string,
     phone: string,
     sessionId: string,
-    balance: string
+    balance: string,
+    subscribed: boolean
 }
 
 
