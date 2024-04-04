@@ -95,3 +95,25 @@ func FindByIDInListingsCollection(listingId string) (*mongo.SingleResult, error)
 
 	return result, nil
 }
+
+/*
+Returns an array of all subscribed users
+*/
+func GetSubscribers() ([]types.User, error) {
+	usersCollection := GetCollection("users")
+	cursor, err := usersCollection.Find(
+		context.Background(),
+		bson.M{"subscribed": true},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var subscribers []types.User
+	err = cursor.All(context.Background(), &subscribers)
+	if err != nil {
+		return nil, err
+	}
+
+	return subscribers, nil
+}
