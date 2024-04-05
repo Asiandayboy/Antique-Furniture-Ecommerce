@@ -175,6 +175,11 @@ func (s *Server) HandleListFurniture(w http.ResponseWriter, r *http.Request) {
 
 	// insertedID is of type primitive.ObjectID, which is type [12]byte
 	insertedId := result.InsertedID.(primitive.ObjectID)
+	newListing.ListingID = insertedId
+
+	// send an email of the new listing to all subscribers
+	go SendNewListingNotificationEmail(newListing)
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(insertedId.Hex()))
 }

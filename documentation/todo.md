@@ -180,10 +180,12 @@ plans established on 3/5
 
 # Things left to do
 - LATEST FURNITURE LISTED [DONE] *3/30/24*
-- SUBSCRIBE!!!!!!!!!! [TODO]
+- SUBSCRIBE [DONE] *4/4/24* 
   - email subscription notification for new listings
-    - backend: write logic
-    - frontend: create button with CSS styles on market page
+    - backend: write logic 
+      - logic for subscription state [DONE] *4/2/24*
+      - logic for sending email [DONE] *4/4/24*
+    - frontend: create button with CSS styles on market page [DONE] *4/2/24*
 - input validation for POST? [MAYBE]
 - delete button for shopping cart items [DONE] *3/30/24*
 
