@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
 
 type FurnitureListing = {
@@ -55,7 +56,7 @@ function validateForm(
 }
 
 
-async function sendRequest(formData: FormData) {
+async function sendRequest(formData: FormData, navigate: NavigateFunction) {
   try {
     const res = await fetch("http://localhost:3000/list_furniture", {
       method: "POST",
@@ -70,6 +71,8 @@ async function sendRequest(formData: FormData) {
 
     const listingID = await res.text();
     console.log("The ID of your new listing is:", listingID)
+    alert("You have successfully creating a furniture listing.")
+    navigate("/market")
 
   } catch(err) {
     console.error(err)
@@ -84,7 +87,7 @@ export default function ListFurniture() {
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [currentFormErr, setCurrentFormErr] = useState<string | null>()
 
-
+  const navigate = useNavigate()
   
   function onFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -103,7 +106,7 @@ export default function ListFurniture() {
         formData.append("furniture_images", file)
       })
 
-      sendRequest(formData)
+      sendRequest(formData, navigate)
     }
 
   }
