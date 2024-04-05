@@ -44,7 +44,6 @@ export default function FurnitureListing(data: Props) {
           <div className="listing-title">
             {data.title}
           </div>
-          <div className="listing-desc">{data.description}</div>
         </div>
         {
           data.bought && <div className="listing-bought">SOLD</div> 

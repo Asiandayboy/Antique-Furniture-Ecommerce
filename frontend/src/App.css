@@ -1273,6 +1273,7 @@ nav {
       background-color: var(--background-color);
       /* box-shadow: 0 0px 10px rgb(225, 225, 225); */
       padding: 1em;
+      margin-bottom: 1em;
 
       .your-listing-main {
         display: flex;
@@ -1448,8 +1449,10 @@ nav {
   
   .slider-mini {
     display: flex;
+    flex-wrap: wrap;
     gap: .5em;
     width: fit-content;
+    justify-content: center;
     padding: .25em;
     margin: 1em 0;
     margin-top: 2em;

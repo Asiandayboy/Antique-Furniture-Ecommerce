@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
-import Navbar from "../components/Navbar"
 
 type LoginInfo = {
   username: string,
