@@ -11,6 +11,16 @@ type Props = {
 }
 
 
+
+function validateFormInput(loginInput: LoginInfo): string {
+  if (loginInput.username == "") return "Username cannot be blank"
+  if (loginInput.password == "") return "Password cannot be blank"
+
+  return "success"
+}
+
+
+
 export default function Login({ setIsLoggedIn }: Props) {
   const navigate = useNavigate()
   const [loginInfo, setLoginInfo] = useState<LoginInfo>({
@@ -22,6 +32,14 @@ export default function Login({ setIsLoggedIn }: Props) {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    const validatedMsg = validateFormInput(loginInfo)
+
+    if (validatedMsg != "success") {
+      setResMsg(validatedMsg)
+      return
+    }
+
 
     try {
       const res = await fetch("http://localhost:3000/login", {
@@ -70,7 +88,10 @@ export default function Login({ setIsLoggedIn }: Props) {
           </div>
           <button type="submit" name="submit">Login</button>
         </form>
-        <div>{resMsg}</div>
+        {
+          resMsg &&
+          <div className="login_err-msg">{resMsg}</div>
+        }
         <div>
           Don't have an account? <Link to="/signup">Sign up</Link>
         </div>

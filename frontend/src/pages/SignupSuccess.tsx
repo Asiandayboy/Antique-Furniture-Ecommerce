@@ -2,8 +2,11 @@ import { Link } from "react-router-dom"
 
 export default function SignupSuccess() {
   return (
-    <div>
-      You have successfully signed up! You can now <Link to="/login">login</Link>
+    <div className="signup-success_page">
+      <div>
+        You have successfully signed up! You can now 
+        <Link to="/login"> login</Link>
+      </div>
     </div>
   )
 }

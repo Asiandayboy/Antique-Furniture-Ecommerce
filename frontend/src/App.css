@@ -171,6 +171,16 @@ nav {
   .home-foot-link {
     color: rgb(175, 175, 175);
   }
+
+  .login_err-msg, .signup_err-msg {
+    color: red;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 1rem;
+    background-color: rgba(255, 38, 0, 0.089);
+    padding: .5em 1em;
+    outline: 1px solid red;
+  }
   
   .login-form, .signup-form {
     display: flex;
@@ -229,6 +239,26 @@ nav {
       }
       
     }
+  }
+}
+
+.signup-success_page {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+
+  a {
+    text-decoration: underline;
+    color: var(--primary-color);
+
+    &:hover {
+      color: rgb(202, 64, 39);
+    }
+  }
+
+  div {
+    border: 1px dashed rgb(161, 161, 161);
+    padding: 1em;
   }
 }
 

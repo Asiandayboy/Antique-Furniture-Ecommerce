@@ -189,3 +189,14 @@ plans established on 3/5
 - input validation for POST? [MAYBE]
 - delete button for shopping cart items [DONE] *3/30/24*
 - documentation
+
+
+
+# Final touches 4/18
+- input validation for login page [DONE] *4/18*
+- better error visuals for input validations (login and signup) [DONE] *4/18*
+- use selenium to test signup and login page
+
+
+# notes
+- focus on UX/documentation/input validation

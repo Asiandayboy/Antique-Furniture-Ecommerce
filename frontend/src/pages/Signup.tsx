@@ -11,7 +11,7 @@ type SignupInfo = {
 
 
 
-function validateSignupInfo(data: SignupInfo): boolean {
+function validateSignupInfoNoEmptyFields(data: SignupInfo): boolean {
   if (data.username == "") {
     return false
   }
@@ -27,6 +27,17 @@ function validateSignupInfo(data: SignupInfo): boolean {
 
   return true
 }
+
+function validateSignupInfoInputType(data: SignupInfo): string {
+  const usernamePattern = /^[a-zA-Z]+$/
+
+  if (!data.username.match(usernamePattern)) {
+    return "Username can only contain letters"
+  }
+
+  return "success"
+}
+
 
 
 export default function Signup() {
@@ -46,12 +57,19 @@ export default function Signup() {
     e.preventDefault()
     console.log("form submited:", signupInfo)
 
-    const validated = validateSignupInfo(signupInfo)
+    const validated = validateSignupInfoNoEmptyFields(signupInfo)
 
     if (!validated) {
       setResMsg("Fields cannot be blank")
       return
     }
+
+    const validated2 = validateSignupInfoInputType(signupInfo)
+    if (validated2 != "success") {
+      setResMsg(validated2)
+      return
+    }
+
 
     try {
       const res = await fetch("http://localhost:3000/signup", {
@@ -112,7 +130,7 @@ export default function Signup() {
           
           <button type="submit" name="submit">Signup</button>
         </form>
-        <div>
+        <div className={(!success && resMsg) && "signup_err-msg" || ""}>
           {success && "Successfully signed up!" || resMsg}
         </div>
         <div>
