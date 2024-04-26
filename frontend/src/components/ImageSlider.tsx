@@ -32,6 +32,7 @@ export default function ImageSlider({ imageURLs }: Props) {
       <div className="slider-mini">
         {imageURLs.map((URL, i) => (
           <div 
+            key={URL}
             onClick={() => setCurrentImageIdx(i)} 
             className="img_wrapper"
             style={currentImageIdx == i && {

@@ -13,13 +13,14 @@ type Props = {
 export default function Dashboard({  }: Props) {
 
   const navigate = useNavigate()
+  const { userData } = useAccountDataContext()
 
   return (
     <>
       <Navbar />
       <main>
         <div className="dashboard_wrapper">
-          <h1>Dashboard</h1>
+          <h1>Hello, {userData?.username}! Welcome to you Dashboard</h1>
           <div className="dashboard-grid">
             <div className="dashboard-grid-item"
               onClick={() => navigate("/dashboard/purchase-history")}

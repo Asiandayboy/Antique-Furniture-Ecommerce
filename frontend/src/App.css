@@ -181,6 +181,7 @@ nav {
     padding: .5em 1em;
     outline: 1px solid red;
   }
+
   
   .login-form, .signup-form {
     display: flex;
@@ -242,17 +243,21 @@ nav {
   }
 }
 
-.signup-success_page {
+.signup-success_page,
+.checkout-success_page {
   height: 100vh;
   display: grid;
   place-items: center;
 
   a {
-    text-decoration: underline;
     color: var(--primary-color);
 
     &:hover {
       color: rgb(202, 64, 39);
+    }
+
+    span {
+      text-decoration: underline;
     }
   }
 
@@ -1818,3 +1823,19 @@ nav {
   }
 }
 
+
+.err-msg-anim {
+  animation: heartbeat .5s ease-in-out;
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

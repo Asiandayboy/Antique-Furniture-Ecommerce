@@ -22,6 +22,7 @@ function validateFormInput(loginInput: LoginInfo): string {
 
 
 export default function Login({ setIsLoggedIn }: Props) {
+  const [isError, setIsError] = useState<boolean>(false)
   const navigate = useNavigate()
   const [loginInfo, setLoginInfo] = useState<LoginInfo>({
     username: "",
@@ -37,6 +38,10 @@ export default function Login({ setIsLoggedIn }: Props) {
 
     if (validatedMsg != "success") {
       setResMsg(validatedMsg)
+      setIsError(true)
+      setTimeout(() => {
+        setIsError(false)
+      }, 1000)
       return
     }
 
@@ -54,6 +59,10 @@ export default function Login({ setIsLoggedIn }: Props) {
       if (!res.ok) {
         const msg = await res.text();
         setResMsg(msg)
+        setIsError(true)
+        setTimeout(() => {
+          setIsError(false)
+        }, 1000)
         throw new Error(msg || "Failed to log in")
       } else {
         setIsLoggedIn(true)
@@ -90,7 +99,7 @@ export default function Login({ setIsLoggedIn }: Props) {
         </form>
         {
           resMsg &&
-          <div className="login_err-msg">{resMsg}</div>
+          <div className={!isError && "login_err-msg" || "login_err-msg err-msg-anim"}>{resMsg}</div>
         }
         <div>
           Don't have an account? <Link to="/signup">Sign up</Link>

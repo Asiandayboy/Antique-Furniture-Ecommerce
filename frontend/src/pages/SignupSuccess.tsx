@@ -5,7 +5,7 @@ export default function SignupSuccess() {
     <div className="signup-success_page">
       <div>
         You have successfully signed up! You can now 
-        <Link to="/login"> login</Link>
+        <Link to="/login"> <span>login</span></Link>
       </div>
     </div>
   )

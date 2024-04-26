@@ -41,6 +41,7 @@ function validateSignupInfoInputType(data: SignupInfo): string {
 
 
 export default function Signup() {
+  const [isError, setIsError] = useState<boolean>(false)
   const navigate = useNavigate()
 
   const [signupInfo, setSignupInfo] = useState<SignupInfo>({
@@ -50,8 +51,15 @@ export default function Signup() {
     confirm: ''
   })
 
-  const [success, setSuccess] = useState<boolean>(false)
   const [resMsg, setResMsg] = useState<string>("")
+
+
+  function startErrorAnim() {
+    setIsError(true)
+    setTimeout(() => {
+      setIsError(false)
+    }, 1000)
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -61,12 +69,14 @@ export default function Signup() {
 
     if (!validated) {
       setResMsg("Fields cannot be blank")
+      startErrorAnim()
       return
     }
 
     const validated2 = validateSignupInfoInputType(signupInfo)
     if (validated2 != "success") {
       setResMsg(validated2)
+      startErrorAnim()
       return
     }
 
@@ -83,11 +93,11 @@ export default function Signup() {
       if (!res.ok) {
         const msg = await res.text()
         setResMsg(msg)
+        startErrorAnim()
         throw new Error(msg || "Failed to sign up!")
       } else {
         const msg = await res.text()
         console.log("signup:", msg)
-        setSuccess(true)
         navigate("/signup-success")
 
       }
@@ -130,9 +140,10 @@ export default function Signup() {
           
           <button type="submit" name="submit">Signup</button>
         </form>
-        <div className={(!success && resMsg) && "signup_err-msg" || ""}>
-          {success && "Successfully signed up!" || resMsg}
-        </div>
+        {
+          resMsg &&
+          <div className={!isError && "signup_err-msg " || "signup_err-msg err-msg-anim"}>{resMsg}</div>
+        }
         <div>
           Have an account? <Link to="/login">Log in</Link>
         </div>

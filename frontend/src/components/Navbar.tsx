@@ -3,6 +3,7 @@ import { useAuthContext } from "../contexts/authContext"
 import { useShoppingCartContext } from "../contexts/shoppingCartContext"
 import CartIcon from "../assets/CartIcon"
 import HamburgerIcon from "../assets/HamburgerIcon"
+import { useAccountDataContext } from "../contexts/accountDataContext"
 
 type Props = {
   // isLoggedIn: boolean
@@ -18,6 +19,7 @@ export default function Navbar({  }: Props) {
 
   const authState = useAuthContext()
   const shoppingCart = useShoppingCartContext()
+  const { userData } = useAccountDataContext()
 
   async function onLogoutClick(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     try {
@@ -76,7 +78,7 @@ export default function Navbar({  }: Props) {
               <div className="acc-dropdown">
                 <Link className="acc-dropdown_btn" to="/dashboard">Account</Link>
                 <div className="acc-dropdown-content">
-                  <div className="acc-balance">Balance: $666.000</div>
+                  <div className="acc-balance">Balance: ${userData?.balance}</div>
                   <Link to="/dashboard">Account</Link>
                   <Link to="/dashboard/purchase-history">Purchase History</Link>
                   <Link to="/dashboard/furniture-listings">My Furniture Listings</Link>
