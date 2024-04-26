@@ -195,7 +195,10 @@ plans established on 3/5
 # Final touches 4/18
 - input validation for login page [DONE] *4/18*
 - better error visuals for input validations (login and signup) [DONE] *4/18*
-- use selenium to test signup and login page
+- use selenium to test signup and login page [DONE] *4/26*
+  - login [DONE]
+  - signup [DONE]
 
 # notes
 - focus on UX/documentation/input validation
+- fix filtering for market filter??
