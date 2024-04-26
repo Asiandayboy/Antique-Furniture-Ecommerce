@@ -215,6 +215,17 @@ func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	sessionManager := GetSessionManager()
 	sessionManager.DeleteSession(session.SessionID)
 
+	cookie := http.Cookie{
+		Name:     SESSIONID_COOKIE_NAME,
+		Value:    "",
+		Path:     "http://127.0.0.1:1573",
+		Expires:  time.Now().Add(-time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	}
+
+	http.SetCookie(w, &cookie)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("success"))
 }
