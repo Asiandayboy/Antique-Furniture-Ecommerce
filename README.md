@@ -25,6 +25,14 @@ Once that is done, you can clone the repository into your local environment, and
 
 Now that the app has started, just go to the URL of the React app. It should just print it out in terminal 1.
 
-#### Note
+
+#### Valid Logins
+- username: `varus`; password: `varuslover`
+- username: `Asiandayboy`; password: `password`
+
+
+
+---
+##### Note
 
 *The app doesn't have a lot of data for furniture listings, but more can be made by creating a new furniture listing.*
