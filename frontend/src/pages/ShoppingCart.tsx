@@ -58,6 +58,7 @@ export default function ShoppingCart() {
     })
     .catch((err: Error) => {
       console.error(err)
+      alert("You must be logged in to checkout.")
     })
 
   }

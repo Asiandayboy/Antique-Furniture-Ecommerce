@@ -244,7 +244,8 @@ nav {
 }
 
 .signup-success_page,
-.checkout-success_page {
+.checkout-success_page,
+.checkout-canceled_page {
   height: 100vh;
   display: grid;
   place-items: center;
