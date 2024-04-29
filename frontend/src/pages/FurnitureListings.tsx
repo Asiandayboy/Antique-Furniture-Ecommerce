@@ -43,9 +43,13 @@ export default function FurnitureListings() {
       <div className="your-furniture-listings_wrapper">
         <h1>Your Furniture Listings</h1>
         <div className="listings_wrapper">
-          {listings.map((listing) => (
-            <YourListing {...listing} key={listing.listingID}/>
-          ))}
+          {
+            listings &&
+            listings.map((listing) => (
+              <YourListing {...listing} key={listing.listingID}/>
+            )) ||
+            "You have not created any furniture listings"
+          }
         </div>
       </div>
     </>
