@@ -800,6 +800,16 @@ nav {
       }
     }
 
+    .addr_err-msg {
+      color: red;
+      font-weight: bold;
+      font-family: monospace;
+      font-size: 1rem;
+      background-color: rgba(255, 38, 0, 0.089);
+      padding: .5em 1em;
+      outline: 1px solid red;
+    }
+
   }
 }
 

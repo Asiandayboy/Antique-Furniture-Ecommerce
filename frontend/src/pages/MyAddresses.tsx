@@ -28,6 +28,23 @@ export default function MyAddresses() {
   const [editId, setEditId] = useState<string>("")
   const [key, setKey] = useState<number>(0) // used to force a remount to render updated data
   const [deleteMode, setDeleteMode] = useState<string>("")
+  const [errMsg, setErrMsg] = useState<string>("")
+  const [isError, setIsError] = useState<boolean>()
+
+  function startErrorAnim() {
+    setIsError(true)
+    setTimeout(() => {
+      setIsError(false)
+    }, 1000)
+  }
+
+  function isFormValid(input: ShippingAddress): boolean {
+    if (!input.street || !input.city || !input.zipCode || !input.street) {
+      return false
+    }
+
+    return true
+  }
 
 
   function editAddress(address: ShippingAddress) {
@@ -70,10 +87,18 @@ export default function MyAddresses() {
     setEditMode(false)
     setEditId("")
     setFormInput(EMPTY_ADDRESS)
+    setErrMsg("")
+    setIsError(false)
   }
 
   function formSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    if (!isFormValid(formInput)) {
+      setErrMsg("Fields cannot be blank")
+      startErrorAnim()
+      return
+    }
 
     console.log("form:", formInput)
 
@@ -239,6 +264,10 @@ export default function MyAddresses() {
                 <button type="submit">{editId.length > 0 && "Edit address" || "Add address"}</button>
                 <button onClick={closeForm}>Cancel</button>
               </div>
+              {
+                errMsg &&
+                <div className={!isError && "addr_err-msg" || "addr_err-msg err-msg-anim"}>{errMsg}</div>
+              }
             </form>
           </div>
         }

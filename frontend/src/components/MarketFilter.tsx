@@ -26,6 +26,7 @@ type SearchCategories = {
   style: FurnitureTypes.FurnitureStyle[],
   material: FurnitureTypes.FurnitureMaterial[]
   bedSize: FurnitureTypes.FurnitureBedSize[]
+  title: string[]
 }
 
 
@@ -41,7 +42,8 @@ function createSearchCategories(words: string[]): SearchCategories {
     type: [],
     style: [],
     material: [],
-    bedSize: []
+    bedSize: [],
+    title: [],
   }
 
   words.forEach((word) => {
@@ -53,6 +55,8 @@ function createSearchCategories(words: string[]): SearchCategories {
       categories.style.push(word)
     } else if (FurnitureTypes.isFurnitureType(word)) {
       categories.type.push(word)
+    } else if (words.includes(word)) {
+      categories.title.push(word)
     }
   })
 
@@ -128,20 +132,42 @@ export default function MarketFilter({ dataSet, setDataSet }: Props) {
       let flag = true;
 
       if (categories.type.length > 0) {
-        flag = categories.type.some(word => listing.type.toLowerCase().includes(word))
+        flag = categories.type.some(word => {
+          const f1 = listing.type.toLowerCase().includes(word)
+          const f2 = listing.title.toLowerCase().includes(word)
+
+          return f1 || f2
+        })
       } 
 
       if (categories.style.length > 0) {
-        flag = categories.style.some(word => listing.style.toLowerCase().includes(word))
+        flag = categories.style.some(word => {
+          const f1 = listing.style.toLowerCase().includes(word)
+          const f2 = listing.title.toLowerCase().includes(word)
+
+          return f1 || f2
+        })
       }
 
       if (categories.material.length > 0) {
-        flag = categories.material.some(word => listing.material.toLowerCase().includes(word))
+        flag = categories.material.some(word => {
+          const f1 = listing.material.toLowerCase().includes(word)
+          const f2 = listing.title.toLowerCase().includes(word)
+
+          return f1 || f2
+        })
       }
+
+      if (categories.title.length > 0) {
+        flag = categories.title.some(word => listing.title.toLowerCase().includes(word))
+      }
+
 
       if (categories.bedSize.length > 0) {
         flag = categories.bedSize.some(word => listing.title.toLowerCase().includes(word))
       }
+
+
       
 
       // match listing attribute with appropriate filter type
