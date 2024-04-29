@@ -1,0 +1,336 @@
+[{
+  "_id": {
+    "$oid": "65c061473e8e189ccb683b55"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Providence",
+    "street": "999 Holy St.",
+    "zipCode": "02907"
+  },
+  "paymentMethod": "Credit",
+  "totalCost": 7500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65bf607585af14e593096ea1"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65b094f4a2cb3bf5e40d42d7"
+  },
+  "datePurchased": {
+    "$date": "2024-02-05T04:17:11.747Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-03-05T04:17:11.747Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65c064bb03a030afebaa45bd"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Providence",
+    "street": "999 Holy St.",
+    "zipCode": "02907"
+  },
+  "paymentMethod": "Credit",
+  "totalCost": 7500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65bf607585af14e593096ea1"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65b094f4a2cb3bf5e40d42d7"
+  },
+  "datePurchased": {
+    "$date": "2024-02-05T04:31:55.193Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-03-05T04:31:55.193Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65f0963b6b5a2a822995ba48"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Providence",
+    "street": "First Test Checkout St.",
+    "zipCode": "02907"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 1000,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65e68d072fc42b8dc717083a"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "datePurchased": {
+    "$date": "2024-03-12T17:51:55.754Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-04-12T17:51:55.754Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65f1e804f8c2fb7fd1d5daa3"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Cranston",
+    "street": "872 Varus Avenue",
+    "zipCode": "02905"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 10500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65e65d8d53ab38f42ca69d5c"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "datePurchased": {
+    "$date": "2024-03-13T17:53:08.432Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-04-13T17:53:08.432Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65f1e804f8c2fb7fd1d5daa2"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Cranston",
+    "street": "872 Varus Avenue",
+    "zipCode": "02905"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 10500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65e65d8d53ab38f42ca69d5c"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "datePurchased": {
+    "$date": "2024-03-13T17:53:08.431Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-04-13T17:53:08.431Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65f203c317ff48a00a13aeb3"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Cranston",
+    "street": "872 Varus Avenue",
+    "zipCode": "02905"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 15500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65c0648c5e2e07eceae9a6b4"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    },
+    {
+      "listingid": {
+        "$oid": "65e66093cedd71eda9b7713d"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "datePurchased": {
+    "$date": "2024-03-13T19:51:31.463Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-04-13T19:51:31.463Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65f203c317ff48a00a13aeb4"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Cranston",
+    "street": "872 Varus Avenue",
+    "zipCode": "02905"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 15500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65c0648c5e2e07eceae9a6b4"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    },
+    {
+      "listingid": {
+        "$oid": "65e66093cedd71eda9b7713d"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "datePurchased": {
+    "$date": "2024-03-13T19:51:31.466Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-04-13T19:51:31.466Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65f2fd06173426d49279c0c2"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Cranston",
+    "street": "872 Varus Avenue",
+    "zipCode": "02905"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 7500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65c0648c5e2e07eceae9a6b4"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "datePurchased": {
+    "$date": "2024-03-14T13:35:02.570Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-04-14T13:35:02.570Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6605bfa0803740caa8e94306"
+  },
+  "shippingAddress": {
+    "state": "RI",
+    "city": "Cranston",
+    "street": "872 Varus Avenue",
+    "zipCode": "02905"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 7500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65bf607585af14e593096ea1"
+      },
+      "sellerid": {
+        "$oid": "65b094f4a2cb3bf5e40d42d7"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "datePurchased": {
+    "$date": "2024-03-28T19:06:08.329Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-04-28T19:06:08.329Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "662b4c69985f3b31fa56f4ea"
+  },
+  "shippingAddress": {
+    "state": "NC",
+    "city": "Wilmington",
+    "street": "111 Avondale Avenue",
+    "zipCode": "28403"
+  },
+  "paymentMethod": "credit",
+  "totalCost": 6500,
+  "items": [
+    {
+      "listingid": {
+        "$oid": "65f50e3d27542dd26f78e784"
+      },
+      "sellerid": {
+        "$oid": "65d66a9272a47617afa62082"
+      }
+    }
+  ],
+  "userid": {
+    "$oid": "660eea92f4a3ad42977d5ce5"
+  },
+  "datePurchased": {
+    "$date": "2024-04-26T06:40:41.190Z"
+  },
+  "estimatedDelivery": {
+    "$date": "2024-05-26T06:40:41.190Z"
+  }
+}]

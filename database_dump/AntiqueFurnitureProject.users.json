@@ -1,0 +1,126 @@
+[{
+  "_id": {
+    "$oid": "65a5a07f062510f606cbd0ae"
+  },
+  "username": "bob",
+  "password": "bob",
+  "email": "bob@gmail.com",
+  "sessionid": "bobbobbo-bobb-bobb-bobb-bobbobbobbob",
+  "phone": "",
+  "balance": {
+    "$numberDecimal": "0"
+  },
+  "subscribed": false
+},
+{
+  "_id": {
+    "$oid": "65a5a26f062510f606cbd0af"
+  },
+  "username": "johnsmith",
+  "password": "password123",
+  "email": "johnsmith@gmail.com",
+  "sessionid": "johnjohn-john-john-john-johnjohnjohn",
+  "phone": "",
+  "balance": {
+    "$numberDecimal": "0"
+  },
+  "subscribed": false
+},
+{
+  "_id": {
+    "$oid": "65a69f20a8ae63c4ddc98038"
+  },
+  "username": "testuser1",
+  "password": "$2a$10$VOn9aFa1IWjkBjdT7GMMNuOOgl/t7mQHLGn/UEN9e.ilEezX0yhw6",
+  "email": "test@gmail.com",
+  "sessionid": "951097a7-3275-46b9-b2f3-4397c241b4bd",
+  "phone": "",
+  "balance": {
+    "$numberDecimal": "0"
+  },
+  "subscribed": false
+},
+{
+  "_id": {
+    "$oid": "65b094f4a2cb3bf5e40d42d7"
+  },
+  "username": "testacc",
+  "password": "$2a$10$AkCPKfH9ipx5Sy3pgZTUBusZdU5b0u5NZCIyLEu/43TVVInmFgk2u",
+  "email": "testacc@gmail.com",
+  "sessionid": "testtest-test-test-test-testtesttest",
+  "phone": "101-111-4444",
+  "balance": {
+    "$numberDecimal": "105162.44"
+  },
+  "subscribed": false
+},
+{
+  "_id": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "username": "varus",
+  "email": "varuslover@gmail.com",
+  "password": "$2a$10$LAlErM5g56GcySTUZNS3K.I.C1zViq9NbAqAWbWzeRXEqtdyGbHXi",
+  "phone": "401-401-4011",
+  "sessionid": "c058005a-903e-4eeb-9839-e0a3730fe9c7",
+  "balance": {
+    "$numberDecimal": "5996.21"
+  },
+  "subscribed": true
+},
+{
+  "_id": {
+    "$oid": "660eea92f4a3ad42977d5ce5"
+  },
+  "username": "Asiandayboy",
+  "email": "russellcheeseday@gmail.com",
+  "password": "$2a$10$h4V6m8nCmTFlDizJHYnPUecW8A6FE8CfOwCUe/BkuVkHwQX7TZSR.",
+  "phone": "",
+  "sessionid": "9b261736-7cb4-4df6-81f9-41582793fae0",
+  "balance": {
+    "$numberDecimal": "0"
+  },
+  "subscribed": true
+},
+{
+  "_id": {
+    "$oid": "66212ea3b1508655aec5be9b"
+  },
+  "username": "bruh",
+  "email": "bruh123@gmail.com",
+  "password": "$2a$10$s6swbIF0we7zYCWwSxJpqe644h1HBo2om62bWXXPhGGlcj2s3KhN2",
+  "phone": "",
+  "sessionid": "fb7227ea-5447-4f53-b8d0-574077addd4d",
+  "balance": {
+    "$numberDecimal": "0"
+  },
+  "subscribed": false
+},
+{
+  "_id": {
+    "$oid": "662b3150d6e487098a0232a3"
+  },
+  "username": "bobby",
+  "email": "bruh@gmail.com",
+  "password": "$2a$10$ckFgk4JKiEq.35YZCgNE1u6UFeyMlL.kHHxqprGxWtZlI1A3d.7Nq",
+  "phone": "",
+  "sessionid": "aaccb655-eed1-4398-994d-5e6ee3f07ab9",
+  "balance": {
+    "$numberDecimal": "0"
+  },
+  "subscribed": false
+},
+{
+  "_id": {
+    "$oid": "662b5f27f8986ef75de4b640"
+  },
+  "username": "ahrilover",
+  "email": "ahrhilover@gmail.com",
+  "password": "$2a$10$kG/JkHMb1z8l6agXYmqHW.D3VsCnbnBnlafyb3l4wnE7mYwWIux5W",
+  "phone": "",
+  "sessionid": "15d3c7b9-ae7f-49ce-b65b-78acdc180d73",
+  "balance": {
+    "$numberDecimal": "0"
+  },
+  "subscribed": false
+}]

@@ -1,0 +1,39 @@
+[{
+  "_id": {
+    "$oid": "65c3f9c52dd8587a26714756"
+  },
+  "userid": {
+    "$oid": "65b094f4a2cb3bf5e40d42d7"
+  },
+  "state": "RI",
+  "city": "Providence",
+  "street": "105 Wizard Avenue",
+  "zipCode": "02907",
+  "default": false
+},
+{
+  "_id": {
+    "$oid": "6602f323bbc084050361c86b"
+  },
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "state": "Rhode Island",
+  "city": "Cranston",
+  "street": "872 Varus Avenue",
+  "zipCode": "02905",
+  "default": false
+},
+{
+  "_id": {
+    "$oid": "6602f32ebbc084050361c86d"
+  },
+  "userid": {
+    "$oid": "65d66a9272a47617afa62082"
+  },
+  "state": "RI",
+  "city": "Cranston",
+  "street": "356 Smith Street",
+  "zipCode": "02905",
+  "default": false
+}]
