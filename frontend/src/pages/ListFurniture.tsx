@@ -86,8 +86,16 @@ export default function ListFurniture() {
   const [listing, setListing] = useState<FurnitureListing>(EMPTY_LISTING)
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [currentFormErr, setCurrentFormErr] = useState<string | null>()
+  const [isError, setIsError] = useState<boolean>(false)
 
   const navigate = useNavigate()
+
+  function startErrorAnim() {
+    setIsError(true)
+    setTimeout(() => {
+      setIsError(false)
+    }, 1000)
+  }
   
   function onFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -97,6 +105,7 @@ export default function ListFurniture() {
     if (formErr) {
       const errStr = keyName![0].toUpperCase() + keyName?.slice(1) // convert keyname to uppercase
       setCurrentFormErr(errStr)
+      startErrorAnim()
     } else {
       setCurrentFormErr(null)
 
@@ -124,8 +133,9 @@ export default function ListFurniture() {
       <main>
         <div className="list-furniture_wrapper">
           <h1>Create a furniture listing</h1>
-          {currentFormErr && 
-            <div className="list-form-err">
+          {
+            currentFormErr &&
+            <div className={!isError && "list-form-err" || "list-form-err err-msg-anim"}>
               Form Error: Furniture {currentFormErr} is missing
             </div>
           }

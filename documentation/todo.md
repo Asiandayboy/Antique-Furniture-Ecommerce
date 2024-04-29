@@ -200,5 +200,5 @@ plans established on 3/5
   - signup [DONE]
 
 # notes
-- focus on UX/documentation/input validation
-- fix filtering for market filter??
+- focus on UX/documentation/input validation [DONE]
+- fix filtering for market filter?? [DONE]
