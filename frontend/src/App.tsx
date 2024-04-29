@@ -49,6 +49,7 @@ function App() {
       getAccountData()
       .then((val: AccountInfo | Error) => {
         if (val instanceof Error) {
+          localStorage.setItem("isLoggedIn", "false")
           console.error(val)
         } else {
           setUserData({...val})
