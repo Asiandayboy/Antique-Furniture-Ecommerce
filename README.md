@@ -15,7 +15,7 @@
     - `receipts`
     - `shippingAddresses`
     - `users`
-
+- Import each of the database_dump JSON files in its respective collection
 
 ___
 
